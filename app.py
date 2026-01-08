@@ -19,9 +19,9 @@ st.markdown("""
 FILE_HISTORIAL = 'historial_cumplimiento.csv'
 FILE_ENTRENOS = 'historial_entrenamientos.csv'
 
-# --- 1. BASE DE DATOS ACTUALIZADA CON TUS NOMBRES ---
+# --- 1. BASE DE DATOS (NOMBRES ACTUALIZADOS) ---
 OPCIONES_ENTRENO = [
-    "Descanso",           # Domingo (Default)
+    "Descanso",           # Domingo
     "Fullbody I",         # Lunes
     "Torso I",            # Martes
     "Preventivo I",       # Miércoles
@@ -30,10 +30,8 @@ OPCIONES_ENTRENO = [
     "Preventivo II"       # Sábado
 ]
 
-# Definimos compatibilidades usando palabras clave para que coincidan con tus nombres
 DB_TRATAMIENTOS = {
     "🔥 Grasa Abdominal": {
-        # Compatible con días de fuerza/metabólicos
         "keywords_compatibles": ["Fullbody", "Torso", "Circuito"], 
         "dias_descanso_min": 0, 
         "momento": "PRE-ENTRENO",
@@ -52,7 +50,6 @@ DB_TRATAMIENTOS = {
         "uso": "⏱️ 10 min | 📏 5-10 cm"
     },
     "🧠 Cerebro / Foco": {
-        # Días más tranquilos o de descanso activo
         "keywords_compatibles": ["Torso I", "Torso + Circuito", "Descanso"],
         "dias_descanso_min": 1, 
         "momento": "MAÑANA",
@@ -62,7 +59,6 @@ DB_TRATAMIENTOS = {
         "uso": "⏱️ 6 min | 📏 30 cm (A la cabeza)"
     },
     "💪 Codos (Analgesia)": {
-        # Días que involucran brazos/empuje
         "keywords_compatibles": ["Fullbody", "Torso", "Preventivo I", "Descanso"],
         "dias_descanso_min": 0, 
         "alerta_repeticion": True,
@@ -73,7 +69,6 @@ DB_TRATAMIENTOS = {
         "uso": "⏱️ 10 min | 📏 5-10 cm"
     },
     "🦵 Rodilla (Reparación)": {
-        # Días de pierna o preventivo de rodilla
         "keywords_compatibles": ["Fullbody", "Preventivo II", "Descanso"],
         "dias_descanso_min": 0,
         "alerta_repeticion": True,
@@ -94,15 +89,31 @@ DB_TRATAMIENTOS = {
     }
 }
 
-# --- GESTIÓN DE DATOS ---
-def cargar_csv(filename, cols):
+# --- GESTIÓN DE DATOS (CON CORRECCIÓN DE ERRORES) ---
+def cargar_csv(filename, cols_esperadas):
+    """
+    Carga el CSV de forma segura. Si el archivo existe pero tiene columnas viejas
+    (que causan el KeyError), devuelve un DataFrame vacío nuevo con las columnas correctas
+    para evitar el crash.
+    """
     if os.path.exists(filename):
-        try: return pd.read_csv(filename)
-        except: return pd.DataFrame(columns=cols)
-    return pd.DataFrame(columns=cols)
+        try:
+            df = pd.read_csv(filename)
+            # Verificamos si las columnas que necesitamos existen
+            if set(cols_esperadas).issubset(df.columns):
+                return df
+            else:
+                # Si el archivo es viejo y no tiene las columnas nuevas, lo ignoramos temporalmente
+                # para que se sobrescriba con el formato correcto.
+                return pd.DataFrame(columns=cols_esperadas)
+        except:
+            return pd.DataFrame(columns=cols_esperadas)
+    return pd.DataFrame(columns=cols_esperadas)
 
 def guardar_estado(fecha_dt, tratamiento, campo, valor):
-    df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Seleccionado", "Realizado"])
+    cols = ["Fecha", "Tratamiento", "Seleccionado", "Realizado"]
+    df = cargar_csv(FILE_HISTORIAL, cols)
+    
     fecha_str = fecha_dt.strftime("%Y-%m-%d")
     mask = (df["Fecha"] == fecha_str) & (df["Tratamiento"] == tratamiento)
     if not df[mask].empty:
@@ -114,20 +125,22 @@ def guardar_estado(fecha_dt, tratamiento, campo, valor):
     df.to_csv(FILE_HISTORIAL, index=False)
 
 def obtener_estado(fecha_dt, tratamiento):
-    df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Seleccionado", "Realizado"])
+    cols = ["Fecha", "Tratamiento", "Seleccionado", "Realizado"]
+    df = cargar_csv(FILE_HISTORIAL, cols)
+    
     fecha_str = fecha_dt.strftime("%Y-%m-%d")
     row = df[(df["Fecha"] == fecha_str) & (df["Tratamiento"] == tratamiento)]
     if not row.empty:
         return bool(row.iloc[0]["Seleccionado"]), bool(row.iloc[0]["Realizado"])
     return False, False
 
-# Guardar DOS entrenos
 def guardar_cambio_entreno(fecha_dt, entreno1, entreno2):
-    df = cargar_csv(FILE_ENTRENOS, ["Fecha", "Entreno1", "Entreno2"])
+    cols = ["Fecha", "Entreno1", "Entreno2"]
+    df = cargar_csv(FILE_ENTRENOS, cols)
+    
     fecha_str = fecha_dt.strftime("%Y-%m-%d")
     mask = (df["Fecha"] == fecha_str)
     
-    # Normalizar "Ninguno" a string vacío o similar para guardar
     e2_val = entreno2 if entreno2 != "Ninguno" else None
     
     if not df[mask].empty:
@@ -140,7 +153,10 @@ def guardar_cambio_entreno(fecha_dt, entreno1, entreno2):
 
 def obtener_entrenos_reales(fecha_dt):
     fecha_str = fecha_dt.strftime("%Y-%m-%d")
-    df = cargar_csv(FILE_ENTRENOS, ["Fecha", "Entreno1", "Entreno2"])
+    # Aquí estaba el error antes. Ahora cargar_csv asegura que las columnas existan.
+    cols = ["Fecha", "Entreno1", "Entreno2"]
+    df = cargar_csv(FILE_ENTRENOS, cols)
+    
     registro = df[df["Fecha"] == fecha_str]
     
     if not registro.empty:
@@ -149,7 +165,7 @@ def obtener_entrenos_reales(fecha_dt):
         if pd.isna(e2): e2 = "Ninguno"
         return e1, e2
     
-    # Lógica por defecto según tu Excel
+    # Lógica por defecto (Tu Rutina Base)
     rutina_base = {
         0: "Fullbody I", 
         1: "Torso I", 
@@ -161,10 +177,13 @@ def obtener_entrenos_reales(fecha_dt):
     return rutina_base.get(fecha_dt.weekday(), "Descanso"), "Ninguno"
 
 def verificar_conflictos_historial(tratamiento, fecha_actual):
-    df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Seleccionado", "Realizado"])
+    cols = ["Fecha", "Tratamiento", "Seleccionado", "Realizado"]
+    df = cargar_csv(FILE_HISTORIAL, cols)
+    
     reglas = DB_TRATAMIENTOS.get(tratamiento, {})
     ayer = fecha_actual - timedelta(days=1)
     ayer_str = ayer.strftime("%Y-%m-%d")
+    
     hecho_ayer = not df[(df["Fecha"] == ayer_str) & (df["Tratamiento"] == tratamiento) & (df["Realizado"] == True)].empty
     
     if reglas.get("dias_descanso_min", 0) > 0 and hecho_ayer:
@@ -181,22 +200,18 @@ def filtrar_tratamientos_compatibles(entreno1, entreno2):
         
     for nombre, datos in DB_TRATAMIENTOS.items():
         es_compatible = False
-        
-        # Chequeo especial "TODOS"
         if "TODOS" in datos["keywords_compatibles"]:
             es_compatible = True
         else:
-            # Buscar coincidencia parcial de palabras clave en AMBOS entrenos
             for kw in datos["keywords_compatibles"]:
                 for ent in lista_entrenos:
-                    if kw in ent: # Ej: "Fullbody" in "Fullbody I"
+                    if kw in ent: 
                         es_compatible = True
                         break
         
         if es_compatible:
             compatibles.append(nombre)
             
-    # Eliminar duplicados y ordenar
     compatibles = list(set(compatibles))
     compatibles.sort(key=lambda x: DB_TRATAMIENTOS[x]["orden"])
     return compatibles
@@ -227,7 +242,7 @@ fecha_sel = col_d.date_input("Fecha", datetime.now())
 
 e1_db, e2_db = obtener_entrenos_reales(fecha_sel)
 
-# Índices seguros
+# Manejo seguro de índices
 try: idx1 = OPCIONES_ENTRENO.index(e1_db)
 except: idx1 = 0
 opciones_e2 = ["Ninguno"] + OPCIONES_ENTRENO
@@ -262,7 +277,6 @@ for orden, titulo in momentos.items():
             if conflicto: st.error(mensaje)
             elif mensaje: st.warning(mensaje)
             
-            # Checkbox
             if st.checkbox(trat, value=sel, key=f"chk_{trat}_{fecha_sel}"):
                 if not sel: guardar_estado(fecha_sel, trat, "Seleccionado", True)
                 seleccionados.append(trat)
@@ -320,5 +334,6 @@ else:
 
 # LINK HISTORIAL
 with st.expander("Ver Historial Completo"):
+    # Carga segura para historial también
     df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Realizado"])
     st.dataframe(df[df["Realizado"]==True].sort_values("Fecha", ascending=False))
