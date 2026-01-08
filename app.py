@@ -1,53 +1,80 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, date
-import calendar
+from datetime import datetime, date, timedelta
 import os
 
-# --- CONFIGURACIÓN ---
-st.set_page_config(page_title="Mega Panel Ultimate", page_icon="🔴", layout="centered")
+# --- CONFIGURACIÓN VISUAL ---
+st.set_page_config(page_title="Mega Panel Guardian", page_icon="🛡️", layout="centered")
+
+st.markdown("""
+<style>
+    .big-font { font-size:18px !important; font-weight: bold; }
+    .param-box { background-color: #f0f2f6; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #ff4b4b; }
+    .safe-box { background-color: #e8fdf5; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #21c354; }
+    .alert-text { color: #9c4d08; font-weight: bold; background-color: #ffdcb2; padding: 5px; border-radius: 5px; }
+</style>
+""", unsafe_allow_html=True)
 
 FILE_HISTORIAL = 'historial_cumplimiento.csv'
 FILE_ENTRENOS = 'historial_entrenamientos.csv'
 
-# --- BASE DE DATOS DE PROTOCOLOS (TÉCNICOS) ---
-# Aquí están los ajustes exactos para tu BlockBlueLight Mega Panel
-DB_PROTOCOLOS = {
-    "🔥 Grasa": {
-        "desc": "Movilización de lípidos antes del ejercicio.",
-        "red": "100%", "nir": "100%", "hz": "0 Hz", 
-        "time": "15 min", "dist": "Contacto (0-2 cm)",
-        "icon": "🔥"
+# --- 1. CEREBRO DE REGLAS Y DESCANSOS ---
+DB_TRATAMIENTOS = {
+    "🔥 Grasa Abdominal": {
+        "compatible_con": ["Empuje", "Tracción", "Pierna", "Torso", "Cardio"], 
+        "dias_descanso_min": 0, # Se puede hacer a diario
+        "momento": "PRE-ENTRENO",
+        "orden": 1,
+        "aviso_tiempo": "⚠️ OBLIGATORIO: Ejercicio físico en los siguientes 60 min.",
+        "config": "🔴 RED + NIR (100%) | ⚡ 0 Hz (Continuo)",
+        "uso": "⏱️ 15 min | 📏 CONTACTO (Pegado piel)"
     },
-    "💪 Codos": {
-        "desc": "Analgesia para epicóndilo y tendones.",
-        "red": "100%", "nir": "100%", "hz": "10 Hz", 
-        "time": "10 min", "dist": "Cerca (5-10 cm)",
-        "icon": "💪"
+    "🦴 Hombro (Activación)": {
+        "compatible_con": ["Preventivo I (Hombro)"],
+        "dias_descanso_min": 0,
+        "momento": "PRE-ENTRENO",
+        "orden": 1,
+        "aviso_tiempo": "Realizar justo antes de las gomas/movilidad.",
+        "config": "🔴 RED + NIR (100%) | ⚡ 0 Hz",
+        "uso": "⏱️ 10 min | 📏 5-10 cm"
     },
-    "🦵 Rodilla": {
-        "desc": "Reparación profunda (LCA/Menisco).",
-        "red": "0% (OFF)", "nir": "100%", "hz": "40 Hz", 
-        "time": "15 min", "dist": "Cerca (5 cm)",
-        "icon": "🦵"
+    "🧠 Cerebro / Foco": {
+        "compatible_con": ["Tracción", "Torso", "Descanso Total"],
+        "dias_descanso_min": 1, # Días alternos recomendados
+        "momento": "MAÑANA",
+        "orden": 1,
+        "aviso_tiempo": "⛔ NO realizar tarde-noche (insomnio).",
+        "config": "🌫️ SOLO NIR (100%) | ⚡ 10 Hz (Alpha)",
+        "uso": "⏱️ 6 min | 📏 30 cm (A la cabeza)"
     },
-    "🦴 Hombro": {
-        "desc": "Calentamiento y elasticidad fascial.",
-        "red": "100%", "nir": "100%", "hz": "0 Hz", 
-        "time": "10 min", "dist": "Media (5-10 cm)",
-        "icon": "🦴"
+    "💪 Codos (Analgesia)": {
+        "compatible_con": ["Empuje", "Torso", "Preventivo I (Hombro)", "Descanso Total"],
+        "dias_descanso_min": 0, # Se permite diario, pero ojo repetición
+        "alerta_repeticion": True, # Avisar si se hizo ayer
+        "momento": "TARDE / POST-ENTRENO",
+        "orden": 2,
+        "aviso_tiempo": "Dejar 4h de separación con el entreno.",
+        "config": "🔴 RED + NIR (100%) | ⚡ 10 Hz",
+        "uso": "⏱️ 10 min | 📏 5-10 cm"
     },
-    "🧠 Cerebro": {
-        "desc": "Neuro-protección y memoria.",
-        "red": "0% (OFF)", "nir": "100%", "hz": "10 Hz", 
-        "time": "6 min", "dist": "Lejos (30 cm)",
-        "icon": "🧠"
+    "🦵 Rodilla (Reparación)": {
+        "compatible_con": ["Pierna", "Preventivo II (Rodilla)", "Descanso Total"],
+        "dias_descanso_min": 0,
+        "alerta_repeticion": True,
+        "momento": "POST-ENTRENO / NOCHE",
+        "orden": 2,
+        "aviso_tiempo": "Idealmente después de ducha.",
+        "config": "🌫️ SOLO NIR (100%) | ⚡ 40 Hz",
+        "uso": "⏱️ 15 min | 📏 5 cm (Rodear rótula)"
     },
-    "😴 Sueño": {
-        "desc": "Inducción de melatonina.",
-        "red": "20%", "nir": "0% (OFF)", "hz": "0 Hz", 
-        "time": "20 min", "dist": "Ambiental (>1m)",
-        "icon": "😴"
+    "😴 Sueño Profundo": {
+        "compatible_con": ["TODOS"], 
+        "dias_descanso_min": 0,
+        "momento": "NOCHE (Pre-dormir)",
+        "orden": 3,
+        "aviso_tiempo": "30 min antes de dormir.",
+        "config": "🔴 SOLO RED (20%) | ⚡ 0 Hz",
+        "uso": "⏱️ 20 min | 📏 >1 metro (Ambiental)"
     }
 }
 
@@ -67,21 +94,15 @@ def cargar_csv(filename, cols):
     return pd.DataFrame(columns=cols)
 
 def guardar_estado(fecha_dt, tratamiento, campo, valor):
-    # campo puede ser 'Seleccionado' o 'Realizado'
-    cols = ["Fecha", "Tratamiento", "Seleccionado", "Realizado"]
-    df = cargar_csv(FILE_HISTORIAL, cols)
+    df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Seleccionado", "Realizado"])
     fecha_str = fecha_dt.strftime("%Y-%m-%d")
-    
-    # Upsert
     mask = (df["Fecha"] == fecha_str) & (df["Tratamiento"] == tratamiento)
     if not df[mask].empty:
         df.loc[mask, campo] = valor
     else:
-        # Crear nuevo registro por defecto False en todo
         nuevo = {"Fecha": fecha_str, "Tratamiento": tratamiento, "Seleccionado": False, "Realizado": False}
         nuevo[campo] = valor
         df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
-    
     df.to_csv(FILE_HISTORIAL, index=False)
 
 def obtener_estado(fecha_dt, tratamiento):
@@ -90,7 +111,7 @@ def obtener_estado(fecha_dt, tratamiento):
     row = df[(df["Fecha"] == fecha_str) & (df["Tratamiento"] == tratamiento)]
     if not row.empty:
         return bool(row.iloc[0]["Seleccionado"]), bool(row.iloc[0]["Realizado"])
-    return False, False # Por defecto no seleccionado, no realizado
+    return False, False
 
 def guardar_cambio_entreno(fecha_dt, nuevo_entreno):
     df = cargar_csv(FILE_ENTRENOS, ["Fecha", "Entreno"])
@@ -108,110 +129,139 @@ def obtener_entreno_real(fecha_dt):
     registro = df[df["Fecha"] == fecha_str]
     if not registro.empty: return registro.iloc[0]["Entreno"]
     
-    # Lógica por defecto
-    rutina = {0: "Empuje (Fuerza)", 1: "Tracción (Fuerza)", 2: "Preventivo I (Hombro)",
-              3: "Pierna (Fuerza)", 4: "Torso (Accesorios)", 5: "Preventivo II (Rodilla)"}
-    return rutina.get(fecha_dt.weekday(), "Descanso Total")
+    rutina_base = {0: "Empuje (Fuerza)", 1: "Tracción (Fuerza)", 2: "Preventivo I (Hombro)",
+                   3: "Pierna (Fuerza)", 4: "Torso (Accesorios)", 5: "Preventivo II (Rodilla)"}
+    return rutina_base.get(fecha_dt.weekday(), "Descanso Total")
 
-# --- MOTOR DE REGLAS ---
-def identificar_compatibles(nombre_entreno):
-    lista = []
-    # Reglas
-    if any(x in nombre_entreno for x in ["Empuje", "Tracción", "Pierna", "Torso"]):
-        lista.append("🔥 Grasa")
-    if any(x in nombre_entreno for x in ["Empuje", "Torso", "Preventivo I"]):
-        lista.append("💪 Codos")
-    if any(x in nombre_entreno for x in ["Pierna", "Preventivo II"]):
-        lista.append("🦵 Rodilla")
-    if "Preventivo I" in nombre_entreno:
-        lista.append("🦴 Hombro")
-    if any(x in nombre_entreno for x in ["Tracción", "Torso", "Descanso"]):
-        lista.append("🧠 Cerebro")
-    lista.append("😴 Sueño")
-    return lista
-
-# --- UI COMPONENT: TARJETA DE DETALLE ---
-def mostrar_tarjeta_tecnica(nombre_tratamiento):
-    data = DB_PROTOCOLOS[nombre_tratamiento]
+# --- LÓGICA DE VIGILANCIA HISTÓRICA ---
+def verificar_conflictos_historial(tratamiento, fecha_actual):
+    """
+    Revisa si el tratamiento se hizo ayer o antes y si viola la regla de descanso.
+    Retorna: (bool_conflicto, mensaje_alerta)
+    """
+    df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Seleccionado", "Realizado"])
+    reglas = DB_TRATAMIENTOS.get(tratamiento, {})
     
-    with st.container():
-        st.markdown(f"#### {data['icon']} {nombre_tratamiento}")
-        st.caption(data['desc'])
+    # 1. Verificar Día Anterior (Ayer)
+    ayer = fecha_actual - timedelta(days=1)
+    ayer_str = ayer.strftime("%Y-%m-%d")
+    
+    hecho_ayer = not df[(df["Fecha"] == ayer_str) & (df["Tratamiento"] == tratamiento) & (df["Realizado"] == True)].empty
+    
+    # REGLA A: Días de descanso obligatorio (ej. Cerebro)
+    dias_min = reglas.get("dias_descanso_min", 0)
+    if dias_min > 0 and hecho_ayer:
+        return True, f"⛔ ALTO: Este tratamiento requiere descanso. Lo hiciste ayer ({ayer_str}). Hoy toca pausa."
         
-        # Grid de datos técnicos
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("🔴 RED", data['red'])
-        c2.metric("🌫️ NIR", data['nir'])
-        c3.metric("⚡ Hz", data['hz'])
-        c4.metric("📏 Dist", data['dist'])
+    # REGLA B: Alerta de repetición (Precaución para lesiones)
+    alerta_rep = reglas.get("alerta_repeticion", False)
+    if alerta_rep and hecho_ayer:
+        return False, f"⚠️ PRECAUCIÓN: Realizado ayer. Asegura 24h de descanso real o reduce intensidad."
         
-        st.info(f"⏱️ **Tiempo:** {data['time']}")
+    return False, ""
 
-# --- APP PRINCIPAL ---
-st.title("🔴 Mega Panel Ultimate")
-tab1, tab2 = st.tabs(["⚡ Planificador Diario", "🗓️ Calendario"])
+def filtrar_tratamientos_compatibles(entreno_hoy):
+    compatibles = []
+    for nombre, datos in DB_TRATAMIENTOS.items():
+        if "TODOS" in datos["compatible_con"] or any(e in entreno_hoy for e in datos["compatible_con"]):
+            compatibles.append(nombre)
+    compatibles.sort(key=lambda x: DB_TRATAMIENTOS[x]["orden"])
+    return compatibles
 
-with tab1:
-    col_date, col_spacer = st.columns([2, 1])
-    fecha_sel = col_date.date_input("Fecha", datetime.now())
-    
-    # SECCIÓN A: ENTRENO
-    entreno_actual = obtener_entreno_real(fecha_sel)
-    idx = OPCIONES_ENTRENO.index(entreno_actual) if entreno_actual in OPCIONES_ENTRENO else 6
-    nuevo_entreno = st.selectbox("🏋️ Entrenamiento:", OPCIONES_ENTRENO, index=idx)
-    
-    if nuevo_entreno != entreno_actual:
-        guardar_cambio_entreno(fecha_sel, nuevo_entreno)
-        st.rerun()
+# --- INTERFAZ ---
+st.title("🛡️ Panel Guardian")
 
-    posibles = identificar_compatibles(nuevo_entreno)
-    
-    st.divider()
-    
-    # SECCIÓN B: SELECCIÓN (QUÉ QUIERO HACER)
-    st.subheader("1️⃣ Selección: ¿Qué harás hoy?")
-    st.caption("Marca los tratamientos que quieres incluir en tu rutina de hoy.")
-    
-    seleccionados_hoy = []
-    
-    cols_sel = st.columns(2)
-    for i, nombre in enumerate(posibles):
-        sel, _ = obtener_estado(fecha_sel, nombre)
-        # Checkbox de selección
-        col_actual = cols_sel[i % 2]
-        if col_actual.checkbox(f"{nombre}", value=sel, key=f"sel_{nombre}_{fecha_sel}"):
-            if not sel: guardar_estado(fecha_sel, nombre, "Seleccionado", True)
-            seleccionados_hoy.append(nombre)
-        else:
-            if sel: guardar_estado(fecha_sel, nombre, "Seleccionado", False)
+# 1. FECHA
+col_d, col_e = st.columns([1, 2])
+fecha_sel = col_d.date_input("Fecha", datetime.now())
+entreno_db = obtener_entreno_real(fecha_sel)
+idx = OPCIONES_ENTRENO.index(entreno_db) if entreno_db in OPCIONES_ENTRENO else 6
+nuevo_entreno = col_e.selectbox("Entreno hoy:", OPCIONES_ENTRENO, index=idx)
 
-    st.divider()
+if nuevo_entreno != entreno_db:
+    guardar_cambio_entreno(fecha_sel, nuevo_entreno)
+    st.rerun()
 
-    # SECCIÓN C: EJECUCIÓN (CÓMO HACERLO)
-    st.subheader("2️⃣ Ejecución: Detalles Técnicos")
-    
-    if not seleccionados_hoy:
-        st.info("👆 Selecciona arriba los tratamientos para ver sus ajustes.")
-    else:
-        progreso = 0
-        for item in seleccionados_hoy:
-            _, realizado = obtener_estado(fecha_sel, item)
+st.divider()
+
+# 2. SELECCIÓN CON ESCÁNER DE HISTORIAL
+st.subheader("1️⃣ Selección Inteligente")
+
+lista_posible = filtrar_tratamientos_compatibles(nuevo_entreno)
+seleccionados = []
+momentos = {1: "🌅 MAÑANA", 2: "🌆 TARDE", 3: "🌙 NOCHE"}
+
+for orden, titulo in momentos.items():
+    grupo = [t for t in lista_posible if DB_TRATAMIENTOS[t]["orden"] == orden]
+    if grupo:
+        st.markdown(f"**{titulo}**")
+        for trat in grupo:
+            sel, _ = obtener_estado(fecha_sel, trat)
             
-            # Marco visual
-            with st.expander(f"{item} {'✅' if realizado else ''}", expanded=not realizado):
-                mostrar_tarjeta_tecnica(item)
-                
-                # Botón de Completado
-                check_realizado = st.checkbox("✅ Marcar como COMPLETADO", value=realizado, key=f"done_{item}_{fecha_sel}")
-                if check_realizado != realizado:
-                    guardar_estado(fecha_sel, item, "Realizado", check_realizado)
-                    st.rerun()
+            # --- VIGILANCIA AQUÍ ---
+            conflicto, mensaje = verificar_conflictos_historial(trat, fecha_sel)
+            label_text = trat
+            
+            # Mostrar alerta visual junto al checkbox
+            if conflicto:
+                st.error(mensaje) # Muestra caja roja si está prohibido
+            elif mensaje:
+                st.warning(mensaje) # Muestra caja amarilla si es precaución
+            
+            # Si hay conflicto grave, deshabilitar o avisar fuerte
+            disabled_chk = False # Podríamos poner True si queremos bloquear totalmente
+            
+            if st.checkbox(label_text, value=sel, key=f"chk_{trat}_{fecha_sel}", disabled=disabled_chk):
+                if not sel: guardar_estado(fecha_sel, trat, "Seleccionado", True)
+                seleccionados.append(trat)
+            else:
+                if sel: guardar_estado(fecha_sel, trat, "Seleccionado", False)
+        st.write("")
 
-with tab2:
-    st.subheader("Historial Visual")
-    # (El código del calendario se mantiene igual que la versión anterior, 
-    #  puedes copiarlo de la V4 o dejarlo simple para ahorrar espacio aquí)
-    st.write("Tus datos se guardan en `historial_cumplimiento.csv`")
+st.divider()
+
+# 3. EJECUCIÓN
+st.subheader("2️⃣ Ejecución Técnica")
+
+if not seleccionados:
+    st.info("👆 Selecciona arriba (si el historial lo permite).")
+else:
+    for trat in seleccionados:
+        data = DB_TRATAMIENTOS[trat]
+        _, hecho = obtener_estado(fecha_sel, trat)
+        
+        # Volver a chequear historial para mostrar aviso dentro de la tarjeta también
+        conflicto, mensaje = verificar_conflictos_historial(trat, fecha_sel)
+        
+        clase_caja = "param-box" if conflicto or mensaje else "safe-box"
+        icono_estado = "✅ HECHO" if hecho else "⏳ PENDIENTE"
+        
+        with st.container():
+            st.markdown(f"### {trat}")
+            st.caption(f"Estado: **{icono_estado}**")
+            
+            if mensaje:
+                st.markdown(f'<div class="alert-text">{mensaje}</div>', unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div class="{clase_caja}">
+                <span style="font-size:16px">⚙️ <b>CONFIG:</b> {data['config']}</span><br>
+                <span style="font-size:16px">📏 <b>USO:</b> {data['uso']}</span><br>
+                <br><i>🕒 {data['aviso_tiempo']}</i>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.checkbox(f"Finalizar {trat}", value=hecho, key=f"done_{trat}"):
+                if not hecho: 
+                    guardar_estado(fecha_sel, trat, "Realizado", True)
+                    st.rerun()
+            else:
+                if hecho: 
+                    guardar_estado(fecha_sel, trat, "Realizado", False)
+                    st.rerun()
+            st.divider()
+
+# Link Historial
+with st.expander("Ver Historial Completo"):
     df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Realizado"])
-    if not df.empty:
-        st.dataframe(df[df["Realizado"]==True].sort_values("Fecha", ascending=False))
+    st.dataframe(df[df["Realizado"]==True].sort_values("Fecha", ascending=False))
