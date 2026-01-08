@@ -4,13 +4,14 @@ from datetime import datetime, date, timedelta
 import os
 
 # --- CONFIGURACIÓN VISUAL ---
-st.set_page_config(page_title="Mega Panel Guardian", page_icon="🛡️", layout="centered")
+st.set_page_config(page_title="Mega Panel Dual", page_icon="🏋️", layout="centered")
 
 st.markdown("""
 <style>
     .big-font { font-size:18px !important; font-weight: bold; }
     .param-box { background-color: #f0f2f6; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #ff4b4b; }
     .safe-box { background-color: #e8fdf5; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #21c354; }
+    .timeline-box { background-color: #eef5ff; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #d0e1f9; }
     .alert-text { color: #9c4d08; font-weight: bold; background-color: #ffdcb2; padding: 5px; border-radius: 5px; }
 </style>
 """, unsafe_allow_html=True)
@@ -18,19 +19,31 @@ st.markdown("""
 FILE_HISTORIAL = 'historial_cumplimiento.csv'
 FILE_ENTRENOS = 'historial_entrenamientos.csv'
 
-# --- 1. CEREBRO DE REGLAS Y DESCANSOS ---
+# --- 1. BASE DE DATOS ACTUALIZADA CON TUS NOMBRES ---
+OPCIONES_ENTRENO = [
+    "Descanso",           # Domingo (Default)
+    "Fullbody I",         # Lunes
+    "Torso I",            # Martes
+    "Preventivo I",       # Miércoles
+    "Fullbody II",        # Jueves
+    "Torso + Circuito",   # Viernes
+    "Preventivo II"       # Sábado
+]
+
+# Definimos compatibilidades usando palabras clave para que coincidan con tus nombres
 DB_TRATAMIENTOS = {
     "🔥 Grasa Abdominal": {
-        "compatible_con": ["Empuje", "Tracción", "Pierna", "Torso", "Cardio"], 
-        "dias_descanso_min": 0, # Se puede hacer a diario
+        # Compatible con días de fuerza/metabólicos
+        "keywords_compatibles": ["Fullbody", "Torso", "Circuito"], 
+        "dias_descanso_min": 0, 
         "momento": "PRE-ENTRENO",
-        "orden": 1,
+        "orden": 1, 
         "aviso_tiempo": "⚠️ OBLIGATORIO: Ejercicio físico en los siguientes 60 min.",
         "config": "🔴 RED + NIR (100%) | ⚡ 0 Hz (Continuo)",
         "uso": "⏱️ 15 min | 📏 CONTACTO (Pegado piel)"
     },
     "🦴 Hombro (Activación)": {
-        "compatible_con": ["Preventivo I (Hombro)"],
+        "keywords_compatibles": ["Preventivo I"],
         "dias_descanso_min": 0,
         "momento": "PRE-ENTRENO",
         "orden": 1,
@@ -39,8 +52,9 @@ DB_TRATAMIENTOS = {
         "uso": "⏱️ 10 min | 📏 5-10 cm"
     },
     "🧠 Cerebro / Foco": {
-        "compatible_con": ["Tracción", "Torso", "Descanso Total"],
-        "dias_descanso_min": 1, # Días alternos recomendados
+        # Días más tranquilos o de descanso activo
+        "keywords_compatibles": ["Torso I", "Torso + Circuito", "Descanso"],
+        "dias_descanso_min": 1, 
         "momento": "MAÑANA",
         "orden": 1,
         "aviso_tiempo": "⛔ NO realizar tarde-noche (insomnio).",
@@ -48,17 +62,19 @@ DB_TRATAMIENTOS = {
         "uso": "⏱️ 6 min | 📏 30 cm (A la cabeza)"
     },
     "💪 Codos (Analgesia)": {
-        "compatible_con": ["Empuje", "Torso", "Preventivo I (Hombro)", "Descanso Total"],
-        "dias_descanso_min": 0, # Se permite diario, pero ojo repetición
-        "alerta_repeticion": True, # Avisar si se hizo ayer
+        # Días que involucran brazos/empuje
+        "keywords_compatibles": ["Fullbody", "Torso", "Preventivo I", "Descanso"],
+        "dias_descanso_min": 0, 
+        "alerta_repeticion": True,
         "momento": "TARDE / POST-ENTRENO",
-        "orden": 2,
-        "aviso_tiempo": "Dejar 4h de separación con el entreno.",
+        "orden": 2, 
+        "aviso_tiempo": "Dejar 4h de separación con el entreno si hay dolor.",
         "config": "🔴 RED + NIR (100%) | ⚡ 10 Hz",
         "uso": "⏱️ 10 min | 📏 5-10 cm"
     },
     "🦵 Rodilla (Reparación)": {
-        "compatible_con": ["Pierna", "Preventivo II (Rodilla)", "Descanso Total"],
+        # Días de pierna o preventivo de rodilla
+        "keywords_compatibles": ["Fullbody", "Preventivo II", "Descanso"],
         "dias_descanso_min": 0,
         "alerta_repeticion": True,
         "momento": "POST-ENTRENO / NOCHE",
@@ -68,29 +84,21 @@ DB_TRATAMIENTOS = {
         "uso": "⏱️ 15 min | 📏 5 cm (Rodear rótula)"
     },
     "😴 Sueño Profundo": {
-        "compatible_con": ["TODOS"], 
+        "keywords_compatibles": ["TODOS"], 
         "dias_descanso_min": 0,
         "momento": "NOCHE (Pre-dormir)",
-        "orden": 3,
+        "orden": 3, 
         "aviso_tiempo": "30 min antes de dormir.",
         "config": "🔴 SOLO RED (20%) | ⚡ 0 Hz",
         "uso": "⏱️ 20 min | 📏 >1 metro (Ambiental)"
     }
 }
 
-OPCIONES_ENTRENO = [
-    "Empuje (Fuerza)", "Tracción (Fuerza)", "Preventivo I (Hombro)",
-    "Pierna (Fuerza)", "Torso (Accesorios)", "Preventivo II (Rodilla)",
-    "Descanso Total", "Cardio Suave"
-]
-
 # --- GESTIÓN DE DATOS ---
 def cargar_csv(filename, cols):
     if os.path.exists(filename):
-        try:
-            return pd.read_csv(filename)
-        except:
-            return pd.DataFrame(columns=cols)
+        try: return pd.read_csv(filename)
+        except: return pd.DataFrame(columns=cols)
     return pd.DataFrame(columns=cols)
 
 def guardar_estado(fecha_dt, tratamiento, campo, valor):
@@ -113,81 +121,133 @@ def obtener_estado(fecha_dt, tratamiento):
         return bool(row.iloc[0]["Seleccionado"]), bool(row.iloc[0]["Realizado"])
     return False, False
 
-def guardar_cambio_entreno(fecha_dt, nuevo_entreno):
-    df = cargar_csv(FILE_ENTRENOS, ["Fecha", "Entreno"])
+# Guardar DOS entrenos
+def guardar_cambio_entreno(fecha_dt, entreno1, entreno2):
+    df = cargar_csv(FILE_ENTRENOS, ["Fecha", "Entreno1", "Entreno2"])
     fecha_str = fecha_dt.strftime("%Y-%m-%d")
     mask = (df["Fecha"] == fecha_str)
+    
+    # Normalizar "Ninguno" a string vacío o similar para guardar
+    e2_val = entreno2 if entreno2 != "Ninguno" else None
+    
     if not df[mask].empty:
-        df.loc[mask, "Entreno"] = nuevo_entreno
+        df.loc[mask, "Entreno1"] = entreno1
+        df.loc[mask, "Entreno2"] = e2_val
     else:
-        df = pd.concat([df, pd.DataFrame([{"Fecha": fecha_str, "Entreno": nuevo_entreno}])], ignore_index=True)
+        nuevo = pd.DataFrame([{"Fecha": fecha_str, "Entreno1": entreno1, "Entreno2": e2_val}])
+        df = pd.concat([df, nuevo], ignore_index=True)
     df.to_csv(FILE_ENTRENOS, index=False)
 
-def obtener_entreno_real(fecha_dt):
+def obtener_entrenos_reales(fecha_dt):
     fecha_str = fecha_dt.strftime("%Y-%m-%d")
-    df = cargar_csv(FILE_ENTRENOS, ["Fecha", "Entreno"])
+    df = cargar_csv(FILE_ENTRENOS, ["Fecha", "Entreno1", "Entreno2"])
     registro = df[df["Fecha"] == fecha_str]
-    if not registro.empty: return registro.iloc[0]["Entreno"]
     
-    rutina_base = {0: "Empuje (Fuerza)", 1: "Tracción (Fuerza)", 2: "Preventivo I (Hombro)",
-                   3: "Pierna (Fuerza)", 4: "Torso (Accesorios)", 5: "Preventivo II (Rodilla)"}
-    return rutina_base.get(fecha_dt.weekday(), "Descanso Total")
+    if not registro.empty:
+        e1 = registro.iloc[0]["Entreno1"]
+        e2 = registro.iloc[0]["Entreno2"]
+        if pd.isna(e2): e2 = "Ninguno"
+        return e1, e2
+    
+    # Lógica por defecto según tu Excel
+    rutina_base = {
+        0: "Fullbody I", 
+        1: "Torso I", 
+        2: "Preventivo I",
+        3: "Fullbody II", 
+        4: "Torso + Circuito", 
+        5: "Preventivo II"
+    }
+    return rutina_base.get(fecha_dt.weekday(), "Descanso"), "Ninguno"
 
-# --- LÓGICA DE VIGILANCIA HISTÓRICA ---
 def verificar_conflictos_historial(tratamiento, fecha_actual):
-    """
-    Revisa si el tratamiento se hizo ayer o antes y si viola la regla de descanso.
-    Retorna: (bool_conflicto, mensaje_alerta)
-    """
     df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Seleccionado", "Realizado"])
     reglas = DB_TRATAMIENTOS.get(tratamiento, {})
-    
-    # 1. Verificar Día Anterior (Ayer)
     ayer = fecha_actual - timedelta(days=1)
     ayer_str = ayer.strftime("%Y-%m-%d")
-    
     hecho_ayer = not df[(df["Fecha"] == ayer_str) & (df["Tratamiento"] == tratamiento) & (df["Realizado"] == True)].empty
     
-    # REGLA A: Días de descanso obligatorio (ej. Cerebro)
-    dias_min = reglas.get("dias_descanso_min", 0)
-    if dias_min > 0 and hecho_ayer:
-        return True, f"⛔ ALTO: Este tratamiento requiere descanso. Lo hiciste ayer ({ayer_str}). Hoy toca pausa."
-        
-    # REGLA B: Alerta de repetición (Precaución para lesiones)
-    alerta_rep = reglas.get("alerta_repeticion", False)
-    if alerta_rep and hecho_ayer:
-        return False, f"⚠️ PRECAUCIÓN: Realizado ayer. Asegura 24h de descanso real o reduce intensidad."
-        
+    if reglas.get("dias_descanso_min", 0) > 0 and hecho_ayer:
+        return True, f"⛔ ALTO: Requiere descanso. Lo hiciste ayer ({ayer_str})."
+    if reglas.get("alerta_repeticion", False) and hecho_ayer:
+        return False, f"⚠️ PRECAUCIÓN: Realizado ayer. Asegura 24h de descanso."
     return False, ""
 
-def filtrar_tratamientos_compatibles(entreno_hoy):
+def filtrar_tratamientos_compatibles(entreno1, entreno2):
     compatibles = []
+    lista_entrenos = [entreno1]
+    if entreno2 != "Ninguno":
+        lista_entrenos.append(entreno2)
+        
     for nombre, datos in DB_TRATAMIENTOS.items():
-        if "TODOS" in datos["compatible_con"] or any(e in entreno_hoy for e in datos["compatible_con"]):
+        es_compatible = False
+        
+        # Chequeo especial "TODOS"
+        if "TODOS" in datos["keywords_compatibles"]:
+            es_compatible = True
+        else:
+            # Buscar coincidencia parcial de palabras clave en AMBOS entrenos
+            for kw in datos["keywords_compatibles"]:
+                for ent in lista_entrenos:
+                    if kw in ent: # Ej: "Fullbody" in "Fullbody I"
+                        es_compatible = True
+                        break
+        
+        if es_compatible:
             compatibles.append(nombre)
+            
+    # Eliminar duplicados y ordenar
+    compatibles = list(set(compatibles))
     compatibles.sort(key=lambda x: DB_TRATAMIENTOS[x]["orden"])
     return compatibles
 
+def generar_cronologia(seleccionados):
+    if len(seleccionados) < 2: return None
+    sel_ordenados = sorted(seleccionados, key=lambda x: DB_TRATAMIENTOS[x]["orden"])
+    timeline = []
+    for i in range(len(sel_ordenados) - 1):
+        actual, siguiente = sel_ordenados[i], sel_ordenados[i+1]
+        ord_a, ord_s = DB_TRATAMIENTOS[actual]["orden"], DB_TRATAMIENTOS[siguiente]["orden"]
+        
+        tiempo_msg = ""
+        if ord_a == ord_s: tiempo_msg = "⏱️ **Seguido:** Deja 10 min enfriar."
+        elif ord_a == 1 and ord_s == 2: tiempo_msg = "⏱️ **Espera:** Entreno + Ducha (~2h)."
+        elif ord_a == 2 and ord_s == 3: tiempo_msg = "⏱️ **Espera:** Hasta la noche."
+        elif ord_a == 1 and ord_s == 3: tiempo_msg = "⏱️ **Espera:** Todo el día."
+        
+        timeline.append((actual, tiempo_msg, siguiente))
+    return timeline
+
 # --- INTERFAZ ---
-st.title("🛡️ Panel Guardian")
+st.title("🛡️ Mega Panel Dual")
 
-# 1. FECHA
-col_d, col_e = st.columns([1, 2])
+# 1. SELECTOR DE FECHA Y ENTRENOS
+col_d, col_e1, col_e2 = st.columns([1, 1.5, 1.5])
 fecha_sel = col_d.date_input("Fecha", datetime.now())
-entreno_db = obtener_entreno_real(fecha_sel)
-idx = OPCIONES_ENTRENO.index(entreno_db) if entreno_db in OPCIONES_ENTRENO else 6
-nuevo_entreno = col_e.selectbox("Entreno hoy:", OPCIONES_ENTRENO, index=idx)
 
-if nuevo_entreno != entreno_db:
-    guardar_cambio_entreno(fecha_sel, nuevo_entreno)
+e1_db, e2_db = obtener_entrenos_reales(fecha_sel)
+
+# Índices seguros
+try: idx1 = OPCIONES_ENTRENO.index(e1_db)
+except: idx1 = 0
+opciones_e2 = ["Ninguno"] + OPCIONES_ENTRENO
+try: idx2 = opciones_e2.index(e2_db)
+except: idx2 = 0
+
+nuevo_e1 = col_e1.selectbox("Entreno 1:", OPCIONES_ENTRENO, index=idx1)
+nuevo_e2 = col_e2.selectbox("Entreno 2 (Opcional):", opciones_e2, index=idx2)
+
+if nuevo_e1 != e1_db or nuevo_e2 != e2_db:
+    guardar_cambio_entreno(fecha_sel, nuevo_e1, nuevo_e2)
     st.rerun()
 
 st.divider()
 
-# 2. SELECCIÓN CON ESCÁNER DE HISTORIAL
+# 2. SELECCIÓN INTELIGENTE (COMBINADA)
 st.subheader("1️⃣ Selección Inteligente")
+st.caption(f"Mostrando terapias para: **{nuevo_e1}**" + (f" + **{nuevo_e2}**" if nuevo_e2 != "Ninguno" else ""))
 
-lista_posible = filtrar_tratamientos_compatibles(nuevo_entreno)
+lista_posible = filtrar_tratamientos_compatibles(nuevo_e1, nuevo_e2)
 seleccionados = []
 momentos = {1: "🌅 MAÑANA", 2: "🌆 TARDE", 3: "🌙 NOCHE"}
 
@@ -197,57 +257,55 @@ for orden, titulo in momentos.items():
         st.markdown(f"**{titulo}**")
         for trat in grupo:
             sel, _ = obtener_estado(fecha_sel, trat)
-            
-            # --- VIGILANCIA AQUÍ ---
             conflicto, mensaje = verificar_conflictos_historial(trat, fecha_sel)
-            label_text = trat
             
-            # Mostrar alerta visual junto al checkbox
-            if conflicto:
-                st.error(mensaje) # Muestra caja roja si está prohibido
-            elif mensaje:
-                st.warning(mensaje) # Muestra caja amarilla si es precaución
+            if conflicto: st.error(mensaje)
+            elif mensaje: st.warning(mensaje)
             
-            # Si hay conflicto grave, deshabilitar o avisar fuerte
-            disabled_chk = False # Podríamos poner True si queremos bloquear totalmente
-            
-            if st.checkbox(label_text, value=sel, key=f"chk_{trat}_{fecha_sel}", disabled=disabled_chk):
+            # Checkbox
+            if st.checkbox(trat, value=sel, key=f"chk_{trat}_{fecha_sel}"):
                 if not sel: guardar_estado(fecha_sel, trat, "Seleccionado", True)
                 seleccionados.append(trat)
             else:
                 if sel: guardar_estado(fecha_sel, trat, "Seleccionado", False)
-        st.write("")
 
 st.divider()
 
-# 3. EJECUCIÓN
+# 3. CRONOLOGÍA
+if len(seleccionados) > 1:
+    st.markdown("### ⏳ Cronología Sugerida")
+    timeline_data = generar_cronologia(seleccionados)
+    st.markdown('<div class="timeline-box">', unsafe_allow_html=True)
+    for i, (t1, tiempo, t2) in enumerate(timeline_data):
+        st.markdown(f"**{i+1}. {t1}**")
+        st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;⬇️&nbsp;&nbsp;*{tiempo}*")
+        if i == len(timeline_data) - 1:
+            st.markdown(f"**{i+2}. {t2}**")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# 4. EJECUCIÓN TÉCNICA
 st.subheader("2️⃣ Ejecución Técnica")
 
 if not seleccionados:
-    st.info("👆 Selecciona arriba (si el historial lo permite).")
+    st.info("👆 Selecciona arriba para comenzar.")
 else:
     for trat in seleccionados:
         data = DB_TRATAMIENTOS[trat]
         _, hecho = obtener_estado(fecha_sel, trat)
-        
-        # Volver a chequear historial para mostrar aviso dentro de la tarjeta también
         conflicto, mensaje = verificar_conflictos_historial(trat, fecha_sel)
         
         clase_caja = "param-box" if conflicto or mensaje else "safe-box"
-        icono_estado = "✅ HECHO" if hecho else "⏳ PENDIENTE"
+        icono = "✅ HECHO" if hecho else "⏳ PENDIENTE"
         
         with st.container():
-            st.markdown(f"### {trat}")
-            st.caption(f"Estado: **{icono_estado}**")
-            
-            if mensaje:
-                st.markdown(f'<div class="alert-text">{mensaje}</div>', unsafe_allow_html=True)
+            st.markdown(f"### {trat} - {icono}")
             
             st.markdown(f"""
             <div class="{clase_caja}">
-                <span style="font-size:16px">⚙️ <b>CONFIG:</b> {data['config']}</span><br>
-                <span style="font-size:16px">📏 <b>USO:</b> {data['uso']}</span><br>
-                <br><i>🕒 {data['aviso_tiempo']}</i>
+                <b>⚙️ CONFIG:</b> {data['config']}<br>
+                <b>📏 USO:</b> {data['uso']}<br>
+                <hr style="margin:5px 0">
+                <i>🕒 {data['aviso_tiempo']}</i>
             </div>
             """, unsafe_allow_html=True)
             
@@ -259,9 +317,8 @@ else:
                 if hecho: 
                     guardar_estado(fecha_sel, trat, "Realizado", False)
                     st.rerun()
-            st.divider()
 
-# Link Historial
+# LINK HISTORIAL
 with st.expander("Ver Historial Completo"):
     df = cargar_csv(FILE_HISTORIAL, ["Fecha", "Tratamiento", "Realizado"])
     st.dataframe(df[df["Realizado"]==True].sort_values("Fecha", ascending=False))
