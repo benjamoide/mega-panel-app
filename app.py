@@ -7,7 +7,7 @@ import os
 st.set_page_config(
     page_title="Mega Panel Control",
     page_icon="🔴",
-    layout="mobile"
+    layout="centered"  # <--- CAMBIO REALIZADO AQUÍ
 )
 
 # --- NOMBRE DEL ARCHIVO PARA GUARDAR DATOS ---
