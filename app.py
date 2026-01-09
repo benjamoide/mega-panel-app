@@ -91,12 +91,16 @@ def obtener_catalogo():
 # --- GESTIÓN DE DATOS ---
 def cargar_datos():
     if not os.path.exists(ARCHIVO_DATOS):
-        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}}
+        # Estructura: historial, meta_diaria, ciclos_activos, descartados
+        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
-            return json.load(f)
+            datos = json.load(f)
+            # Asegurar compatibilidad
+            if "descartados" not in datos: datos["descartados"] = {}
+            return datos
     except:
-        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}}
+        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
 
 def guardar_datos(datos):
     with open(ARCHIVO_DATOS, 'w') as f:
@@ -145,27 +149,25 @@ if seleccion_rutinas != entreno_guardado:
 
 st.divider()
 
-# --- INTELIGENCIA DE COMBINACIONES (NUEVO) ---
-# Detectamos qué tratamientos están activos hoy para dar consejos globales
+# --- INTELIGENCIA DE COMBINACIONES ---
 tratamientos_activos_ids = []
 registros_dia = st.session_state.db["historial"].get(fecha_str, {})
+descartados_dia = st.session_state.db.get("descartados", {}).get(fecha_str, [])
 
 for t in lista_tratamientos:
-    # Lógica simplificada de visibilidad para análisis
     activo = False
     if t.tipo == "PERMANENTE": activo = True
     elif t.tipo == "LESION" and st.session_state.db["ciclos_activos"].get(t.id, {}).get('activo'): activo = True
     elif t.tipo == "GRASA" and "Active" in tags_dia: activo = True
     elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: activo = True
     
-    if activo:
+    if activo and t.id not in descartados_dia: # Solo cuenta si no está descartado
         tratamientos_activos_ids.append(t.id)
 
-# ALERTAS INTELIGENTES DE COMBINACIÓN
 if "brain" in tratamientos_activos_ids and "sleep" in tratamientos_activos_ids:
-    st.info("💡 **Consejo de Combinación:** Vas a hacer CEREBRO y SUEÑO hoy. Sepáralos: Haz Cerebro por la mañana (activación) y Sueño justo antes de dormir.")
+    st.info("💡 **Consejo:** Separa 'Salud Cerebral' (Mañana) y 'Sueño' (Noche).")
 if "fat_d" in tratamientos_activos_ids and "fat_front" in tratamientos_activos_ids:
-    st.info("💡 **Estrategia Fat Loss:** Puedes alternar zonas. Haz una antes de entrenar y la otra al terminar (si mantienes actividad ligera).")
+    st.info("💡 **Consejo Fat Loss:** Alterna zonas antes y después del entreno.")
 
 st.subheader(f"📋 Tu Plan del Día")
 
@@ -178,7 +180,8 @@ grupos = {
     "NIGHT": [],     
     "FLEX": [],      
     "COMPLETED": [], 
-    "HIDDEN": []     
+    "HIDDEN": [],
+    "DISCARDED": [] # Nuevo grupo para papelera
 }
 
 mapa_seleccion = {
@@ -190,10 +193,9 @@ mapa_seleccion = {
 }
 
 for t in lista_tratamientos:
-    # 1. ¿Aplica hoy?
+    # 1. Filtros de validez
     aplica_hoy = False
     es_ciclo_activo = False
-    
     if t.tipo == "LESION":
         ciclo = st.session_state.db["ciclos_activos"].get(t.id)
         if ciclo and ciclo['activo']:
@@ -210,24 +212,26 @@ for t in lista_tratamientos:
     sesiones_hechas = registros_dia.get(t.id, [])
     num_hechos = len(sesiones_hechas)
     esta_completo = num_hechos >= t.max_diario
+    esta_descartado = t.id in descartados_dia
 
     # 3. Clasificación
-    if not aplica_hoy:
+    if esta_descartado:
+        grupos["DISCARDED"].append((t, es_ciclo_activo))
+    elif not aplica_hoy:
         grupos["HIDDEN"].append((t, False))
     elif esta_completo:
         grupos["COMPLETED"].append((t, es_ciclo_activo))
     else:
-        # Dinámica de movimiento
+        # Lógica de movimiento en tiempo real
         key_radio = f"rad_{t.id}"
         grupo_destino = t.default_visual_group
         
-        # Prioridad 1: Interacción en tiempo real
+        # Prioridad 1: Interacción
         if key_radio in st.session_state:
             seleccion_actual = st.session_state[key_radio]
             if seleccion_actual in mapa_seleccion:
                 grupo_destino = mapa_seleccion[seleccion_actual]
-        
-        # Prioridad 2: Historial previo hoy
+        # Prioridad 2: Historial
         elif num_hechos > 0:
             ultimo = sesiones_hechas[-1]['detalle']
             if "Antes" in ultimo: grupo_destino = "PRE"
@@ -241,7 +245,8 @@ for t in lista_tratamientos:
             grupos["FLEX"].append((t, es_ciclo_activo))
 
 # --- RENDERIZADO ---
-def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
+def render_tratamiento(t, es_ciclo_activo, modo="normal"):
+    # Info Fase
     info_fase = ""
     bloqueado_por_fin = False
     if t.tipo == "LESION" and es_ciclo_activo:
@@ -263,20 +268,42 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
     num_hechos = len(sesiones_hechas)
     completo = num_hechos >= t.max_diario
     
-    icono = "✅" if completo else ("⏳" if num_hechos > 0 else "⬜")
-    titulo = f"{icono} {t.nombre} ({num_hechos}/{t.max_diario})"
+    # Iconos según modo
+    if modo == "discarded":
+        icono = "❌"
+        estado_txt = "(Descartado)"
+    elif completo:
+        icono = "✅"
+        estado_txt = "(Completado)"
+    else:
+        icono = "⏳" if num_hechos > 0 else "⬜"
+        estado_txt = f"({num_hechos}/{t.max_diario})"
+
+    titulo = f"{icono} {t.nombre} {estado_txt}"
     
     with st.expander(titulo):
         if info_fase: st.info(info_fase)
         
-        if not es_solo_lectura:
+        # Si está descartado, mostrar botón de recuperar
+        if modo == "discarded":
+            st.caption("Este tratamiento ha sido omitido hoy.")
+            if st.button("↩️ Recuperar y Realizar", key=f"rest_{t.id}"):
+                if fecha_str in st.session_state.db["descartados"]:
+                    if t.id in st.session_state.db["descartados"][fecha_str]:
+                        st.session_state.db["descartados"][fecha_str].remove(t.id)
+                        guardar_datos(st.session_state.db)
+                        st.rerun()
+            return # Salimos, no mostramos el resto de opciones
+
+        # MODO NORMAL / COMPLETADO
+        if modo != "readonly":
             st.caption(f"📍 Sugerido: {t.momento_ideal_txt}")
             c1, c2 = st.columns(2)
             c1.markdown(f"**Zona:** {t.zona}\n\n**Ondas:** {t.ondas}")
             c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
             if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
-        # Historial y Borrado
+        # Historial y Borrado de Sesiones
         if num_hechos > 0:
             st.markdown("---")
             for i, reg in enumerate(sesiones_hechas):
@@ -284,14 +311,14 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                 with col_txt:
                     st.success(f"✅ {reg['hora']} - {reg['detalle']}")
                 with col_del:
-                    if st.button("🗑️", key=f"del_{t.id}_{i}_read{es_solo_lectura}"):
+                    if st.button("🗑️", key=f"del_{t.id}_{i}_{modo}"):
                         registros_dia[t.id].pop(i)
                         if not registros_dia[t.id]: del registros_dia[t.id]
                         guardar_datos(st.session_state.db)
                         st.rerun()
 
-        # Registro
-        if not es_solo_lectura and not completo and not bloqueado_por_fin:
+        # Registro de Nueva Sesión
+        if modo == "normal" and not completo and not bloqueado_por_fin:
             # Validar 6h
             bloqueado_tiempo = False
             if num_hechos > 0 and t.tiempo_espera_horas > 0 and fecha_seleccionada == datetime.date.today():
@@ -306,9 +333,8 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                 st.markdown("---")
                 permitir = True
                 
-                # --- SELECTOR DE MOMENTO ---
+                # Selector Momento
                 opciones = []
-                # Personalización de opciones según tipo
                 if t.tipo == "PERMANENTE" and "Testosterona" in t.nombre:
                     opciones = ["🌞 Mañana", "⛅ Tarde"]
                 elif t.tipo == "PERMANENTE" and "Sueño" in t.nombre:
@@ -316,15 +342,15 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                 else:
                     opciones = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
                 
-                detalle_sel = st.radio("¿Cuándo lo vas a realizar?", options=opciones, key=f"rad_{t.id}")
+                detalle_sel = st.radio("¿Cuándo?", options=opciones, key=f"rad_{t.id}")
                 
-                # Advertencias de combinación horaria
                 if t.tipo == "GRASA" and "Después" in detalle_sel:
-                    st.warning("⚠️ Efectividad reducida: La grasa liberada podría reabsorberse si no hay actividad física ligera después.")
-                if t.nombre == "Salud Cerebral" and "Noche" in detalle_sel:
-                    st.warning("⚠️ Cuidado: La luz NIR cerebral puede ser estimulante y afectar el sueño.")
+                    st.warning("⚠️ Recuerda moverte un poco después.")
 
-                if permitir:
+                # BOTONES DE ACCIÓN: REGISTRAR O DESCARTAR
+                c_reg, c_discard = st.columns([3, 1])
+                
+                with c_reg:
                     if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}"):
                         ahora = datetime.datetime.now().strftime('%H:%M')
                         if "historial" not in st.session_state.db: st.session_state.db["historial"] = {}
@@ -334,7 +360,18 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                         st.session_state.db["historial"][fecha_str][t.id].append({"hora": ahora, "detalle": detalle_sel})
                         guardar_datos(st.session_state.db)
                         st.rerun()
-        
+                
+                with c_discard:
+                    # Botón para descartar
+                    if st.button("🚫 Omitir", key=f"disc_{t.id}", help="Mover a descartados por hoy"):
+                        if "descartados" not in st.session_state.db: st.session_state.db["descartados"] = {}
+                        if fecha_str not in st.session_state.db["descartados"]: st.session_state.db["descartados"][fecha_str] = []
+                        
+                        if t.id not in st.session_state.db["descartados"][fecha_str]:
+                            st.session_state.db["descartados"][fecha_str].append(t.id)
+                            guardar_datos(st.session_state.db)
+                            st.rerun()
+
         # Reinicio Ciclo
         if t.tipo == "LESION" and bloqueado_por_fin:
             if st.button("🔄 Reiniciar Ciclo", key=f"rst_{t.id}"):
@@ -356,11 +393,16 @@ for key, title in sections_order:
     if grupos[key]:
         st.markdown(f"### {title}")
         for t, ciclo in grupos[key]:
-            render_tratamiento(t, ciclo)
+            render_tratamiento(t, ciclo, modo="normal")
 
 if grupos["COMPLETED"]:
     st.markdown("### ✅ Completados Hoy")
-    for t, ciclo in grupos["COMPLETED"]: render_tratamiento(t, ciclo, es_solo_lectura=True)
+    for t, ciclo in grupos["COMPLETED"]: render_tratamiento(t, ciclo, modo="readonly")
+
+# SECCIÓN DE DESCARTADOS (NUEVA)
+if grupos["DISCARDED"]:
+    st.markdown("### ❌ Tratamientos Descartados")
+    for t, ciclo in grupos["DISCARDED"]: render_tratamiento(t, ciclo, modo="discarded")
 
 if grupos["HIDDEN"]:
     st.markdown("---")
