@@ -6,7 +6,7 @@ import os
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(
     page_title="Mega Panel AI",
-    page_icon="🔥",
+    page_icon="🧬",
     layout="centered"
 )
 
@@ -46,7 +46,7 @@ def obtener_catalogo():
     }
     
     catalogo = [
-        # --- GRASA (Flexible: Pre recomendado, Post permitido) ---
+        # --- GRASA ---
         Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen Frente", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar")
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
         
@@ -83,8 +83,8 @@ def obtener_catalogo():
         Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "10-20%", "> 50 cm", 15, 1, 0, "PERMANENTE", ['All'], "NIGHT", "Noche (30 min antes dormir)")
         .set_incompatibilidades("⛔ NO USAR PULSOS."),
         
-        Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 0, "PERMANENTE", ['All'], "FLEX", "Cualquier hora (Con Gafas)")
-        .set_incompatibilidades("⛔ GAFAS OBLIGATORIAS.")
+        Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 0, "PERMANENTE", ['All'], "FLEX", "Mañana o Tarde (Con Gafas)")
+        .set_incompatibilidades("⛔ GAFAS OBLIGATORIAS. Evitar muy tarde.")
     ]
     return catalogo
 
@@ -103,7 +103,7 @@ def guardar_datos(datos):
         json.dump(datos, f, indent=4)
 
 # --- INTERFAZ PRINCIPAL ---
-st.title(f"🔥 Mega Panel AI")
+st.title(f"🧠 Mega Panel AI")
 
 if 'db' not in st.session_state:
     st.session_state.db = cargar_datos()
@@ -144,9 +144,30 @@ if seleccion_rutinas != entreno_guardado:
     st.rerun()
 
 st.divider()
-st.subheader(f"📋 Tu Plan del Día")
 
+# --- INTELIGENCIA DE COMBINACIONES (NUEVO) ---
+# Detectamos qué tratamientos están activos hoy para dar consejos globales
+tratamientos_activos_ids = []
 registros_dia = st.session_state.db["historial"].get(fecha_str, {})
+
+for t in lista_tratamientos:
+    # Lógica simplificada de visibilidad para análisis
+    activo = False
+    if t.tipo == "PERMANENTE": activo = True
+    elif t.tipo == "LESION" and st.session_state.db["ciclos_activos"].get(t.id, {}).get('activo'): activo = True
+    elif t.tipo == "GRASA" and "Active" in tags_dia: activo = True
+    elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: activo = True
+    
+    if activo:
+        tratamientos_activos_ids.append(t.id)
+
+# ALERTAS INTELIGENTES DE COMBINACIÓN
+if "brain" in tratamientos_activos_ids and "sleep" in tratamientos_activos_ids:
+    st.info("💡 **Consejo de Combinación:** Vas a hacer CEREBRO y SUEÑO hoy. Sepáralos: Haz Cerebro por la mañana (activación) y Sueño justo antes de dormir.")
+if "fat_d" in tratamientos_activos_ids and "fat_front" in tratamientos_activos_ids:
+    st.info("💡 **Estrategia Fat Loss:** Puedes alternar zonas. Haz una antes de entrenar y la otra al terminar (si mantienes actividad ligera).")
+
+st.subheader(f"📋 Tu Plan del Día")
 
 # --- CLASIFICACIÓN DINÁMICA ---
 grupos = {
@@ -169,9 +190,10 @@ mapa_seleccion = {
 }
 
 for t in lista_tratamientos:
-    # Filtros
+    # 1. ¿Aplica hoy?
     aplica_hoy = False
     es_ciclo_activo = False
+    
     if t.tipo == "LESION":
         ciclo = st.session_state.db["ciclos_activos"].get(t.id)
         if ciclo and ciclo['activo']:
@@ -184,28 +206,28 @@ for t in lista_tratamientos:
     elif t.tipo == "MUSCULAR":
         if "Upper" in tags_dia: aplica_hoy = True
 
-    # Estado
+    # 2. Estado
     sesiones_hechas = registros_dia.get(t.id, [])
     num_hechos = len(sesiones_hechas)
     esta_completo = num_hechos >= t.max_diario
 
-    # Clasificación
+    # 3. Clasificación
     if not aplica_hoy:
         grupos["HIDDEN"].append((t, False))
     elif esta_completo:
         grupos["COMPLETED"].append((t, es_ciclo_activo))
     else:
-        # Lógica de movimiento en tiempo real
+        # Dinámica de movimiento
         key_radio = f"rad_{t.id}"
         grupo_destino = t.default_visual_group
         
-        # 1. Si el usuario toca el radio button ahora mismo
+        # Prioridad 1: Interacción en tiempo real
         if key_radio in st.session_state:
             seleccion_actual = st.session_state[key_radio]
             if seleccion_actual in mapa_seleccion:
                 grupo_destino = mapa_seleccion[seleccion_actual]
         
-        # 2. Si ya hay historial previo hoy, agrupar con el último
+        # Prioridad 2: Historial previo hoy
         elif num_hechos > 0:
             ultimo = sesiones_hechas[-1]['detalle']
             if "Antes" in ultimo: grupo_destino = "PRE"
@@ -286,20 +308,21 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                 
                 # --- SELECTOR DE MOMENTO ---
                 opciones = []
-                
+                # Personalización de opciones según tipo
                 if t.tipo == "PERMANENTE" and "Testosterona" in t.nombre:
                     opciones = ["🌞 Mañana", "⛅ Tarde"]
                 elif t.tipo == "PERMANENTE" and "Sueño" in t.nombre:
                     opciones = ["🌙 Noche"]
                 else:
-                    # Todos los demás (Grasa, Lesión, Músculo) permiten Pre/Post
                     opciones = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
                 
                 detalle_sel = st.radio("¿Cuándo lo vas a realizar?", options=opciones, key=f"rad_{t.id}")
                 
-                # Advertencia para Grasa Post-Entreno
+                # Advertencias de combinación horaria
                 if t.tipo == "GRASA" and "Después" in detalle_sel:
-                    st.warning("⚠️ Efectividad reducida: La grasa liberada podría reabsorberse si no hay actividad física ligera después (caminar, etc).")
+                    st.warning("⚠️ Efectividad reducida: La grasa liberada podría reabsorberse si no hay actividad física ligera después.")
+                if t.nombre == "Salud Cerebral" and "Noche" in detalle_sel:
+                    st.warning("⚠️ Cuidado: La luz NIR cerebral puede ser estimulante y afectar el sueño.")
 
                 if permitir:
                     if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}"):
