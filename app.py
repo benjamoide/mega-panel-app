@@ -15,7 +15,7 @@ ARCHIVO_DATOS = 'historial_mega_panel_final.json'
 
 # --- CLASE DE TRATAMIENTO ---
 class Tratamiento:
-    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, tags_entreno, momentos_visuales, momento_ideal_txt, fases_info=None):
+    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, tags_entreno, momentos_visuales_default, momento_ideal_txt, fases_info=None):
         self.id = id_t
         self.nombre = nombre
         self.zona = zona
@@ -25,9 +25,9 @@ class Tratamiento:
         self.duracion = duracion
         self.max_diario = max_diario
         self.tiempo_espera_horas = tiempo_espera_horas
-        self.tipo = tipo  # 'LESION', 'PERMANENTE', 'MUSCULAR', 'GRASA'
+        self.tipo = tipo
         self.tags_entreno = tags_entreno 
-        self.momentos_visuales = momentos_visuales # LISTA: ["PRE", "POST", "MORNING", etc.]
+        self.momentos_visuales_default = momentos_visuales_default # Dónde aparece por defecto
         self.momento_ideal_txt = momento_ideal_txt 
         self.incompatibilidades = "" 
         self.fases_info = fases_info if fases_info else {}
@@ -36,7 +36,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO ORGANIZADO (Multi-horario) ---
+# --- CATÁLOGO ---
 @st.cache_data
 def obtener_catalogo():
     fases_articulacion = {
@@ -45,39 +45,37 @@ def obtener_catalogo():
         60: "🧱 Fase 3: Remodelación (Flexibilidad)"
     }
     
-    # TIPOS DE VISUALIZACIÓN: "PRE", "POST", "MORNING", "NIGHT", "ANY"
+    # MOMENTOS VISUALES: "PRE", "POST", "FLEX" (Flexible), "MORNING", "NIGHT", "ANY"
     
     catalogo = [
-        # --- GRASA (Solo Pre) ---
+        # --- GRASA ---
         Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], ["PRE"], "OBLIGATORIO: Antes de Entrenar")
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
         
         Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], ["PRE"], "OBLIGATORIO: Antes de Entrenar")
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
 
-        # --- LESIONES (Pre Y Post) ---
-        # Aparecen en ambas listas. Si haces 1, siguen saliendo. Si haces 2, desaparecen.
-        Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["PRE", "POST"], "Flexible: Antes (Calor) o Después (Alivio)", fases_articulacion)
+        # --- LESIONES (Por defecto en FLEXIBLE, pero se moverán si eliges Pre/Post) ---
+        Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["FLEX"], "Flexible: Antes o Después", fases_articulacion)
         .set_incompatibilidades("Implantes metálicos, Cáncer activo."),
         
-        Tratamiento("rodilla_i", "Rodilla Izquierda (Lesión)", "Rodilla Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["PRE", "POST"], "Flexible: Antes (Calor) o Después (Alivio)", fases_articulacion)
+        Tratamiento("rodilla_i", "Rodilla Izquierda (Lesión)", "Rodilla Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["FLEX"], "Flexible: Antes o Después", fases_articulacion)
         .set_incompatibilidades("Implantes metálicos, Cáncer activo."),
         
-        Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["PRE", "POST"], "Flexible: Antes (Calor) o Después (Alivio)", fases_articulacion)
+        Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["FLEX"], "Flexible: Antes o Después", fases_articulacion)
         .set_incompatibilidades("No usar si infiltración <5 días."),
         
-        Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["PRE", "POST"], "Flexible: Antes (Calor) o Después (Alivio)", fases_articulacion)
+        Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], ["FLEX"], "Flexible: Antes o Después", fases_articulacion)
         .set_incompatibilidades("No usar si infiltración <5 días."),
         
-        # --- MÚSCULO (Preferente Post, pero podría ser Pre si usuario quiere) ---
-        # Lo dejamos solo en POST por recomendación científica, pero podrías añadir "PRE" a la lista si quieres.
+        # --- MÚSCULO ---
         Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], ["POST"], "Ideal: Después de Entrenar")
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
         Tratamiento("arm_i", "Antebrazo Izquierdo (Recuperación)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], ["POST"], "Ideal: Después de Entrenar")
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
-        # --- RUTINAS FIJAS ---
+        # --- RUTINAS ---
         Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, 1, 0, "PERMANENTE", ['All'], ["MORNING"], "Mañana (Al despertar)")
         .set_incompatibilidades("No exceder tiempo. Varicocele."),
         
@@ -150,7 +148,7 @@ if seleccion_rutinas != entreno_guardado:
 
 st.divider()
 
-# --- LOGICA DE DISTRIBUCIÓN ---
+# --- LÓGICA DE CLASIFICACIÓN DINÁMICA ---
 st.subheader(f"📋 Tu Plan del Día")
 
 registros_dia = st.session_state.db["historial"].get(fecha_str, {})
@@ -158,17 +156,18 @@ registros_dia = st.session_state.db["historial"].get(fecha_str, {})
 # Grupos visuales
 grupos_visuales = {
     "PRE": [],
+    "FLEX": [],
     "POST": [],
     "MORNING": [],
     "NIGHT": [],
     "ANY": [],
-    "COMPLETED": [], # Nueva sección para lo terminado
+    "COMPLETED": [],
     "HIDDEN": []
 }
 
 for t in lista_tratamientos:
     
-    # 1. Verificar si aplica hoy (Filtros de Lesión/Entreno)
+    # 1. ¿Aplica hoy?
     aplica_hoy = False
     es_ciclo_activo = False
     
@@ -184,25 +183,40 @@ for t in lista_tratamientos:
     elif t.tipo == "MUSCULAR":
         if "Upper" in tags_dia: aplica_hoy = True
 
-    # 2. Verificar estado de completado
+    # 2. Estado
     sesiones_hechas = registros_dia.get(t.id, [])
     num_hechos = len(sesiones_hechas)
     esta_completo = num_hechos >= t.max_diario
 
+    # 3. CLASIFICACIÓN DINÁMICA
     if not aplica_hoy:
         grupos_visuales["HIDDEN"].append((t, False))
     elif esta_completo:
-        # Si ya acabaste el cupo diario, va a COMPLETADO (desaparece de las otras listas)
         grupos_visuales["COMPLETED"].append((t, es_ciclo_activo))
     else:
-        # Si aún puedes hacerlo, se añade a TODAS sus listas visuales permitidas
-        for momento in t.momentos_visuales:
-            grupos_visuales[momento].append((t, es_ciclo_activo))
+        # LÓGICA CLAVE: Si ya hay registros, ver qué eligió el usuario
+        destino_final = t.momentos_visuales_default # Por defecto (lista)
+        
+        if num_hechos > 0:
+            ultimo_detalle = sesiones_hechas[-1]['detalle']
+            # Detectar palabras clave para reubicar la tarjeta
+            if "Antes" in ultimo_detalle or "Pre-Entreno" in ultimo_detalle:
+                destino_final = ["PRE"]
+            elif "Después" in ultimo_detalle or "Post" in ultimo_detalle:
+                destino_final = ["POST"]
+            elif "Mañana" in ultimo_detalle:
+                destino_final = ["MORNING"]
+            elif "Noche" in ultimo_detalle:
+                destino_final = ["NIGHT"]
+        
+        # Asignar a los grupos correspondientes
+        for grupo in destino_final:
+            grupos_visuales[grupo].append((t, es_ciclo_activo))
 
-# --- RENDERIZADO POR SECCIONES ---
+# --- RENDERIZADO ---
 
 def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
-    # Info Fase Lesión
+    # Info Fase
     info_fase = ""
     bloqueado_por_fin = False
     if t.tipo == "LESION" and es_ciclo_activo:
@@ -220,27 +234,27 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                     break
             info_fase = f"🗓️ Día {dias_trans}: {fase_txt}"
 
-    # Estado
     sesiones_hechas = registros_dia.get(t.id, [])
     num_hechos = len(sesiones_hechas)
     completo = num_hechos >= t.max_diario
     
-    # Icono y Título
     icono = "✅" if completo else ("⏳" if num_hechos > 0 else "⬜")
     titulo = f"{icono} {t.nombre} ({num_hechos}/{t.max_diario})"
     
     with st.expander(titulo):
         if info_fase: st.info(info_fase)
-        
-        # Info técnica
         if not es_solo_lectura:
-            st.caption(f"📍 {t.momento_ideal_txt}")
+            st.caption(f"📍 Recomendado: {t.momento_ideal_txt}")
+            # Mostrar si ha sido movido dinámicamente
+            if num_hechos > 0 and not completo:
+                st.caption(f"📌 *Ubicado aquí por tu última sesión: {sesiones_hechas[-1]['detalle']}*")
+
             c1, c2 = st.columns(2)
             c1.markdown(f"**Zona:** {t.zona}\n\n**Ondas:** {t.ondas}")
             c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
             if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
-        # HISTORIAL Y BORRADO
+        # HISTORIAL
         if num_hechos > 0:
             st.markdown("---")
             for i, reg in enumerate(sesiones_hechas):
@@ -248,16 +262,15 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                 with col_txt:
                     st.success(f"✅ {reg['hora']} - {reg['detalle']}")
                 with col_del:
-                    # Botón eliminar
                     if st.button("🗑️", key=f"del_{t.id}_{i}_read{es_solo_lectura}"):
                         registros_dia[t.id].pop(i)
                         if not registros_dia[t.id]: del registros_dia[t.id]
                         guardar_datos(st.session_state.db)
                         st.rerun()
 
-        # REGISTRO (Solo si no es solo lectura y no está completo)
+        # REGISTRO
         if not es_solo_lectura and not completo and not bloqueado_por_fin:
-            # Validar espera 6h
+            # Validar 6h
             bloqueado_tiempo = False
             if num_hechos > 0 and t.tiempo_espera_horas > 0 and fecha_seleccionada == datetime.date.today():
                 last = datetime.datetime.strptime(sesiones_hechas[-1]['hora'], "%H:%M").time()
@@ -272,7 +285,7 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                 detalle_sel = "Estándar"
                 permitir = True
                 
-                # Contexto
+                # PREGUNTAS
                 if t.tipo in ["LESION", "MUSCULAR"] and seleccion_rutinas:
                     detalle_sel = st.radio("Momento:", ["Antes de Entrenar", "Después de Entrenar", "Otro"], horizontal=True, key=f"rad_{t.id}")
                 elif t.tipo == "GRASA":
@@ -302,19 +315,18 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
 
 # --- SECCIONES VISUALES ---
 
-# 1. PRE-ENTRENO
 if grupos_visuales["PRE"]:
     st.markdown("### 🔥 Antes de Entrenar")
-    for t, ciclo in grupos_visuales["PRE"]:
-        render_tratamiento(t, ciclo)
+    for t, ciclo in grupos_visuales["PRE"]: render_tratamiento(t, ciclo)
 
-# 2. POST-ENTRENO
+if grupos_visuales["FLEX"]:
+    st.markdown("### ⚖️ Flexible / Pendiente de Elección")
+    for t, ciclo in grupos_visuales["FLEX"]: render_tratamiento(t, ciclo)
+
 if grupos_visuales["POST"]:
     st.markdown("### 🧘 Después de Entrenar")
-    for t, ciclo in grupos_visuales["POST"]:
-        render_tratamiento(t, ciclo)
+    for t, ciclo in grupos_visuales["POST"]: render_tratamiento(t, ciclo)
 
-# 3. RUTINAS DIARIAS
 if grupos_visuales["MORNING"] or grupos_visuales["NIGHT"] or grupos_visuales["ANY"]:
     st.markdown("### 📅 Rutinas Diarias")
     if grupos_visuales["MORNING"]:
@@ -327,16 +339,13 @@ if grupos_visuales["MORNING"] or grupos_visuales["NIGHT"] or grupos_visuales["AN
         st.caption("⚡ Cualquier Hora")
         for t, ciclo in grupos_visuales["ANY"]: render_tratamiento(t, ciclo)
 
-# 4. COMPLETADOS (NUEVA SECCIÓN)
 if grupos_visuales["COMPLETED"]:
-    st.markdown("### ✅ Tareas Completadas Hoy")
-    for t, ciclo in grupos_visuales["COMPLETED"]:
-        render_tratamiento(t, ciclo, es_solo_lectura=True)
+    st.markdown("### ✅ Completados Hoy")
+    for t, ciclo in grupos_visuales["COMPLETED"]: render_tratamiento(t, ciclo, es_solo_lectura=True)
 
-# 5. OCULTOS / INACTIVOS
 if grupos_visuales["HIDDEN"]:
     st.markdown("---")
-    with st.expander("📂 Tratamientos No Prioritarios / Inactivos"):
+    with st.expander("📂 Tratamientos Inactivos / No Prioritarios"):
         for t, _ in grupos_visuales["HIDDEN"]:
             c1, c2 = st.columns([3, 1])
             c1.write(f"**{t.nombre}**")
