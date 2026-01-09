@@ -5,17 +5,17 @@ import os
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(
-    page_title="Mega Panel Expert",
-    page_icon="🧬",
+    page_title="Mega Panel AI",
+    page_icon="🤖",
     layout="centered"
 )
 
 # --- ARCHIVO DE DATOS ---
-ARCHIVO_DATOS = 'historial_mega_panel_v3.json'
+ARCHIVO_DATOS = 'historial_mega_panel_final.json'
 
 # --- CLASE DE TRATAMIENTO ---
 class Tratamiento:
-    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, fases_info=None):
+    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, tags_entreno, fases_info=None):
         self.id = id_t
         self.nombre = nombre
         self.zona = zona
@@ -25,216 +25,263 @@ class Tratamiento:
         self.duracion = duracion
         self.max_diario = max_diario
         self.tiempo_espera_horas = tiempo_espera_horas
-        self.tipo = tipo  # 'LESION' (Ciclo finito) o 'PERMANENTE' (Siempre disponible)
-        
-        # Diccionario de fases: { dias_limite: "Nombre Fase" }
-        # Ej: { 7: "Aguda/Inflamación", 21: "Proliferación", 60: "Remodelación" }
+        self.tipo = tipo  # 'LESION', 'PERMANENTE', 'MUSCULAR', 'GRASA'
+        self.tags_entreno = tags_entreno # Lista de entrenamientos compatibles (ej: ['Upper', 'FullBody'])
         self.fases_info = fases_info if fases_info else {}
 
-# --- CATÁLOGO EXPERTO ---
+# --- CATÁLOGO INTELIGENTE ---
 @st.cache_data
 def obtener_catalogo():
-    # FASES TÍPICAS DE RECUPERACIÓN DE TEJIDOS (Para lesiones)
     fases_articulacion = {
-        7: "🔥 Fase 1: Aguda/Inflamatoria (Enfoque: Bajar dolor)",
-        21: "🛠️ Fase 2: Proliferación (Enfoque: Generar tejido)",
-        60: "🧱 Fase 3: Remodelación (Enfoque: Flexibilidad y Fuerza)"
+        7: "🔥 Fase 1: Aguda (Bajar dolor)",
+        21: "🛠️ Fase 2: Proliferación (Generar tejido)",
+        60: "🧱 Fase 3: Remodelación (Flexibilidad)"
     }
     
+    # TIPOS DE ENTRENO: 'Cardio', 'Upper' (Superior), 'Lower' (Inferior), 'Rest' (Descanso)
+    # Nota: 'All' significa que siempre se recomienda.
+    
     return [
-        # --- LESIONES (Tipo: LESION - Tienen fin y reinicio) ---
-        Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", fases_articulacion),
-        Tratamiento("rodilla_i", "Rodilla Izquierda (Lesión)", "Rodilla Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", fases_articulacion),
-        Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", fases_articulacion),
-        Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", fases_articulacion),
+        # --- LESIONES (Prioridad Máxima - Siempre visibles si activas) ---
+        Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], fases_articulacion),
+        Tratamiento("rodilla_i", "Rodilla Izquierda (Lesión)", "Rodilla Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], fases_articulacion),
+        Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], fases_articulacion),
+        Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], fases_articulacion),
         
-        # --- PERMANENTES (Tipo: PERMANENTE - Siempre disponibles) ---
-        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "PERMANENTE"),
-        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "PERMANENTE"),
-        Tratamiento("arm_d", "Antebrazo Derecho (Músculo)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "PERMANENTE"),
-        Tratamiento("arm_i", "Antebrazo Izquierdo (Músculo)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "PERMANENTE"),
-        Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, 1, 0, "PERMANENTE"),
-        Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 0, "PERMANENTE"),
-        Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "10-20%", "> 50 cm", 15, 1, 0, "PERMANENTE")
+        # --- QUEMA DE GRASA (Solo con Cardio o Pesas - Prohibido en Descanso) ---
+        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Cardio', 'Upper', 'Lower']),
+        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Cardio', 'Upper', 'Lower']),
+        
+        # --- MÚSCULO (Según zona entrenada) ---
+        Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper']),
+        Tratamiento("arm_i", "Antebrazo Izquierdo (Recuperación)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper']),
+        
+        # --- BIENESTAR (Siempre disponibles) ---
+        Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, 1, 0, "PERMANENTE", ['All']),
+        Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 0, "PERMANENTE", ['All']),
+        Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "10-20%", "> 50 cm", 15, 1, 0, "PERMANENTE", ['All'])
     ]
 
 # --- GESTIÓN DE DATOS ---
 def cargar_datos():
     if not os.path.exists(ARCHIVO_DATOS):
-        return {"historial": {}, "ciclos_activos": {}}
+        # Estructura: historial (tratamientos), meta_diaria (tipo entreno del dia), ciclos_activos
+        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}}
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
-            datos = json.load(f)
-            # Asegurar estructura compatible si viene de versión anterior
-            if "historial" not in datos:
-                return {"historial": datos, "ciclos_activos": {}}
-            return datos
+            return json.load(f)
     except:
-        return {"historial": {}, "ciclos_activos": {}}
+        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}}
 
 def guardar_datos(datos):
     with open(ARCHIVO_DATOS, 'w') as f:
         json.dump(datos, f, indent=4)
 
 # --- INTERFAZ PRINCIPAL ---
-st.title(f"🧬 Mega Panel Expert")
+st.title(f"🧠 Mega Panel AI")
 
-# Carga inicial
 if 'db' not in st.session_state:
     st.session_state.db = cargar_datos()
 
 lista_tratamientos = obtener_catalogo()
 
-# 📅 CALENDARIO
-fecha_seleccionada = st.date_input("Selecciona Fecha", datetime.date.today())
-fecha_str = fecha_seleccionada.isoformat()
+# 1. SELECCIÓN DE FECHA
+c_fecha, c_resumen = st.columns([2, 1])
+with c_fecha:
+    fecha_seleccionada = st.date_input("📅 Fecha de Registro", datetime.date.today())
+    fecha_str = fecha_seleccionada.isoformat()
 
-# Barra de Progreso Global del Día
-registros_dia = st.session_state.db["historial"].get(fecha_str, {})
-sesiones_hoy = sum([len(sesiones) for sesiones in registros_dia.values()])
-st.caption(f"Actividad del: **{fecha_seleccionada.strftime('%d/%m/%Y')}** | Sesiones: {sesiones_hoy}")
+# 2. SELECCIÓN DE ENTRENAMIENTO (CRITERIO DE FILTRADO)
+# Recuperar qué se entrenó ese día (si ya se guardó)
+entreno_guardado = st.session_state.db.get("meta_diaria", {}).get(fecha_str, [])
+
+st.info("🏋️ **Configuración del Día:** ¿Qué tipo de actividad realizas hoy?")
+opciones_entreno = ["Descanso / Nada", "Cardio / Aeróbico", "Fuerza: Tren Superior (Brazos/Pecho/Espalda)", "Fuerza: Tren Inferior (Piernas)"]
+
+# Mapeo de opciones visuales a tags internos
+mapa_entreno = {
+    "Descanso / Nada": "Rest",
+    "Cardio / Aeróbico": "Cardio",
+    "Fuerza: Tren Superior (Brazos/Pecho/Espalda)": "Upper",
+    "Fuerza: Tren Inferior (Piernas)": "Lower"
+}
+
+seleccion_usuario = st.multiselect(
+    "Selecciona uno o varios:", 
+    opciones_entreno, 
+    default=[k for k, v in mapa_entreno.items() if v in entreno_guardado]
+)
+
+# Convertir selección a tags internos (ej. ['Cardio', 'Upper'])
+tags_dia = []
+if not seleccion_usuario: 
+    tags_dia = ["Rest"] # Por defecto descanso si no marca nada
+else:
+    for s in seleccion_usuario:
+        tags_dia.append(mapa_entreno[s])
+
+# Guardar automáticamente el tipo de entreno al cambiar
+if set(tags_dia) != set(entreno_guardado):
+    if "meta_diaria" not in st.session_state.db: st.session_state.db["meta_diaria"] = {}
+    st.session_state.db["meta_diaria"][fecha_str] = tags_dia
+    guardar_datos(st.session_state.db)
+    st.rerun()
+
 st.divider()
 
-# --- BUCLE DE TRATAMIENTOS ---
+# --- MOTOR DE RECOMENDACIÓN ---
+st.subheader(f"📋 Tratamientos Recomendados para hoy")
+
+registros_dia = st.session_state.db["historial"].get(fecha_str, {})
+contador_visible = 0
+
 for t in lista_tratamientos:
     
-    # 1. LÓGICA DE FASES Y CICLOS (Solo para lesiones)
-    info_fase = ""
-    bloqueado_por_fin_ciclo = False
-    dias_transcurridos = 0
+    # --- FILTRO INTELIGENTE ---
+    mostrar = False
+    motivo_oculto = ""
     
+    # 1. Lesiones activas: SIEMPRE mostrar
+    es_ciclo_activo = False
     if t.tipo == "LESION":
-        # Ver si hay un ciclo activo para esta lesión
         ciclo = st.session_state.db["ciclos_activos"].get(t.id)
-        
         if ciclo and ciclo['activo']:
-            fecha_inicio = datetime.date.fromisoformat(ciclo['fecha_inicio'])
-            dias_transcurridos = (fecha_seleccionada - fecha_inicio).days
-            
-            # Determinar fase actual
-            nombre_fase = "Mantenimiento / Final"
-            limite_maximo = max(t.fases_info.keys()) if t.fases_info else 60
-            
-            if dias_transcurridos < 0:
-                info_fase = "📅 Planificado para futuro"
-            elif dias_transcurridos > limite_maximo:
-                info_fase = "🏁 Protocolo Finalizado (Periodo de descanso recomendado)"
-                bloqueado_por_fin_ciclo = True
-            else:
-                # Buscar en qué fase cae
-                for limite, nombre in sorted(t.fases_info.items()):
-                    if dias_transcurridos <= limite:
-                        nombre_fase = nombre
-                        break
-                info_fase = f"🗓️ Día {dias_transcurridos}: {nombre_fase}"
+            mostrar = True
+            es_ciclo_activo = True
         else:
-            info_fase = "🌑 Sin protocolo activo"
-            bloqueado_por_fin_ciclo = True # Bloqueado hasta que se inicie
-
-    # 2. ESTADO DEL DÍA
-    sesiones_realizadas = registros_dia.get(t.id, [])
-    cantidad_hecha = len(sesiones_realizadas)
-    esta_completo_hoy = cantidad_hecha >= t.max_diario
-
-    # Icono
-    if t.tipo == "LESION" and bloqueado_por_fin_ciclo and not (ciclo and ciclo.get('activo') and dias_transcurridos > 0):
-        icono = "⏸️" # Pausado/No iniciado
-    elif esta_completo_hoy:
-        icono = "✅"
-    elif cantidad_hecha > 0:
-        icono = "⏳"
-    else:
-        icono = "⬜"
-
-    titulo = f"{icono} {t.nombre}"
+            # Si es lesión pero no activa, mostrar solo si el usuario quiere activarla
+            # Lo mostramos al final o en una sección de "Otros"
+            motivo_oculto = "Inactivo"
     
-    # --- INTERFAZ DEL EXPANDER ---
-    with st.expander(titulo):
+    # 2. Permanente/Lifestyle: SIEMPRE mostrar
+    elif t.tipo == "PERMANENTE":
+        mostrar = True
         
-        # A) GESTIÓN DE INICIO/REINICIO DE LESIÓN
-        if t.tipo == "LESION":
-            if not ciclo or not ciclo['activo']:
-                st.info("Este tratamiento requiere activar un protocolo de recuperación.")
-                if st.button(f"🚀 Iniciar Nuevo Protocolo de {t.nombre}", key=f"start_{t.id}"):
-                    st.session_state.db["ciclos_activos"][t.id] = {
-                        "fecha_inicio": datetime.date.today().isoformat(),
-                        "activo": True
-                    }
-                    guardar_datos(st.session_state.db)
-                    st.rerun()
+    # 3. Grasa: Solo si hay actividad física (Cardio o Pesas)
+    elif t.tipo == "GRASA":
+        if "Rest" in tags_dia:
+            mostrar = False
+            motivo_oculto = "Requiere ejercicio (Día de Descanso)"
+        elif any(tag in tags_dia for tag in t.tags_entreno):
+            mostrar = True
             
-            elif bloqueado_por_fin_ciclo and dias_transcurridos > 0:
-                st.success(f"Has completado el ciclo de recuperación ({dias_transcurridos} días).")
-                st.write("Si la lesión ha regresado, puedes reiniciar el contador.")
-                if st.button(f"🔄 Reiniciar Protocolo (Recaída)", key=f"restart_{t.id}"):
-                    st.session_state.db["ciclos_activos"][t.id] = {
-                        "fecha_inicio": datetime.date.today().isoformat(),
-                        "activo": True
-                    }
-                    guardar_datos(st.session_state.db)
-                    st.rerun()
-            
+    # 4. Muscular: Solo si coincide el grupo muscular
+    elif t.tipo == "MUSCULAR":
+        if any(tag in tags_dia for tag in t.tags_entreno):
+            mostrar = True
+        else:
+            mostrar = False
+            motivo_oculto = "Grupo muscular no entrenado hoy"
+
+    # --- RENDERIZADO SI PASA EL FILTRO ---
+    if mostrar:
+        contador_visible += 1
+        
+        # Lógica de Fases (Copiada de versión anterior)
+        info_fase = ""
+        bloqueado_por_fin = False
+        dias_trans = 0
+        
+        if t.tipo == "LESION" and es_ciclo_activo:
+            start = datetime.date.fromisoformat(ciclo['fecha_inicio'])
+            dias_trans = (fecha_seleccionada - start).days
+            if dias_trans > 60:
+                info_fase = "🏁 Ciclo Completado"
+                bloqueado_por_fin = True
             else:
-                st.warning(info_fase)
-                st.progress(min(dias_transcurridos / 60, 1.0)) # Barra de progreso del ciclo total (aprox 60 dias)
+                fase_txt = "Mantenimiento"
+                for lim, txt in sorted(t.fases_info.items()):
+                    if dias_trans <= lim:
+                        fase_txt = txt
+                        break
+                info_fase = f"🗓️ Día {dias_trans}: {fase_txt}"
 
-        # B) INFORMACIÓN TÉCNICA
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown(f"**Zona:** {t.zona}")
-            st.markdown(f"**Luces:** {t.ondas}")
-        with c2:
-            st.markdown(f"**Distancia:** {t.distancia}")
-            st.markdown(f"**Tiempo:** {t.duracion} min")
+        # Estado visual
+        hechos = len(registros_dia.get(t.id, []))
+        completo = hechos >= t.max_diario
+        icono = "✅" if completo else ("⏳" if hechos > 0 else "⬜")
         
-        # C) REGISTRO DIARIO (Solo si no está bloqueado por fin de ciclo o no iniciado)
-        puede_registrar = True
-        if t.tipo == "LESION" and bloqueado_por_fin_ciclo:
-            puede_registrar = False
+        titulo = f"{icono} {t.nombre}"
+        if completo: titulo += " (Completado)"
         
-        if puede_registrar:
-            # Mostrar historial de hoy
-            if cantidad_hecha > 0:
-                st.markdown("---")
-                for i, sesion in enumerate(sesiones_realizadas):
-                    st.info(f"✅ Sesión {i+1}: {sesion['hora']} - {sesion['detalle']}")
+        with st.expander(titulo):
+            # INFO
+            if info_fase: st.info(info_fase)
             
-            # Botón para nueva sesión
-            if not esta_completo_hoy:
-                st.markdown("---")
-                
-                # Validación de 6 horas
-                bloqueado_tiempo = False
-                if cantidad_hecha > 0 and t.tiempo_espera_horas > 0 and fecha_seleccionada == datetime.date.today():
-                    ultima = datetime.datetime.strptime(sesiones_realizadas[-1]['hora'], "%H:%M").time()
-                    ahora = datetime.datetime.now().time()
-                    diff = ahora.hour - ultima.hour + (ahora.minute - ultima.minute)/60
-                    if diff < t.tiempo_espera_horas:
-                        st.error(f"⏳ Espera {round(t.tiempo_espera_horas - diff, 1)}h para la siguiente sesión.")
-                        bloqueado_tiempo = True
+            c1, c2 = st.columns(2)
+            c1.markdown(f"**Zona:** {t.zona}\n\n**Ondas:** {t.ondas}")
+            c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
+            
+            if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
+            # HISTORIAL HOY
+            if hechos > 0:
+                st.markdown("---")
+                for reg in registros_dia[t.id]:
+                    st.success(f"Hecho a las {reg['hora']} ({reg['detalle']})")
+
+            # BOTONES ACCIÓN
+            if not completo and not bloqueado_por_fin:
+                # Validar espera 6h (si aplica)
+                bloqueado_tiempo = False
+                if hechos > 0 and t.tiempo_espera_horas > 0 and fecha_seleccionada == datetime.date.today():
+                    last = datetime.datetime.strptime(registros_dia[t.id][-1]['hora'], "%H:%M").time()
+                    now = datetime.datetime.now().time()
+                    diff = now.hour - last.hour + (now.minute - last.minute)/60
+                    if diff < t.tiempo_espera_horas:
+                        st.error(f"⏳ Espera {round(t.tiempo_espera_horas - diff, 1)}h más.")
+                        bloqueado_tiempo = True
+                
                 if not bloqueado_tiempo:
-                    col_btn, col_check = st.columns([1, 2])
+                    st.markdown("---")
                     detalle = "Estándar"
-                    confirmar = True
                     
-                    if t.nombre.startswith("Flanco"): # Grasa
-                         st.caption("🔥 Requisito: Entrenar en 30-60 min.")
-                         if not st.checkbox("Voy a entrenar", key=f"chk_{t.id}"): confirmar = False
-                         detalle = "Pre-Entreno"
+                    # Lógica Grasa Pre-Entreno
+                    permitir = True
+                    if t.tipo == "GRASA":
+                        st.write("🔥 **Requisito:** Entrenar en breve.")
+                        if not st.checkbox("Confirmo entreno inminente", key=f"c_{t.id}"): permitir = False
+                        detalle = "Pre-Entreno"
                     
-                    if confirmar:
-                        if st.button(f"Registrar Sesión {cantidad_hecha+1}", key=f"btn_{t.id}"):
-                            ahora_str = datetime.datetime.now().strftime('%H:%M')
-                            
-                            # Crear estructura si no existe
+                    if permitir:
+                        if st.button(f"Registrar Sesión {hechos+1}", key=f"b_{t.id}"):
+                            ahora = datetime.datetime.now().strftime('%H:%M')
                             if "historial" not in st.session_state.db: st.session_state.db["historial"] = {}
                             if fecha_str not in st.session_state.db["historial"]: st.session_state.db["historial"][fecha_str] = {}
                             if t.id not in st.session_state.db["historial"][fecha_str]: st.session_state.db["historial"][fecha_str][t.id] = []
                             
-                            st.session_state.db["historial"][fecha_str][t.id].append({
-                                "hora": ahora_str,
-                                "detalle": detalle
-                            })
+                            st.session_state.db["historial"][fecha_str][t.id].append({"hora": ahora, "detalle": detalle})
                             guardar_datos(st.session_state.db)
                             st.rerun()
+            
+            # REINICIO LESION
+            if t.tipo == "LESION" and bloqueado_por_fin:
+                if st.button("🔄 Reiniciar Ciclo (Recaída)", key=f"r_{t.id}"):
+                     st.session_state.db["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
+                     guardar_datos(st.session_state.db)
+                     st.rerun()
+
+# --- SECCIÓN DE TRATAMIENTOS OCULTOS/INACTIVOS ---
+if contador_visible < len(lista_tratamientos):
+    st.markdown("---")
+    with st.expander("📂 Ver otros tratamientos no recomendados hoy (o inactivos)"):
+        for t in lista_tratamientos:
+            # Repetimos lógica inversa para encontrar los ocultos
+            es_visible_arriba = False
+            if t.tipo == "PERMANENTE": es_visible_arriba = True
+            elif t.tipo == "LESION" and st.session_state.db["ciclos_activos"].get(t.id, {}).get('activo'): es_visible_arriba = True
+            elif t.tipo == "GRASA" and "Rest" not in tags_dia and any(tag in tags_dia for tag in t.tags_entreno): es_visible_arriba = True
+            elif t.tipo == "MUSCULAR" and any(tag in tags_dia for tag in t.tags_entreno): es_visible_arriba = True
+            
+            if not es_visible_arriba:
+                c1, c2 = st.columns([3, 1])
+                c1.write(f"**{t.nombre}**")
+                
+                # Botón para activar lesión si está inactiva
+                if t.tipo == "LESION":
+                    if c2.button("Activar", key=f"act_{t.id}"):
+                        st.session_state.db["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
+                        guardar_datos(st.session_state.db)
+                        st.rerun()
+                else:
+                    c2.caption("No prioritario hoy")
