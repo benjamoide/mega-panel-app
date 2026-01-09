@@ -1,160 +1,101 @@
 import datetime
+import json
+import os
 
-class MegaPanelTratamiento:
-    def __init__(self, id_trat, nombre, zona, ondas, intensidad, distancia_cm, duracion_min, frecuencia, momento_ideal, incompatibilidades):
-        self.id = id_trat
+# --- NOMBRE DEL ARCHIVO PARA GUARDAR DATOS ---
+ARCHIVO_DATOS = 'historial_mega_panel.json'
+
+class Tratamiento:
+    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, frecuencia, momento_tipo, incompatibilidades):
+        self.id = id_t
         self.nombre = nombre
-        self.zona = zona  # Ej: "Rodilla Derecha"
-        self.ondas = ondas  # Ej: "NIR + RED"
-        self.intensidad = intensidad  # Ej: "100%"
-        self.distancia_cm = distancia_cm  # Rango en cm
-        self.duracion_min = duracion_min
+        self.zona = zona
+        self.ondas = ondas
+        self.intensidad = intensidad
+        self.distancia = distancia
+        self.duracion = duracion
         self.frecuencia = frecuencia
-        self.momento_ideal = momento_ideal  # Ej: "Pre-Entreno", "Noche", "Flexible"
+        # Tipos de momento: 'Flexible_Entreno', 'Pre_Obligatorio', 'Mañana', 'Noche', 'Cualquiera'
+        self.momento_tipo = momento_tipo 
         self.incompatibilidades = incompatibilidades
         self.completado_hoy = False
-        self.ultimo_registro = None
+        self.detalle_realizacion = "" # Para guardar si fue "Antes" o "Despues"
 
-    def mostrar_instrucciones(self):
-        print(f"\n--- CONFIGURACIÓN MEGA PANEL: {self.nombre.upper()} ---")
-        print(f"🎯 Zona: {self.zona}")
-        print(f"💡 Ondas: {self.ondas}")
-        print(f"⚡ Intensidad: {self.intensidad}")
-        print(f"wb📏 Distancia: {self.distancia_cm}")
-        print(f"⏱️ Tiempo: {self.duracion_min} minutos")
-        print(f"📅 Frecuencia: {self.frecuencia}")
-        print(f"⚠️ PRECAUCIÓN: {self.incompatibilidades}")
+    def mostrar_info(self):
+        print(f"\n{'='*60}")
+        print(f"🔹 TRATAMIENTO: {self.nombre.upper()}")
+        print(f"{'='*60}")
+        print(f"📍 Zona:        {self.zona}")
+        print(f"💡 Luces:       {self.ondas}")
+        print(f"🔥 Intensidad:  {self.intensidad}")
+        print(f"📏 Distancia:   {self.distancia}")
+        print(f"⏱️  Duración:    {self.duracion} min")
+        print(f"📅 Frecuencia:  {self.frecuencia}")
+        print(f"⚠️  PRECAUCIÓN:  {self.incompatibilidades}")
+        print(f"{'-'*60}")
+
+    def realizar(self):
+        ahora = datetime.datetime.now()
+        hora_actual = ahora.hour
         
-        # Lógica de elección de momento (Pre/Post)
-        if self.momento_ideal == "Flexible_Entreno":
-            eleccion = input("\n¿Vas a realizarlo ANTES o DESPUÉS de entrenar? (Escribe 'antes' o 'despues'): ").lower()
-            if eleccion == "antes":
-                print("✅ Configuración PRE-ENTRENO seleccionada: Ideal para calentar tejido o movilizar grasa.")
-            else:
-                print("✅ Configuración POST-ENTRENO seleccionada: Ideal para recuperación y bajar inflamación.")
-        elif self.momento_ideal == "Pre_Obligatorio":
-            print("❗ IMPORTANTE: Realizar ANTES del ejercicio para movilizar la grasa.")
-        elif self.momento_ideal == "Noche":
-            print("🌙 MODO SUEÑO: Asegúrate de que la intensidad esté baja (10-20%) y no usar pulsos.")
+        # --- Lógica de Advertencia Horaria ---
+        if self.momento_tipo == 'Mañana' and hora_actual > 12:
+            print("⚠️  NOTA: Este tratamiento es óptimo por la MAÑANA (pico hormonal).")
+        elif self.momento_tipo == 'Noche' and hora_actual < 19:
+            print("⚠️  NOTA: Este tratamiento es para DORMIR. Hacerlo ahora podría darte sueño o no ser efectivo.")
 
-    def marcar_completado(self):
+        # --- Lógica de Selección de Momento (Entreno) ---
+        nota_extra = ""
+        
+        if self.momento_tipo == 'Flexible_Entreno':
+            while True:
+                opcion = input("\n🏋️ ¿Vas a realizarlo ANTES o DESPUÉS de entrenar? (a/d): ").lower()
+                if opcion.startswith('a'):
+                    nota_extra = "Realizado PRE-ENTRENO (Calentamiento/Activación)"
+                    print(f"✅ Registrando como: {nota_extra}")
+                    break
+                elif opcion.startswith('d'):
+                    nota_extra = "Realizado POST-ENTRENO (Recuperación/Inflamación)"
+                    print(f"✅ Registrando como: {nota_extra}")
+                    break
+                else:
+                    print("Por favor, elige 'a' (Antes) o 'd' (Después).")
+        
+        elif self.momento_tipo == 'Pre_Obligatorio':
+            print("\n🔥 IMPORTANTE: Debes realizar ejercicio físico en los próximos 30-60 min para oxidar la grasa liberada.")
+            confirmar = input("¿Confirmas que vas a entrenar después? (s/n): ")
+            if confirmar.lower() != 's':
+                print("❌ Tratamiento cancelado. Sin ejercicio, la grasa se reabsorbe.")
+                return False
+            nota_extra = "Realizado PRE-ENTRENO (Obligatorio para Grasa)"
+
+        # --- Confirmación Final ---
+        if self.momento_tipo not in ['Flexible_Entreno', 'Pre_Obligatorio']:
+             input("\nPresiona ENTER cuando termines la sesión...")
+
         self.completado_hoy = True
-        self.ultimo_registro = datetime.datetime.now()
-        print(f"✅ Tratamiento '{self.nombre}' registrado correctamente a las {self.ultimo_registro.strftime('%H:%M')}.")
+        self.detalle_realizacion = f"{ahora.strftime('%H:%M')} - {nota_extra}"
+        print(f"\n✅ ¡Tratamiento '{self.nombre}' registrado con éxito!")
+        return True
 
-# --- BASE DE DATOS DE PROTOCOLOS (Actualizada con Manual + Ciencia) ---
-
-protocolos = [
-    # --- DOLOR ARTICULAR (Rodillas y Codos separados por lado) ---
-    MegaPanelTratamiento(
-        id_trat="rodilla_d", nombre="Rodilla Derecha (Dolor)", zona="Rodilla Derecha",
-        ondas="NIR + RED (Todas ON)", intensidad="100%", distancia_cm="15-20 cm",
-        duracion_min=10, frecuencia="6-7x/semana (2x/día si agudo)",
-        momento_ideal="Flexible_Entreno",
-        incompatibilidades="Implantes metálicos (vigilar calor), Cáncer activo."
-    ),
-    MegaPanelTratamiento(
-        id_trat="rodilla_i", nombre="Rodilla Izquierda (Dolor)", zona="Rodilla Izquierda",
-        ondas="NIR + RED (Todas ON)", intensidad="100%", distancia_cm="15-20 cm",
-        duracion_min=10, frecuencia="6-7x/semana (2x/día si agudo)",
-        momento_ideal="Flexible_Entreno",
-        incompatibilidades="Implantes metálicos (vigilar calor), Cáncer activo."
-    ),
-    MegaPanelTratamiento(
-        id_trat="codo_d", nombre="Codo Derecho (Dolor)", zona="Codo Derecho",
-        ondas="NIR + RED (Todas ON)", intensidad="100%", distancia_cm="15-20 cm",
-        duracion_min=10, frecuencia="6-7x/semana",
-        momento_ideal="Flexible_Entreno",
-        incompatibilidades="Infiltraciones recientes (esperar 5 días)."
-    ),
-    MegaPanelTratamiento(
-        id_trat="codo_i", nombre="Codo Izquierdo (Dolor)", zona="Codo Izquierdo",
-        ondas="NIR + RED (Todas ON)", intensidad="100%", distancia_cm="15-20 cm",
-        duracion_min=10, frecuencia="6-7x/semana",
-        momento_ideal="Flexible_Entreno",
-        incompatibilidades="Infiltraciones recientes (esperar 5 días)."
-    ),
-
-    # --- PÉRDIDA DE GRASA (Flancos separados, distancia muy corta) ---
-    MegaPanelTratamiento(
-        id_trat="abdo_d", nombre="Flanco Abdominal Derecho (Grasa)", zona="Abdomen Derecho",
-        ondas="NIR + RED (Todas ON)", intensidad="100%", distancia_cm="10-15 cm (Muy cerca)",
-        duracion_min=10, frecuencia="5-7x/semana",
-        momento_ideal="Pre_Obligatorio", # Prioridad Pre-Entreno
-        incompatibilidades="Tatuajes oscuros (riesgo quemadura), Embarazo."
-    ),
-    MegaPanelTratamiento(
-        id_trat="abdo_i", nombre="Flanco Abdominal Izquierdo (Grasa)", zona="Abdomen Izquierdo",
-        ondas="NIR + RED (Todas ON)", intensidad="100%", distancia_cm="10-15 cm (Muy cerca)",
-        duracion_min=10, frecuencia="5-7x/semana",
-        momento_ideal="Pre_Obligatorio",
-        incompatibilidades="Tatuajes oscuros (riesgo quemadura), Embarazo."
-    ),
-
-    # --- RECUPERACIÓN MUSCULAR (Antebrazos) ---
-    MegaPanelTratamiento(
-        id_trat="antebrazo_d", nombre="Antebrazo Derecho (Recuperación)", zona="Antebrazo Derecho",
-        ondas="NIR + RED", intensidad="100%", distancia_cm="15-30 cm",
-        duracion_min=10, frecuencia="3-5x/semana",
-        momento_ideal="Flexible_Entreno", # Preferiblemente Post, pero flexible
-        incompatibilidades="Ninguna específica. Opcional: Usar pulsos 50Hz."
-    ),
-    MegaPanelTratamiento(
-        id_trat="antebrazo_i", nombre="Antebrazo Izquierdo (Recuperación)", zona="Antebrazo Izquierdo",
-        ondas="NIR + RED", intensidad="100%", distancia_cm="15-30 cm",
-        duracion_min=10, frecuencia="3-5x/semana",
-        momento_ideal="Flexible_Entreno",
-        incompatibilidades="Ninguna específica. Opcional: Usar pulsos 50Hz."
-    ),
-
-    # --- HORMONAL Y CEREBRAL (Protocolos Especiales) ---
-    MegaPanelTratamiento(
-        id_trat="testo", nombre="Boost Testosterona", zona="Testículos",
-        ondas="NIR + RED", intensidad="100%", distancia_cm="15-20 cm",
-        duracion_min=8, frecuencia="5-7x/semana",
-        momento_ideal="Mañana",
-        incompatibilidades="Tumores testiculares, Varicocele (consultar)."
-    ),
-    MegaPanelTratamiento(
-        id_trat="cerebro", nombre="Salud Cerebral (Cognitivo)", zona="Cabeza/Frente",
-        ondas="NIR (Infrarrojo)", intensidad="100%", distancia_cm="30 cm",
-        duracion_min=10, frecuencia="5-7x/semana",
-        momento_ideal="Flexible",
-        incompatibilidades="USO OBLIGATORIO DE GAFAS (Protección Retina)."
-    ),
-    MegaPanelTratamiento(
-        id_trat="sueno", nombre="Sueño y Ritmo Circadiano", zona="Cuerpo Completo / Ambiente",
-        ondas="SOLO RED (Apagar NIR)", intensidad="10-20% (Baja)", distancia_cm=">50 cm",
-        duracion_min=15, frecuencia="Diario",
-        momento_ideal="Noche",
-        incompatibilidades="NO USAR PULSOS (Epilepsia/Estimulación)."
-    )
-]
-
-# --- EJEMPLO DE USO EN LA APP ---
-def ejecutar_app():
-    print("\n📱 --- APP MEGA PANEL CONTROL ---")
-    print("Selecciona un tratamiento para ver configuración:")
-    
-    # Listar tratamientos disponibles
-    for i, t in enumerate(protocolos):
-        estado = "✅" if t.completado_hoy else "⬜"
-        print(f"{i+1}. {estado} {t.nombre}")
-
-    try:
-        opcion = int(input("\nNúmero de tratamiento: ")) - 1
-        if 0 <= opcion < len(protocolos):
-            seleccionado = protocolos[opcion]
-            seleccionado.mostrar_instrucciones()
-            
-            confirmar = input("\n¿Marcar como realizado? (s/n): ")
-            if confirmar.lower() == 's':
-                seleccionado.marcar_completado()
-        else:
-            print("Opción no válida.")
-    except ValueError:
-        print("Entrada no válida.")
-
-# Simulación de ejecución
-if __name__ == "__main__":
-    ejecutar_app()
+# --- BASE DE DATOS MAESTRA (Con tus parámetros actualizados) ---
+def cargar_tratamientos():
+    return [
+        # --- DOLOR ARTICULAR ---
+        Tratamiento("rodilla_d", "Rodilla Derecha (Dolor)", "Rodilla Dcha", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "Implantes metálicos (calor), Cáncer activo."),
+        Tratamiento("rodilla_i", "Rodilla Izquierda (Dolor)", "Rodilla Izq", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "Implantes metálicos (calor), Cáncer activo."),
+        Tratamiento("codo_d", "Codo Derecho (Dolor)", "Codo Dcho", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "No usar si hubo infiltración hace <5 días."),
+        Tratamiento("codo_i", "Codo Izquierdo (Dolor)", "Codo Izq", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "No usar si hubo infiltración hace <5 días."),
+        
+        # --- GRASA (Distancia Corta + Pre-Entreno Obligatorio) ---
+        Tratamiento("fat_d", "Flanco Derecho (Quema Grasa)", "Abdomen Dcho", "NIR + RED (Todo ON)", "100%", "10-15 cm (Muy Cerca)", 10, "5-7x/sem", "Pre_Obligatorio", "Cuidado con tatuajes oscuros. Embarazo prohibido."),
+        Tratamiento("fat_i", "Flanco Izquierdo (Quema Grasa)", "Abdomen Izq", "NIR + RED (Todo ON)", "100%", "10-15 cm (Muy Cerca)", 10, "5-7x/sem", "Pre_Obligatorio", "Cuidado con tatuajes oscuros. Embarazo prohibido."),
+        
+        # --- RECUPERACIÓN MUSCULAR ---
+        Tratamiento("arm_d", "Antebrazo Derecho (Músculo)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, "3-5x/sem", "Flexible_Entreno", "Opcional: Pulsos 50Hz para drenar."),
+        Tratamiento("arm_i", "Antebrazo Izquierdo (Músculo)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, "3-5x/sem", "Flexible_Entreno", "Opcional: Pulsos 50Hz para drenar."),
+        
+        # --- PROTOCOLOS ESPECIALES ---
+        Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, "5-7x/sem", "Mañana", "No exceder tiempo. Consultar si hay varicocele."),
+        Tratamiento("brain", "Salud Cerebral (Cognitivo)", "Cabeza/Frente", "SOLO NIR (Infrarrojo)", "100%", "30 cm", 10, "5-7x/sem", "Cualquiera", "⛔ GAFAS OBLIGATORIAS. NIR daña la retina si se mira fijo."),
+        Tratamiento("sleep", "Sueño y Ritmo Circadiano", "Ambiente Habitación", "SOLO RED (Rojo)", "10-20% (Bajo)", "> 50 cm",
