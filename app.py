@@ -6,7 +6,7 @@ import os
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(
     page_title="Mega Panel AI",
-    page_icon="🧬",
+    page_icon="🔥",
     layout="centered"
 )
 
@@ -27,7 +27,7 @@ class Tratamiento:
         self.tiempo_espera_horas = tiempo_espera_horas
         self.tipo = tipo
         self.tags_entreno = tags_entreno 
-        self.default_visual_group = default_visual_group # Dónde aparece si no se ha tocado nada
+        self.default_visual_group = default_visual_group 
         self.momento_ideal_txt = momento_ideal_txt 
         self.incompatibilidades = "" 
         self.fases_info = fases_info if fases_info else {}
@@ -45,17 +45,18 @@ def obtener_catalogo():
         60: "🧱 Fase 3: Remodelación (Flexibilidad)"
     }
     
-    # GRUPOS VISUALES INTERNOS: "PRE", "POST", "MORNING", "AFTERNOON", "NIGHT", "FLEX"
-    
     catalogo = [
-        # --- GRASA (Fijo en PRE) ---
-        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "OBLIGATORIO: Antes de Entrenar")
+        # --- GRASA (Flexible: Pre recomendado, Post permitido) ---
+        Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen Frente", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar")
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
         
-        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "OBLIGATORIO: Antes de Entrenar")
+        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar")
+        .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
+        
+        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar")
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
 
-        # --- LESIONES (Por defecto FLEX, pero se moverán dinámicamente) ---
+        # --- LESIONES ---
         Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después", fases_articulacion)
         .set_incompatibilidades("Implantes metálicos, Cáncer activo."),
         
@@ -68,14 +69,14 @@ def obtener_catalogo():
         Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después", fases_articulacion)
         .set_incompatibilidades("No usar si infiltración <5 días."),
         
-        # --- MÚSCULO (Por defecto POST) ---
+        # --- MÚSCULO ---
         Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar")
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
         Tratamiento("arm_i", "Antebrazo Izquierdo (Recuperación)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar")
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
-        # --- PERMANENTES (Horarios variados) ---
+        # --- PERMANENTES ---
         Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, 1, 0, "PERMANENTE", ['All'], "MORNING", "Mañana (Al despertar)")
         .set_incompatibilidades("No exceder tiempo. Varicocele."),
         
@@ -102,20 +103,20 @@ def guardar_datos(datos):
         json.dump(datos, f, indent=4)
 
 # --- INTERFAZ PRINCIPAL ---
-st.title(f"🧠 Mega Panel AI")
+st.title(f"🔥 Mega Panel AI")
 
 if 'db' not in st.session_state:
     st.session_state.db = cargar_datos()
 
 lista_tratamientos = obtener_catalogo()
 
-# 1. SELECCIÓN DE FECHA
+# 1. FECHA
 c_fecha, c_resumen = st.columns([2, 1])
 with c_fecha:
     fecha_seleccionada = st.date_input("📅 Fecha de Registro", datetime.date.today())
     fecha_str = fecha_seleccionada.isoformat()
 
-# 2. SELECCIÓN DE ENTRENAMIENTO
+# 2. RUTINAS
 entreno_guardado = st.session_state.db.get("meta_diaria", {}).get(fecha_str, [])
 opciones_rutinas = {
     "Descanso Total": [],
@@ -129,7 +130,7 @@ opciones_rutinas = {
 }
 nombres_rutinas = list(opciones_rutinas.keys())
 default_options = [x for x in entreno_guardado if x in nombres_rutinas]
-seleccion_rutinas = st.multiselect("Rutinas realizadas:", nombres_rutinas, default=default_options)
+seleccion_rutinas = st.multiselect("Rutinas realizadas hoy:", nombres_rutinas, default=default_options)
 
 tags_dia = set()
 if seleccion_rutinas:
@@ -147,21 +148,18 @@ st.subheader(f"📋 Tu Plan del Día")
 
 registros_dia = st.session_state.db["historial"].get(fecha_str, {})
 
-# --- LÓGICA DE CLASIFICACIÓN DINÁMICA (EL CEREBRO DE LA APP) ---
-
-# Diccionario de Grupos Visuales
+# --- CLASIFICACIÓN DINÁMICA ---
 grupos = {
-    "PRE": [],       # Antes de Entrenar
-    "POST": [],      # Después de Entrenar
-    "MORNING": [],   # Mañana
-    "AFTERNOON": [], # Tarde
-    "NIGHT": [],     # Noche
-    "FLEX": [],      # Sin decidir / Flexible
-    "COMPLETED": [], # Completados
-    "HIDDEN": []     # Ocultos
+    "PRE": [],       
+    "POST": [],      
+    "MORNING": [],   
+    "AFTERNOON": [], 
+    "NIGHT": [],     
+    "FLEX": [],      
+    "COMPLETED": [], 
+    "HIDDEN": []     
 }
 
-# Mapa de Texto del Radio Button -> Grupo Visual
 mapa_seleccion = {
     "🏋️ Antes de Entrenar": "PRE",
     "🧘 Después de Entrenar": "POST",
@@ -171,10 +169,9 @@ mapa_seleccion = {
 }
 
 for t in lista_tratamientos:
-    # 1. ¿Aplica hoy?
+    # Filtros
     aplica_hoy = False
     es_ciclo_activo = False
-    
     if t.tipo == "LESION":
         ciclo = st.session_state.db["ciclos_activos"].get(t.id)
         if ciclo and ciclo['activo']:
@@ -187,48 +184,42 @@ for t in lista_tratamientos:
     elif t.tipo == "MUSCULAR":
         if "Upper" in tags_dia: aplica_hoy = True
 
-    # 2. Estado Completado
+    # Estado
     sesiones_hechas = registros_dia.get(t.id, [])
     num_hechos = len(sesiones_hechas)
     esta_completo = num_hechos >= t.max_diario
 
-    # 3. DETERMINAR DÓNDE SE MUESTRA
+    # Clasificación
     if not aplica_hoy:
         grupos["HIDDEN"].append((t, False))
     elif esta_completo:
         grupos["COMPLETED"].append((t, es_ciclo_activo))
     else:
-        # AQUÍ ESTÁ LA MAGIA DINÁMICA:
-        # Miramos si el usuario ha tocado el Radio Button en el Session State
+        # Lógica de movimiento en tiempo real
         key_radio = f"rad_{t.id}"
-        grupo_destino = t.default_visual_group # Por defecto
+        grupo_destino = t.default_visual_group
         
-        # A) Si el usuario está interactuando AHORA MISMO (Session State)
+        # 1. Si el usuario toca el radio button ahora mismo
         if key_radio in st.session_state:
             seleccion_actual = st.session_state[key_radio]
             if seleccion_actual in mapa_seleccion:
                 grupo_destino = mapa_seleccion[seleccion_actual]
         
-        # B) Si no está tocando nada, miramos si ya hizo una sesión previa hoy
-        # y usamos ese contexto (opcional, para agrupar)
+        # 2. Si ya hay historial previo hoy, agrupar con el último
         elif num_hechos > 0:
             ultimo = sesiones_hechas[-1]['detalle']
-            # Mapeo inverso simple del historial
             if "Antes" in ultimo: grupo_destino = "PRE"
             elif "Después" in ultimo: grupo_destino = "POST"
             elif "Mañana" in ultimo: grupo_destino = "MORNING"
             elif "Noche" in ultimo: grupo_destino = "NIGHT"
         
-        # Asignar al grupo calculado
         if grupo_destino in grupos:
             grupos[grupo_destino].append((t, es_ciclo_activo))
         else:
             grupos["FLEX"].append((t, es_ciclo_activo))
 
 # --- RENDERIZADO ---
-
 def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
-    # Info Fase
     info_fase = ""
     bloqueado_por_fin = False
     if t.tipo == "LESION" and es_ciclo_activo:
@@ -253,7 +244,6 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
     icono = "✅" if completo else ("⏳" if num_hechos > 0 else "⬜")
     titulo = f"{icono} {t.nombre} ({num_hechos}/{t.max_diario})"
     
-    # El expander debe mantener el estado abierto si se está interactuando
     with st.expander(titulo):
         if info_fase: st.info(info_fase)
         
@@ -264,7 +254,7 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
             c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
             if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
-        # HISTORIAL
+        # Historial y Borrado
         if num_hechos > 0:
             st.markdown("---")
             for i, reg in enumerate(sesiones_hechas):
@@ -272,13 +262,13 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                 with col_txt:
                     st.success(f"✅ {reg['hora']} - {reg['detalle']}")
                 with col_del:
-                    if st.button("🗑️", key=f"del_{t.id}_{i}"):
+                    if st.button("🗑️", key=f"del_{t.id}_{i}_read{es_solo_lectura}"):
                         registros_dia[t.id].pop(i)
                         if not registros_dia[t.id]: del registros_dia[t.id]
                         guardar_datos(st.session_state.db)
                         st.rerun()
 
-        # REGISTRO
+        # Registro
         if not es_solo_lectura and not completo and not bloqueado_por_fin:
             # Validar 6h
             bloqueado_tiempo = False
@@ -292,30 +282,24 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
             
             if not bloqueado_tiempo:
                 st.markdown("---")
-                detalle_sel = "Estándar"
                 permitir = True
                 
-                # SELECCIÓN DINÁMICA DE MOMENTO
-                # Definimos opciones según el tipo de tratamiento
+                # --- SELECTOR DE MOMENTO ---
                 opciones = []
-                index_default = 0
                 
-                if t.tipo == "GRASA":
-                    opciones = ["🏋️ Antes de Entrenar"]
-                elif t.tipo == "PERMANENTE" and "Testosterona" in t.nombre:
-                    opciones = ["🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
+                if t.tipo == "PERMANENTE" and "Testosterona" in t.nombre:
+                    opciones = ["🌞 Mañana", "⛅ Tarde"]
                 elif t.tipo == "PERMANENTE" and "Sueño" in t.nombre:
-                    opciones = ["🌙 Noche", "⛅ Tarde"]
+                    opciones = ["🌙 Noche"]
                 else:
-                    # Lesiones, Muscular, Cerebro (Flexible completo)
+                    # Todos los demás (Grasa, Lesión, Músculo) permiten Pre/Post
                     opciones = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
-                    # Intentar seleccionar por defecto el grupo actual para que no salte solo
-                    # Pero queremos que salte SI el usuario lo cambia.
                 
-                # Widget Radio Button
-                # key=f"rad_{t.id}" es CRÍTICO para la detección dinámica arriba
-                seleccion = st.radio("¿Cuándo lo vas a realizar?", options=opciones, key=f"rad_{t.id}")
-                detalle_sel = seleccion
+                detalle_sel = st.radio("¿Cuándo lo vas a realizar?", options=opciones, key=f"rad_{t.id}")
+                
+                # Advertencia para Grasa Post-Entreno
+                if t.tipo == "GRASA" and "Después" in detalle_sel:
+                    st.warning("⚠️ Efectividad reducida: La grasa liberada podría reabsorberse si no hay actividad física ligera después (caminar, etc).")
 
                 if permitir:
                     if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}"):
@@ -328,16 +312,14 @@ def render_tratamiento(t, es_ciclo_activo, es_solo_lectura=False):
                         guardar_datos(st.session_state.db)
                         st.rerun()
         
-        # REINICIO
+        # Reinicio Ciclo
         if t.tipo == "LESION" and bloqueado_por_fin:
             if st.button("🔄 Reiniciar Ciclo", key=f"rst_{t.id}"):
                  st.session_state.db["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
                  guardar_datos(st.session_state.db)
                  st.rerun()
 
-# --- SECCIONES VISUALES ---
-
-# Orden de renderizado lógico del día
+# --- SECCIONES ---
 sections_order = [
     ("MORNING", "🌞 Rutinas de Mañana"),
     ("PRE", "🔥 Antes de Entrenar"),
