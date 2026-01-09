@@ -1,6 +1,14 @@
+import streamlit as st
 import datetime
 import json
 import os
+
+# --- CONFIGURACIÓN DE LA PÁGINA ---
+st.set_page_config(
+    page_title="Mega Panel Control",
+    page_icon="🔴",
+    layout="mobile"
+)
 
 # --- NOMBRE DEL ARCHIVO PARA GUARDAR DATOS ---
 ARCHIVO_DATOS = 'historial_mega_panel.json'
@@ -15,220 +23,147 @@ class Tratamiento:
         self.distancia = distancia
         self.duracion = duracion
         self.frecuencia = frecuencia
-        # Tipos de momento: 'Flexible_Entreno', 'Pre_Obligatorio', 'Mañana', 'Noche', 'Cualquiera'
         self.momento_tipo = momento_tipo 
         self.incompatibilidades = incompatibilidades
         self.completado_hoy = False
-        self.detalle_realizacion = "" # Para guardar si fue "Antes" o "Despues"
+        self.detalle_realizacion = ""
 
-    def mostrar_info(self):
-        print(f"\n{'='*60}")
-        print(f"🔹 TRATAMIENTO: {self.nombre.upper()}")
-        print(f"{'='*60}")
-        print(f"📍 Zona:        {self.zona}")
-        print(f"💡 Luces:       {self.ondas}")
-        print(f"🔥 Intensidad:  {self.intensidad}")
-        print(f"📏 Distancia:   {self.distancia}")
-        print(f"⏱️  Duración:    {self.duracion} min")
-        print(f"📅 Frecuencia:  {self.frecuencia}")
-        print(f"⚠️  PRECAUCIÓN:  {self.incompatibilidades}")
-        print(f"{'-'*60}")
+    def to_dict(self):
+        return {
+            "completado": self.completado_hoy,
+            "detalle": self.detalle_realizacion
+        }
 
-    def realizar(self):
-        ahora = datetime.datetime.now()
-        hora_actual = ahora.hour
-        
-        # --- Lógica de Advertencia Horaria ---
-        if self.momento_tipo == 'Mañana' and hora_actual > 12:
-            print("⚠️  NOTA: Este tratamiento es óptimo por la MAÑANA (pico hormonal).")
-        elif self.momento_tipo == 'Noche' and hora_actual < 19:
-            print("⚠️  NOTA: Este tratamiento es para DORMIR. Hacerlo ahora podría darte sueño o no ser efectivo.")
-
-        # --- Lógica de Selección de Momento (Entreno) ---
-        nota_extra = ""
-        
-        if self.momento_tipo == 'Flexible_Entreno':
-            while True:
-                opcion = input("\n🏋️ ¿Vas a realizarlo ANTES o DESPUÉS de entrenar? (a/d): ").lower()
-                if opcion.startswith('a'):
-                    nota_extra = "Realizado PRE-ENTRENO (Calentamiento/Activación)"
-                    print(f"✅ Registrando como: {nota_extra}")
-                    break
-                elif opcion.startswith('d'):
-                    nota_extra = "Realizado POST-ENTRENO (Recuperación/Inflamación)"
-                    print(f"✅ Registrando como: {nota_extra}")
-                    break
-                else:
-                    print("Por favor, elige 'a' (Antes) o 'd' (Después).")
-        
-        elif self.momento_tipo == 'Pre_Obligatorio':
-            print("\n🔥 IMPORTANTE: Debes realizar ejercicio físico en los próximos 30-60 min para oxidar la grasa liberada.")
-            confirmar = input("¿Confirmas que vas a entrenar después? (s/n): ")
-            if confirmar.lower() != 's':
-                print("❌ Tratamiento cancelado. Sin ejercicio, la grasa se reabsorbe.")
-                return False
-            nota_extra = "Realizado PRE-ENTRENO (Obligatorio para Grasa)"
-
-        # --- Confirmación Final ---
-        if self.momento_tipo not in ['Flexible_Entreno', 'Pre_Obligatorio']:
-             input("\nPresiona ENTER cuando termines la sesión...")
-
-        self.completado_hoy = True
-        self.detalle_realizacion = f"{ahora.strftime('%H:%M')} - {nota_extra}"
-        print(f"\n✅ ¡Tratamiento '{self.nombre}' registrado con éxito!")
-        return True
-
-# --- BASE DE DATOS MAESTRA (FORMATO SEGURO) ---
-def cargar_tratamientos():
+# --- FUNCIÓN PARA CARGAR TRATAMIENTOS ---
+@st.cache_data
+def obtener_catalogo():
     return [
         # --- DOLOR ARTICULAR ---
-        Tratamiento(
-            "rodilla_d", "Rodilla Derecha (Dolor)", "Rodilla Dcha", 
-            "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", 
-            "Flexible_Entreno", "Implantes metálicos (calor), Cáncer activo."
-        ),
-        Tratamiento(
-            "rodilla_i", "Rodilla Izquierda (Dolor)", "Rodilla Izq", 
-            "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", 
-            "Flexible_Entreno", "Implantes metálicos (calor), Cáncer activo."
-        ),
-        Tratamiento(
-            "codo_d", "Codo Derecho (Dolor)", "Codo Dcho", 
-            "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", 
-            "Flexible_Entreno", "No usar si hubo infiltración hace <5 días."
-        ),
-        Tratamiento(
-            "codo_i", "Codo Izquierdo (Dolor)", "Codo Izq", 
-            "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", 
-            "Flexible_Entreno", "No usar si hubo infiltración hace <5 días."
-        ),
+        Tratamiento("rodilla_d", "Rodilla Derecha (Dolor)", "Rodilla Dcha", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "Implantes metálicos (calor), Cáncer activo."),
+        Tratamiento("rodilla_i", "Rodilla Izquierda (Dolor)", "Rodilla Izq", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "Implantes metálicos (calor), Cáncer activo."),
+        Tratamiento("codo_d", "Codo Derecho (Dolor)", "Codo Dcho", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "No usar si hubo infiltración hace <5 días."),
+        Tratamiento("codo_i", "Codo Izquierdo (Dolor)", "Codo Izq", "NIR + RED (Todo ON)", "100%", "15-20 cm", 10, "6-7x/sem", "Flexible_Entreno", "No usar si hubo infiltración hace <5 días."),
         
-        # --- GRASA (Distancia Corta + Pre-Entreno Obligatorio) ---
-        Tratamiento(
-            "fat_d", "Flanco Derecho (Quema Grasa)", "Abdomen Dcho", 
-            "NIR + RED (Todo ON)", "100%", "10-15 cm (Muy Cerca)", 10, "5-7x/sem", 
-            "Pre_Obligatorio", "Cuidado con tatuajes oscuros. Embarazo prohibido."
-        ),
-        Tratamiento(
-            "fat_i", "Flanco Izquierdo (Quema Grasa)", "Abdomen Izq", 
-            "NIR + RED (Todo ON)", "100%", "10-15 cm (Muy Cerca)", 10, "5-7x/sem", 
-            "Pre_Obligatorio", "Cuidado con tatuajes oscuros. Embarazo prohibido."
-        ),
+        # --- GRASA ---
+        Tratamiento("fat_d", "Flanco Derecho (Quema Grasa)", "Abdomen Dcho", "NIR + RED (Todo ON)", "100%", "10-15 cm (Muy Cerca)", 10, "5-7x/sem", "Pre_Obligatorio", "Cuidado con tatuajes oscuros. Embarazo prohibido."),
+        Tratamiento("fat_i", "Flanco Izquierdo (Quema Grasa)", "Abdomen Izq", "NIR + RED (Todo ON)", "100%", "10-15 cm (Muy Cerca)", 10, "5-7x/sem", "Pre_Obligatorio", "Cuidado con tatuajes oscuros. Embarazo prohibido."),
         
-        # --- RECUPERACIÓN MUSCULAR ---
-        Tratamiento(
-            "arm_d", "Antebrazo Derecho (Músculo)", "Antebrazo Dcho", 
-            "NIR + RED", "100%", "15-30 cm", 10, "3-5x/sem", 
-            "Flexible_Entreno", "Opcional: Pulsos 50Hz para drenar."
-        ),
-        Tratamiento(
-            "arm_i", "Antebrazo Izquierdo (Músculo)", "Antebrazo Izq", 
-            "NIR + RED", "100%", "15-30 cm", 10, "3-5x/sem", 
-            "Flexible_Entreno", "Opcional: Pulsos 50Hz para drenar."
-        ),
+        # --- MÚSCULO ---
+        Tratamiento("arm_d", "Antebrazo Derecho (Músculo)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, "3-5x/sem", "Flexible_Entreno", "Opcional: Pulsos 50Hz para drenar."),
+        Tratamiento("arm_i", "Antebrazo Izquierdo (Músculo)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, "3-5x/sem", "Flexible_Entreno", "Opcional: Pulsos 50Hz para drenar."),
         
-        # --- PROTOCOLOS ESPECIALES ---
-        Tratamiento(
-            "testo", "Boost Testosterona", "Testículos", 
-            "NIR + RED", "100%", "15-20 cm", 5, "5-7x/sem", 
-            "Mañana", "No exceder tiempo. Consultar si hay varicocele."
-        ),
-        Tratamiento(
-            "brain", "Salud Cerebral (Cognitivo)", "Cabeza/Frente", 
-            "SOLO NIR (Infrarrojo)", "100%", "30 cm", 10, "5-7x/sem", 
-            "Cualquiera", "⛔ GAFAS OBLIGATORIAS. NIR daña la retina si se mira fijo."
-        ),
-        Tratamiento(
-            "sleep", "Sueño y Ritmo Circadiano", "Ambiente Habitación", 
-            "SOLO RED (Rojo)", "10-20% (Bajo)", "> 50 cm", 15, "Diario", 
-            "Noche", "⛔ NO USAR PULSOS. Luz fija y suave."
-        )
+        # --- ESPECIALES ---
+        Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, "5-7x/sem", "Mañana", "No exceder tiempo. Consultar varicocele."),
+        Tratamiento("brain", "Salud Cerebral (Cognitivo)", "Cabeza/Frente", "SOLO NIR (Infrarrojo)", "100%", "30 cm", 10, "5-7x/sem", "Cualquiera", "⛔ GAFAS OBLIGATORIAS. NIR daña la retina."),
+        Tratamiento("sleep", "Sueño y Ritmo Circadiano", "Ambiente Habitación", "SOLO RED (Rojo)", "10-20% (Bajo)", "> 50 cm", 15, "Diario", "Noche", "⛔ NO USAR PULSOS. Luz fija y suave.")
     ]
 
-# --- SISTEMA DE GUARDADO Y CARGA (JSON) ---
-def guardar_estado(lista_tratamientos):
-    datos = {}
-    hoy = datetime.date.today().isoformat()
-    datos['fecha'] = hoy
-    datos['registros'] = {}
-    
-    for t in lista_tratamientos:
-        if t.completado_hoy:
-            datos['registros'][t.id] = {
-                'completado': True,
-                'detalle': t.detalle_realizacion
-            }
-    
-    with open(ARCHIVO_DATOS, 'w') as f:
-        json.dump(datos, f, indent=4)
-
-def cargar_estado(lista_tratamientos):
+# --- GESTIÓN DE ESTADO (PERSISTENCIA) ---
+def cargar_estado():
     if not os.path.exists(ARCHIVO_DATOS):
-        return
-
+        return {}
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
             datos = json.load(f)
-        
         hoy = datetime.date.today().isoformat()
+        # Si es otro día, reiniciamos (devolvemos dict vacío)
+        if datos.get('fecha') != hoy:
+            return {}
+        return datos.get('registros', {})
+    except:
+        return {}
+
+def guardar_estado(registros):
+    datos = {
+        'fecha': datetime.date.today().isoformat(),
+        'registros': registros
+    }
+    with open(ARCHIVO_DATOS, 'w') as f:
+        json.dump(datos, f, indent=4)
+
+# --- INICIALIZAR SESSION STATE ---
+if 'registros' not in st.session_state:
+    st.session_state.registros = cargar_estado()
+
+# --- INTERFAZ PRINCIPAL ---
+st.title(f"🔴 Mega Panel Control")
+st.caption(f"Fecha: {datetime.date.today().strftime('%d/%m/%Y')}")
+
+lista_tratamientos = obtener_catalogo()
+
+# Barra de progreso
+completados = len(st.session_state.registros)
+total = len(lista_tratamientos)
+progreso = completados / total
+st.progress(progreso, text=f"Progreso Diario: {completados}/{total}")
+
+st.divider()
+
+# --- GENERAR LISTA DE TRATAMIENTOS ---
+for t in lista_tratamientos:
+    # Verificar si está completado en el estado actual
+    esta_completado = t.id in st.session_state.registros
+    
+    # Icono y Color según estado
+    icono = "✅" if esta_completado else "⬜"
+    
+    # Usamos un expander para cada tratamiento
+    with st.expander(f"{icono} {t.nombre}"):
         
-        if datos.get('fecha') == hoy:
-            registros = datos.get('registros', {})
-            for t in lista_tratamientos:
-                if t.id in registros:
-                    t.completado_hoy = True
-                    t.detalle_realizacion = registros[t.id].get('detalle', '')
-    except Exception as e:
-        print(f"Error cargando historial: {e}")
+        # 1. Mostrar Información Técnica
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown(f"**Zona:** {t.zona}")
+            st.markdown(f"**Luces:** {t.ondas}")
+            st.markdown(f"**Intensidad:** {t.intensidad}")
+        with c2:
+            st.markdown(f"**Distancia:** {t.distancia}")
+            st.markdown(f"**Tiempo:** {t.duracion} min")
+            st.markdown(f"**Frec:** {t.frecuencia}")
+            
+        if t.incompatibilidades:
+            st.warning(f"⚠️ {t.incompatibilidades}")
 
-# --- INTERFAZ DE USUARIO (CLI) ---
-def main():
-    lista_tratamientos = cargar_tratamientos()
-    cargar_estado(lista_tratamientos)
+        # 2. Lógica de Advertencia Horaria (Visual)
+        hora_actual = datetime.datetime.now().hour
+        if t.momento_tipo == 'Mañana' and hora_actual > 12:
+            st.info("💡 Consejo: Este tratamiento es mejor por la mañana.")
+        elif t.momento_tipo == 'Noche' and hora_actual < 19:
+            st.info("💡 Consejo: Este tratamiento es para antes de dormir.")
 
-    while True:
-        print("\n" * 2) 
-        print(f"🔴 CONTROL MEGA PANEL - {datetime.date.today().strftime('%d/%m/%Y')}")
-        print("="*60)
-        print(f"{'ID':<4} {'ESTADO':<10} {'NOMBRE DEL TRATAMIENTO':<35} {'MOMENTO'}")
-        print("-" * 60)
+        # 3. Interfaz de Registro
+        if esta_completado:
+            detalle = st.session_state.registros[t.id]['detalle']
+            st.success(f"Completado a las: {detalle}")
+            # Botón para deshacer (opcional)
+            if st.button("Deshacer", key=f"undo_{t.id}"):
+                del st.session_state.registros[t.id]
+                guardar_estado(st.session_state.registros)
+                st.rerun()
+        else:
+            # Selector de Momento (si aplica)
+            nota_extra = ""
+            
+            if t.momento_tipo == 'Flexible_Entreno':
+                momento = st.radio("¿Momento del entreno?", ["Antes", "Después"], horizontal=True, key=f"rad_{t.id}")
+                nota_extra = f"Realizado {momento.upper()}-ENTRENO"
+            
+            elif t.momento_tipo == 'Pre_Obligatorio':
+                st.error("🔥 REQUISITO: Debes entrenar en los próximos 30-60 min.")
+                confirmacion = st.checkbox("Confirmo que voy a entrenar", key=f"chk_{t.id}")
+                if not confirmacion:
+                    st.stop() # Detiene la ejecución de este bloque hasta que marque
+                nota_extra = "Realizado PRE-ENTRENO (Obligatorio)"
 
-        for i, t in enumerate(lista_tratamientos):
-            estado = "✅ LISTO" if t.completado_hoy else "⬜ PEND"
-            print(f"{i+1:<4} {estado:<10} {t.nombre:<35} {t.detalle_realizacion}")
-
-        print("="*60)
-        print("Escribe el número del tratamiento para ver instrucciones o realizarlo.")
-        print("Escribe 'S' para salir y guardar.")
-        
-        opcion = input("\n👉 Tu elección: ")
-
-        if opcion.lower() == 's':
-            guardar_estado(lista_tratamientos)
-            print("💾 Progreso guardado. ¡Hasta mañana!")
-            break
-        
-        try:
-            idx = int(opcion) - 1
-            if 0 <= idx < len(lista_tratamientos):
-                seleccionado = lista_tratamientos[idx]
-                seleccionado.mostrar_info()
+            # Botón de Completar
+            if st.button("Marcar como Realizado", key=f"btn_{t.id}"):
+                ahora_str = datetime.datetime.now().strftime('%H:%M')
+                detalle_final = f"{ahora_str} {nota_extra}"
                 
-                if not seleccionado.completado_hoy:
-                    check = input("¿Quieres marcarlo como REALIZADO ahora? (s/n): ")
-                    if check.lower() == 's':
-                        if seleccionado.realizar():
-                            guardar_estado(lista_tratamientos)
-                else:
-                    print(f"ℹ️  Este tratamiento ya fue registrado a las: {seleccionado.detalle_realizacion}")
-                    check = input("¿Quieres repetirlo/sobrescribirlo? (s/n): ")
-                    if check.lower() == 's':
-                        seleccionado.realizar()
-                        guardar_estado(lista_tratamientos)
-            else:
-                print("❌ Número inválido.")
-        except ValueError:
-            print("❌ Entrada no válida.")
-
-if __name__ == "__main__":
-    main()
+                # Guardar en Session State y JSON
+                st.session_state.registros[t.id] = {
+                    'completado': True,
+                    'detalle': detalle_final
+                }
+                guardar_estado(st.session_state.registros)
+                st.rerun() # Recargar página para actualizar iconos
