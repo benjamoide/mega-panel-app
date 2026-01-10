@@ -15,7 +15,7 @@ ARCHIVO_DATOS = 'historial_mega_panel_multiuser.json'
 
 # --- CLASE DE TRATAMIENTO ---
 class Tratamiento:
-    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, tags_entreno, default_visual_group, momento_ideal_txt, tips_antes, tips_despues, fases_info=None):
+    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, tags_entreno, default_visual_group, momento_ideal_txt, momentos_prohibidos, tips_antes, tips_despues, fases_info=None):
         self.id = id_t
         self.nombre = nombre
         self.zona = zona
@@ -28,7 +28,8 @@ class Tratamiento:
         self.tipo = tipo
         self.tags_entreno = tags_entreno 
         self.default_visual_group = default_visual_group 
-        self.momento_ideal_txt = momento_ideal_txt 
+        self.momento_ideal_txt = momento_ideal_txt
+        self.momentos_prohibidos = momentos_prohibidos # Lista de strings prohibidos (ej. ["🌙 Noche"])
         self.tips_antes = tips_antes
         self.tips_despues = tips_despues
         self.incompatibilidades = "" 
@@ -47,49 +48,60 @@ def obtener_catalogo():
         60: "🧱 Fase 3: Remodelación (Flexibilidad)"
     }
     
+    # MOMENTOS DISPONIBLES: 
+    # "🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"
+
     catalogo = [
         # --- REJUVENECIMIENTO FACIAL ---
         Tratamiento("face_rejuv", "Rejuvenecimiento Facial", "Cara/Cuello", "RED + NIR (Opcional)", "50-80%", "30-50 cm", 10, 1, 0, "PERMANENTE", ['All'], "FLEX", "Cualquier hora (Piel Limpia)",
+                    momentos_prohibidos=["🏋️ Antes de Entrenar"], # Sudor prohibido
                     tips_antes=["🧼 DOBLE LIMPIEZA: Piel 100% limpia.", "🕶️ GAFAS OBLIGATORIAS si usas NIR.", "🧴 Evitar Retinol justo antes."],
                     tips_despues=["🧴 APLICAR SERUM: Absorción x2.", "❌ NO sol directo inmediato.", "💧 Hidratar mucho."])
         .set_incompatibilidades("Melasma (Calor NIR puede empeorar). Medicamentos fotosensibles."),
 
         # --- GRASA ---
         Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen Frente", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+                    momentos_prohibidos=["🌙 Noche"], # Grasa liberada de noche se reabsorbe
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia."],
                     tips_despues=["🏃‍♂️ ENTRENA YA (<45 min).", "❌ Ayuno post-sesión 1h."])
         .set_incompatibilidades("Tatuajes oscuros. Embarazo."),
         
         Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+                    momentos_prohibidos=["🌙 Noche"],
                     tips_antes=["💧 Beber agua."],
                     tips_despues=["🏃‍♂️ ENTRENA YA.", "❌ Ayuno post-sesión 1h."])
         .set_incompatibilidades("Tatuajes oscuros."),
         
         Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+                    momentos_prohibidos=["🌙 Noche"],
                     tips_antes=["💧 Beber agua."],
                     tips_despues=["🏃‍♂️ ENTRENA YA.", "❌ Ayuno post-sesión 1h."])
         .set_incompatibilidades("Tatuajes oscuros."),
 
         # --- LESIONES ---
         Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia.", "❄️ NO hielo antes."],
                     tips_despues=["🦶 Movilidad suave.", "🚿 Ducha normal.", "🧊 Hielo OK si hay dolor."],
                     fases_info=fases_articulacion)
         .set_incompatibilidades("Implantes metálicos. Cáncer activo."),
         
         Tratamiento("rodilla_i", "Rodilla Izquierda (Lesión)", "Rodilla Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia.", "❄️ NO hielo antes."],
                     tips_despues=["🦶 Movilidad suave.", "🚿 Ducha normal."],
                     fases_info=fases_articulacion)
         .set_incompatibilidades("Implantes metálicos. Cáncer activo."),
         
         Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia."],
                     tips_despues=["🔄 Estiramiento suave.", "❌ No cargar peso."],
                     fases_info=fases_articulacion)
         .set_incompatibilidades("No usar si infiltración <5 días."),
         
         Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia."],
                     tips_despues=["🔄 Estiramiento suave.", "❌ No cargar peso."],
                     fases_info=fases_articulacion)
@@ -97,34 +109,39 @@ def obtener_catalogo():
         
         # --- MÚSCULO ---
         Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar",
+                    momentos_prohibidos=[],
                     tips_antes=["🚿 Quitar sudor."],
                     tips_despues=["🥩 Proteína.", "🚿 Ducha contraste OK."])
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
         Tratamiento("arm_i", "Antebrazo Izquierdo (Recuperación)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar",
+                    momentos_prohibidos=[],
                     tips_antes=["🚿 Quitar sudor."],
                     tips_despues=["🥩 Proteína.", "🚿 Ducha contraste OK."])
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
         # --- PERMANENTES ---
         Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, 1, 0, "PERMANENTE", ['All'], "MORNING", "Mañana (Al despertar)",
+                    momentos_prohibidos=["🌙 Noche"], # La testosterona baja de noche naturalmente
                     tips_antes=["🚿 Piel limpia.", "❄️ Zona fresca."],
                     tips_despues=["🚿 Ducha fría.", "❌ Ropa holgada."])
         .set_incompatibilidades("Varicocele."),
         
         Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "10-20%", "> 50 cm", 15, 1, 0, "PERMANENTE", ['All'], "NIGHT", "Noche (30 min antes dormir)",
+                    momentos_prohibidos=["🌞 Mañana", "⛅ Tarde", "🏋️ Antes de Entrenar"], # Induce sueño, malo para actividad
                     tips_antes=["📵 Apagar pantallas.", "💡 Luces apagadas."],
                     tips_despues=["🛌 A DORMIR.", "❌ No pantallas."])
         .set_incompatibilidades("⛔ NO USAR PULSOS."),
         
         Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 0, "PERMANENTE", ['All'], "FLEX", "Mañana o Tarde (Con Gafas)",
+                    momentos_prohibidos=["🌙 Noche"], # NIR activa y desvela
                     tips_antes=["🕶️ GAFAS PUESTAS."],
                     tips_despues=["🧠 Tarea cognitiva.", "❌ NO DORMIR."])
         .set_incompatibilidades("⛔ GAFAS OBLIGATORIAS.")
     ]
     return catalogo
 
-# --- GESTIÓN DE DATOS MULTI-USUARIO ---
+# --- GESTIÓN DE DATOS ---
 def cargar_datos_completos():
     if not os.path.exists(ARCHIVO_DATOS):
         return {
@@ -135,11 +152,7 @@ def cargar_datos_completos():
         with open(ARCHIVO_DATOS, 'r') as f:
             datos = json.load(f)
             if "usuario_rutina" not in datos:
-                datos_antiguos = datos.copy()
-                datos = {
-                    "usuario_rutina": datos_antiguos,
-                    "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
-                }
+                datos = {"usuario_rutina": datos, "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}}
             return datos
     except:
         return {
@@ -151,46 +164,36 @@ def guardar_datos_completos(datos_completos):
     with open(ARCHIVO_DATOS, 'w') as f:
         json.dump(datos_completos, f, indent=4)
 
-# --- FUNCIÓN DE CONFLICTOS ---
-def verificar_conflicto(tratamiento, momento_elegido, tratamientos_hechos_hoy):
-    msg = ""
-    conflicto = False
-
-    # Cronobiología
-    if tratamiento.id == "brain" and momento_elegido == "🌙 Noche":
-        return True, "⛔ PELIGRO: NIR cerebral de noche te desvelará."
-    if tratamiento.id == "sleep" and momento_elegido != "🌙 Noche":
-        return True, "⚠️ CUIDADO: El protocolo Sueño induce relajación."
-    if tratamiento.id == "face_rejuv" and momento_elegido == "🏋️ Antes de Entrenar":
-        return True, "⚠️ SUBÓPTIMO: El sudor irritará la piel post-tratamiento."
-    if tratamiento.tipo == "GRASA" and momento_elegido == "🧘 Después de Entrenar":
-        msg = "⚠️ RECUERDA: Mantén actividad ligera después para oxidar grasa."
-
-    # Combinaciones
-    ids_hechos = list(tratamientos_hechos_hoy.keys())
-    if tratamiento.id == "brain" and "sleep" in ids_hechos:
-        return True, "⛔ CONTRADICTORIO: Ya has hecho Sueño. No actives cerebro ahora."
-
-    return conflicto, msg
+# --- DETECCIÓN DE CONFLICTOS ENTRE TRATAMIENTOS ---
+def check_cross_compatibility(nuevo_id, lista_ids_actuales):
+    """
+    Verifica si el nuevo_id es compatible con lo que ya está en lista_ids_actuales.
+    Devuelve: (bool_conflicto, nombre_conflictivo, mensaje_error)
+    """
+    # Matriz de incompatibilidades
+    incompatibles = {
+        "brain": ["sleep"],
+        "sleep": ["brain"],
+        # Puedes añadir más pares aquí
+    }
+    
+    if nuevo_id in incompatibles:
+        for prohibido in incompatibles[nuevo_id]:
+            if prohibido in lista_ids_actuales:
+                return True, prohibido, "Objetivos opuestos: Uno activa (Brain) y el otro relaja (Sleep)."
+    
+    return False, None, None
 
 # --- INTERFAZ PRINCIPAL ---
 st.title(f"🧠 Mega Panel AI")
 
-# CARGA DE DATOS GLOBAL
 if 'db_global' not in st.session_state:
     st.session_state.db_global = cargar_datos_completos()
 
-# 1. SELECTOR DE USUARIO
-usuario_activo = st.sidebar.selectbox(
-    "👤 Seleccionar Perfil",
-    ["Usuario Rutina", "Usuario Libre (Sin Rutina)"],
-    index=0
-)
-
-# Mapeo a claves internas
+# 1. USUARIO
+usuario_activo = st.sidebar.selectbox("👤 Seleccionar Perfil", ["Usuario Rutina", "Usuario Libre (Sin Rutina)"], index=0)
 clave_usuario = "usuario_rutina" if usuario_activo == "Usuario Rutina" else "usuario_libre"
 db_usuario = st.session_state.db_global[clave_usuario]
-
 lista_tratamientos = obtener_catalogo()
 
 # 2. FECHA
@@ -199,33 +202,25 @@ with c_fecha:
     fecha_seleccionada = st.date_input("📅 Fecha de Registro", datetime.date.today())
     fecha_str = fecha_seleccionada.isoformat()
 
-# --- LÓGICA DIFERENCIADA POR USUARIO ---
+# --- LÓGICA DE SELECCIÓN ---
 tags_dia = set()
+ids_seleccionados_libre = []
 
 if clave_usuario == "usuario_rutina":
-    # MODO RUTINA
+    # MODO RUTINA (Lógica original)
     entreno_guardado = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
-    
     opciones_rutinas = {
-        "Descanso Total": [],
-        "Cardio Genérico": ["Active"],
-        "FULLBODY I": ["Upper", "Active"],  
-        "TORSO I": ["Upper", "Active"],     
-        "PREVENTIVO I": ["Active"],         
-        "FULLBODY II": ["Upper", "Active"], 
-        "TORSO II / CIRCUITO": ["Upper", "Active"], 
-        "PREVENTIVO II": ["Active"]         
+        "Descanso Total": [], "Cardio Genérico": ["Active"], "FULLBODY I": ["Upper", "Active"],  
+        "TORSO I": ["Upper", "Active"], "PREVENTIVO I": ["Active"], "FULLBODY II": ["Upper", "Active"], 
+        "TORSO II / CIRCUITO": ["Upper", "Active"], "PREVENTIVO II": ["Active"]         
     }
     nombres_rutinas = list(opciones_rutinas.keys())
     default_options = [x for x in entreno_guardado if x in nombres_rutinas]
-    
     seleccion_rutinas = st.multiselect("🏋️ Rutinas realizadas hoy:", nombres_rutinas, default=default_options)
     
     if seleccion_rutinas:
-        for rutina in seleccion_rutinas:
-            tags_dia.update(opciones_rutinas[rutina])
+        for rutina in seleccion_rutinas: tags_dia.update(opciones_rutinas[rutina])
     
-    # Guardar selección de rutina
     if seleccion_rutinas != entreno_guardado:
         if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
         db_usuario["meta_diaria"][fecha_str] = seleccion_rutinas
@@ -233,13 +228,66 @@ if clave_usuario == "usuario_rutina":
         st.rerun()
 
 else:
-    # MODO LIBRE
-    st.info(f"🔓 Modo Libre: Tienes acceso a todo el catálogo de tratamientos.")
-    tags_dia = {'Active', 'Upper', 'All'} 
+    # MODO LIBRE (Con gestión de conflictos)
+    st.info("🔓 **Modo Libre:** Elige a la carta.")
+    
+    # Recuperar selección previa
+    ids_guardados = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
+    
+    mapa_nombres = {t.nombre: t.id for t in lista_tratamientos}
+    mapa_ids_nombres = {t.id: t.nombre for t in lista_tratamientos}
+    nombres_disponibles = list(mapa_nombres.keys())
+    default_nombres = [mapa_ids_nombres[i] for i in ids_guardados if i in mapa_ids_nombres]
+    
+    # Widget de selección
+    seleccion_nombres = st.multiselect("🎯 Tratamientos hoy:", nombres_disponibles, default=default_nombres, key="multi_libre")
+    
+    # PROCESAMIENTO DE CAMBIOS CON DETECCIÓN DE CONFLICTOS
+    nuevos_ids = [mapa_nombres[n] for n in seleccion_nombres]
+    
+    # Detectar qué se acaba de añadir
+    agregados = set(nuevos_ids) - set(ids_guardados)
+    
+    if agregados:
+        for nuevo_id in agregados:
+            conflicto, id_rival, motivo = check_cross_compatibility(nuevo_id, ids_guardados)
+            if conflicto:
+                nombre_nuevo = mapa_ids_nombres[nuevo_id]
+                nombre_rival = mapa_ids_nombres[id_rival]
+                
+                st.error(f"⛔ **CONFLICTO DETECTADO:** No puedes combinar **{nombre_nuevo}** con **{nombre_rival}**.")
+                st.write(f"Motivo: {motivo}")
+                
+                col_keep, col_change = st.columns(2)
+                with col_keep:
+                    if st.button(f"Mantener {nombre_rival} (Cancelar {nombre_nuevo})"):
+                        # Forzamos recarga sin guardar el nuevo
+                        st.rerun()
+                with col_change:
+                    if st.button(f"Cambiar a {nombre_nuevo} (Eliminar {nombre_rival})"):
+                        # Quitamos el rival, ponemos el nuevo
+                        lista_final = [x for x in ids_guardados if x != id_rival]
+                        lista_final.append(nuevo_id)
+                        if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
+                        db_usuario["meta_diaria"][fecha_str] = lista_final
+                        guardar_datos_completos(st.session_state.db_global)
+                        st.rerun()
+                
+                # Detenemos ejecución para esperar decisión
+                st.stop()
+
+    # Si no hay conflictos o se resolvieron, guardar estado normal
+    if set(nuevos_ids) != set(ids_guardados):
+        if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
+        db_usuario["meta_diaria"][fecha_str] = nuevos_ids
+        guardar_datos_completos(st.session_state.db_global)
+        st.rerun()
+    
+    ids_seleccionados_libre = ids_guardados
 
 st.divider()
 
-# --- CLASIFICACIÓN DE TARJETAS ---
+# --- CLASIFICACIÓN ---
 registros_dia = db_usuario["historial"].get(fecha_str, {})
 descartados_dia = db_usuario.get("descartados", {}).get(fecha_str, [])
 
@@ -256,7 +304,6 @@ mapa_seleccion = {
     "🌙 Noche": "NIGHT"
 }
 
-# Bucle de filtrado
 for t in lista_tratamientos:
     aplica_hoy = False
     es_ciclo_activo = False
@@ -269,30 +316,25 @@ for t in lista_tratamientos:
         elif t.tipo == "GRASA" and "Active" in tags_dia: aplica_hoy = True
         elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: aplica_hoy = True
     else:
-        # Modo Libre
-        if t.tipo == "LESION":
+        # Modo Libre: Si está seleccionado O si ya tiene historial (para no perderlo)
+        if t.id in ids_seleccionados_libre:
+            aplica_hoy = True
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
-            if ciclo and ciclo['activo']: 
-                aplica_hoy = True; es_ciclo_activo = True
-            else:
-                aplica_hoy = False 
-        else:
-            aplica_hoy = True 
+            if ciclo and ciclo['activo']: es_ciclo_activo = True
+        elif len(registros_dia.get(t.id, [])) > 0:
+            aplica_hoy = True # Mantener visible si ya se hizo algo
 
-    # Estado
     sesiones_hechas = registros_dia.get(t.id, [])
     num_hechos = len(sesiones_hechas)
     esta_completo = num_hechos >= t.max_diario
     esta_descartado = t.id in descartados_dia
 
-    # Clasificación
     if esta_descartado: grupos["DISCARDED"].append((t, es_ciclo_activo))
     elif not aplica_hoy: grupos["HIDDEN"].append((t, False))
     elif esta_completo: grupos["COMPLETED"].append((t, es_ciclo_activo))
     else:
         key_radio = f"rad_{t.id}_{clave_usuario}"
         grupo_destino = t.default_visual_group
-        
         if key_radio in st.session_state and st.session_state[key_radio] in mapa_seleccion:
             grupo_destino = mapa_seleccion[st.session_state[key_radio]]
         elif num_hechos > 0:
@@ -303,7 +345,7 @@ for t in lista_tratamientos:
         if grupo_destino in grupos: grupos[grupo_destino].append((t, es_ciclo_activo))
         else: grupos["FLEX"].append((t, es_ciclo_activo))
 
-# --- RENDERIZADO DE TARJETAS ---
+# --- RENDERIZADO ---
 def render_tratamiento(t, es_ciclo_activo, modo="normal"):
     info_fase = ""
     bloqueado_por_fin = False
@@ -328,7 +370,6 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
     with st.expander(titulo):
         if info_fase: st.info(info_fase)
         
-        # MODO RECUPERAR (PAPELERA)
         if modo == "discarded":
             st.caption("Tratamiento omitido.")
             if st.button("↩️ Recuperar", key=f"rec_{t.id}_{clave_usuario}"):
@@ -339,28 +380,25 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
                     st.rerun()
             return
 
-        # INFO TÉCNICA
         if modo != "readonly":
-            st.caption(f"📍 Sugerido: {t.momento_ideal_txt}")
+            # --- CONSEJO DE MEJOR MOMENTO ---
+            st.success(f"💡 **Mejor momento:** {t.momento_ideal_txt}")
+            
             c1, c2 = st.columns(2)
             c1.markdown(f"**Zona:** {t.zona}\n\n**Ondas:** {t.ondas}")
             c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
             
             st.markdown("---")
-            # --- CONSEJOS VISUALES LIMPIOS ---
             ca, cb = st.columns(2)
             with ca:
                 st.markdown("**🏁 ANTES**")
-                for x in t.tips_antes:
-                    st.caption(f"• {x}")
+                for x in t.tips_antes: st.caption(f"• {x}")
             with cb:
                 st.markdown("**🏁 DESPUÉS**")
-                for x in t.tips_despues:
-                    st.caption(f"• {x}")
+                for x in t.tips_despues: st.caption(f"• {x}")
             
             if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
-        # HISTORIAL DE HOY
         if num_hechos > 0:
             st.markdown("---")
             for i, reg in enumerate(sesiones_hechas):
@@ -372,59 +410,58 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
 
-        # REGISTRO
         if modo == "normal" and not completo and not bloqueado_por_fin:
             st.markdown("---")
             
-            opciones = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
-            if t.id == "face_rejuv": opciones = ["🌞 Mañana", "⛅ Tarde", "🌙 Noche", "🏋️ Antes de Entrenar"]
+            # --- FILTRADO DE HORAS PROHIBIDAS ---
+            # Solo mostramos opciones que NO estén en la lista de prohibidos
+            opciones_base = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
+            opciones_validas = [op for op in opciones_base if op not in t.momentos_prohibidos]
             
-            seleccion = st.radio("Momento:", opciones, key=f"rad_{t.id}_{clave_usuario}")
+            seleccion = st.radio("Elige momento:", opciones_validas, key=f"rad_{t.id}_{clave_usuario}")
             
-            # CONFLICTOS
-            hay_conflicto, msg_conflicto = verificar_conflicto(t, seleccion, registros_dia)
-            permitir_guardar = True
-            
-            if hay_conflicto:
-                st.error(msg_conflicto)
-                if not st.checkbox("Entiendo el riesgo, confirmar.", key=f"conf_{t.id}_{clave_usuario}"):
-                    permitir_guardar = False
-            elif msg_conflicto:
-                st.warning(msg_conflicto)
+            # Advertencias leves (no bloqueantes)
+            msg_leve = ""
+            if t.tipo == "GRASA" and "Después" in seleccion:
+                msg_leve = "⚠️ Recuerda moverte un poco después."
+            if msg_leve: st.warning(msg_leve)
 
             c_reg, c_disc = st.columns([3, 1])
             with c_reg:
-                if permitir_guardar:
-                    if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}_{clave_usuario}"):
-                        ahora = datetime.datetime.now().strftime('%H:%M')
-                        if "historial" not in db_usuario: db_usuario["historial"] = {}
-                        if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
-                        if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
-                        
-                        db_usuario["historial"][fecha_str][t.id].append({"hora": ahora, "detalle": seleccion})
-                        guardar_datos_completos(st.session_state.db_global)
-                        st.rerun()
-                else:
-                    st.button("🚫 Bloqueado", disabled=True, key=f"blk_{t.id}_{clave_usuario}")
+                if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}_{clave_usuario}"):
+                    ahora = datetime.datetime.now().strftime('%H:%M')
+                    if "historial" not in db_usuario: db_usuario["historial"] = {}
+                    if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
+                    if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
+                    
+                    db_usuario["historial"][fecha_str][t.id].append({"hora": ahora, "detalle": seleccion})
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.rerun()
             
             with c_disc:
                 if st.button("🚫 Omitir", key=f"omit_{t.id}_{clave_usuario}"):
                     if "descartados" not in db_usuario: db_usuario["descartados"] = {}
                     if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
-                    
                     if t.id not in db_usuario["descartados"][fecha_str]:
                         db_usuario["descartados"][fecha_str].append(t.id)
                         guardar_datos_completos(st.session_state.db_global)
                         st.rerun()
         
-        if t.tipo == "LESION" and bloqueado_por_fin:
-            if st.button("🔄 Reiniciar Ciclo", key=f"rst_{t.id}_{clave_usuario}"):
-                 if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                 db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
-                 guardar_datos_completos(st.session_state.db_global)
-                 st.rerun()
+        if t.tipo == "LESION":
+            if not es_ciclo_activo and not bloqueado_por_fin:
+                if st.button("🚀 Iniciar Protocolo", key=f"start_{t.id}_{clave_usuario}"):
+                    if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                    db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.rerun()
+            elif bloqueado_por_fin:
+                if st.button("🔄 Reiniciar Ciclo", key=f"rst_{t.id}_{clave_usuario}"):
+                     if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                     db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
+                     guardar_datos_completos(st.session_state.db_global)
+                     st.rerun()
 
-# --- SECCIONES VISUALES ---
+# --- SECCIONES ---
 sections_order = [
     ("MORNING", "🌞 Rutinas de Mañana"),
     ("PRE", "🔥 Antes de Entrenar"),
@@ -450,14 +487,15 @@ if grupos["DISCARDED"]:
 
 if grupos["HIDDEN"]:
     st.markdown("---")
-    with st.expander("📂 Inactivos / No Prioritarios"):
+    with st.expander(f"📂 Ver Catálogo Completo"):
         for tr, _ in grupos["HIDDEN"]:
             c1, c2 = st.columns([3, 1])
             c1.write(f"**{tr.nombre}**")
-            if tr.tipo == "LESION":
+            if clave_usuario == "usuario_rutina" and tr.tipo == "LESION":
                 if c2.button("Activar", key=f"act_{tr.id}_{clave_usuario}"):
                     if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
                     db_usuario["ciclos_activos"][tr.id] = {"fecha_inicio": fecha_str, "activo": True}
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
-            else: c2.caption("-")
+            else:
+                c2.caption("-")
