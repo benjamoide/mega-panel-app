@@ -40,10 +40,10 @@ class Tratamiento:
         self.id = id_t
         self.nombre = nombre
         self.zona = zona
-        self.ondas_txt = ondas_txt          # Ej: "RED + NIR"
-        self.config_energia = config_energia # Ej: "RED 50% | NIR 100%"
-        self.herzios = herzios              # Ej: "10Hz (Alfa)" o "CW"
-        self.intensidad = intensidad        # Ej: "100%"
+        self.ondas_txt = ondas_txt          
+        self.config_energia = config_energia 
+        self.herzios = herzios              
+        self.intensidad = intensidad        
         self.distancia = distancia
         self.duracion = duracion
         self.max_diario = max_diario
@@ -63,7 +63,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO CIENTÍFICO ---
+# --- CATÁLOGO CON LONGITUDES DE ONDA ---
 def obtener_catalogo():
     fases_lesion = [
         {"nombre": "🔥 Fase 1: Inflamatoria/Aguda", "dias_fin": 7, "min_sesiones": 5},
@@ -73,54 +73,54 @@ def obtener_catalogo():
     
     catalogo = [
         # --- GRASA ---
-        Tratamiento("fat_glutes", "Glúteos (Grasa)", "Glúteos/Caderas", "NIR + RED", "RED 100% | NIR 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active', 'Lower'], "PRE", "Ideal: Antes de Entrenar Pierna",
+        Tratamiento("fat_glutes", "Glúteos (Grasa)", "Glúteos/Caderas", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active', 'Lower'], "PRE", "Ideal: Antes de Entrenar Pierna",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"], 
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia.", "👖 Ropa mínima."],
                     tips_despues=["🏃‍♂️ ACTIVIDAD YA: Sentadillas/Caminar.", "❌ NO sentarse en 45 min.", "🚿 Ducha post-ejercicio."],
                     incompatible_with=["fat_front", "fat_d", "fat_i"])
         .set_incompatibilidades("Tatuajes oscuros. Embarazo."),
 
-        Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "NIR + RED", "RED 100% | NIR 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+        Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"],
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia."],
                     tips_despues=["🏃‍♂️ ENTRENA YA.", "❌ Ayuno 1h post-sesión."],
                     incompatible_with=["fat_glutes"]),
         
-        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen", "NIR + RED", "RED 100% | NIR 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"],
                     tips_antes=["💧 Beber agua."],
                     tips_despues=["🏃‍♂️ ENTRENA YA."],
                     incompatible_with=["fat_glutes"]),
         
-        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen", "NIR + RED", "RED 100% | NIR 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"],
                     tips_antes=["💧 Beber agua."],
                     tips_despues=["🏃‍♂️ ENTRENA YA."],
                     incompatible_with=["fat_glutes"]),
 
         # --- ESTÉTICA ---
-        Tratamiento("face_rejuv", "Rejuvenecimiento Facial", "Cara", "RED (+NIR Opcional)", "RED 100% | NIR 50%", "CW (0Hz)", "50-80%", "30-50 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Cualquier hora (Piel Limpia)",
+        Tratamiento("face_rejuv", "Rejuvenecimiento Facial", "Cara", "630nm/660nm (+850nm Opcional)", "630nm: 100% | 850nm: 50%", "CW (0Hz)", "50-80%", "30-50 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Cualquier hora (Piel Limpia)",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"],
                     tips_antes=["🧼 DOBLE LIMPIEZA.", "🕶️ GAFAS OBLIGATORIAS.", "🧴 No Retinol."],
                     tips_despues=["🧴 Serum hidratante.", "❌ No sol directo.", "🚿 Ducha agua fría en cara OK."])
-        .set_incompatibilidades("Melasma (Calor empeora), Fotosensibilidad."),
+        .set_incompatibilidades("Melasma (Calor 850nm empeora, usar solo 630nm). Fotosensibilidad."),
 
         # --- LESIONES ---
-        Tratamiento("foot_d", "Pie Derecho (Plantar/Lateral)", "Pie", "NIR + RED", "RED 50% | NIR 100%", "10Hz (Alfa) o 50Hz", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("foot_d", "Pie Derecho (Plantar/Lateral)", "Pie", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz (Alfa) o 50Hz", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🦶 Piel limpia.", "❌ Quitar calcetín."],
                     tips_despues=["🎾 Rodar pelota suave.", "❌ Evitar saltos/impacto.", "🧊 Hielo si dolor."],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes metálicos."),
 
-        Tratamiento("foot_i", "Pie Izquierdo (Plantar/Lateral)", "Pie", "NIR + RED", "RED 50% | NIR 100%", "10Hz o 50Hz", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("foot_i", "Pie Izquierdo (Plantar/Lateral)", "Pie", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz o 50Hz", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🦶 Piel limpia.", "❌ Quitar calcetín."],
                     tips_despues=["🎾 Rodar pelota suave.", "❌ Evitar saltos.", "🧊 Hielo si dolor."],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes metálicos."),
 
-        Tratamiento("epi_d", "Epicondilitis Dcha (Codo)", "Codo Lateral", "NIR + RED", "RED 50% | NIR 100%", "50Hz (Dolor)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("epi_d", "Epicondilitis Dcha (Codo)", "Codo Lateral", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "50Hz (Dolor)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia.", "❌ Quitar cincha."],
                     tips_despues=["🛑 NO hacer pinza con dedos.", "🚫 No rotaciones (llaves).", "🧊 Hielo local."],
@@ -128,7 +128,7 @@ def obtener_catalogo():
                     fases_config=fases_lesion)
         .set_incompatibilidades("Infiltración <5 días."),
 
-        Tratamiento("epi_i", "Epicondilitis Izq (Codo)", "Codo Lateral", "NIR + RED", "RED 50% | NIR 100%", "50Hz (Dolor)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("epi_i", "Epicondilitis Izq (Codo)", "Codo Lateral", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "50Hz (Dolor)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia.", "❌ Quitar cincha."],
                     tips_despues=["🛑 NO hacer pinza.", "🚫 No rotaciones.", "🧊 Hielo local."],
@@ -136,7 +136,7 @@ def obtener_catalogo():
                     fases_config=fases_lesion)
         .set_incompatibilidades("Infiltración <5 días."),
 
-        Tratamiento("forearm_inj_d", "Tendinitis Antebrazo D", "Muñeca/Vientre", "NIR + RED", "RED 50% | NIR 100%", "10Hz (Reparación)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("forearm_inj_d", "Tendinitis Antebrazo D", "Muñeca/Vientre", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz (Reparación)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["⌚ Quitar reloj.", "🧴 Piel limpia."],
                     tips_despues=["👋 Movilidad suave.", "❌ No cargar peso muerto.", "🧊 Hielo local."],
@@ -144,7 +144,7 @@ def obtener_catalogo():
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes."),
 
-        Tratamiento("forearm_inj_i", "Tendinitis Antebrazo I", "Muñeca/Vientre", "NIR + RED", "RED 50% | NIR 100%", "10Hz (Reparación)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("forearm_inj_i", "Tendinitis Antebrazo I", "Muñeca/Vientre", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz (Reparación)", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["⌚ Quitar reloj.", "🧴 Piel limpia."],
                     tips_despues=["👋 Movilidad suave.", "❌ No cargar peso.", "🧊 Hielo local."],
@@ -152,35 +152,35 @@ def obtener_catalogo():
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes."),
 
-        Tratamiento("shoulder_d", "Hombro Dcho (Lesión)", "Deltoides", "NIR + RED", "RED 50% | NIR 100%", "10Hz - 40Hz", "100%", "15-20 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("shoulder_d", "Hombro Dcho (Lesión)", "Deltoides", "660nm + 810nm/850nm", "660nm: 50% | 850nm: 100%", "10Hz - 40Hz", "100%", "15-20 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["👕 Sin ropa compresiva.", "🧴 Piel limpia."],
                     tips_despues=["🔄 Movimientos pendulares.", "❌ No elevar brazo sobre cabeza.", "🧊 Hielo si dolor."],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Marcapasos. Implantes."),
 
-        Tratamiento("shoulder_i", "Hombro Izq (Lesión)", "Deltoides", "NIR + RED", "RED 50% | NIR 100%", "10Hz - 40Hz", "100%", "15-20 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("shoulder_i", "Hombro Izq (Lesión)", "Deltoides", "660nm + 810nm/850nm", "660nm: 50% | 850nm: 100%", "10Hz - 40Hz", "100%", "15-20 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["👕 Sin ropa compresiva.", "🧴 Piel limpia."],
                     tips_despues=["🔄 Movimientos pendulares.", "❌ No elevar brazo sobre cabeza.", "🧊 Hielo si dolor."],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Marcapasos. Implantes."),
 
-        Tratamiento("rodilla_d", "Rodilla Dcha (Lesión)", "Rodilla", "NIR + RED", "RED 50% | NIR 100%", "10Hz (Hueso/Tendón)", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("rodilla_d", "Rodilla Dcha (Lesión)", "Rodilla", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz (Hueso/Tendón)", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["❄️ NO hielo antes.", "🧴 Piel limpia."],
                     tips_despues=["🦶 Movilidad sin carga.", "🚿 Ducha fría OK.", "🧊 Hielo OK."],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes metálicos."),
         
-        Tratamiento("rodilla_i", "Rodilla Izq (Lesión)", "Rodilla", "NIR + RED", "RED 50% | NIR 100%", "10Hz (Hueso/Tendón)", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("rodilla_i", "Rodilla Izq (Lesión)", "Rodilla", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz (Hueso/Tendón)", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["❄️ NO hielo antes.", "🧴 Piel limpia."],
                     tips_despues=["🦶 Movilidad sin carga.", "🚿 Ducha fría OK.", "🧊 Hielo OK."],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes metálicos."),
         
-        Tratamiento("codo_d", "Codo Dcho (Genérico)", "Codo", "NIR + RED", "RED 50% | NIR 100%", "10Hz", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("codo_d", "Codo Dcho (Genérico)", "Codo", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia."],
                     tips_despues=["🔄 Estiramiento suave.", "❌ No cargar peso.", "🚿 Ducha normal."],
@@ -188,7 +188,7 @@ def obtener_catalogo():
                     fases_config=fases_lesion)
         .set_incompatibilidades("No infiltración <5 días."),
         
-        Tratamiento("codo_i", "Codo Izq (Genérico)", "Codo", "NIR + RED", "RED 50% | NIR 100%", "10Hz", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("codo_i", "Codo Izq (Genérico)", "Codo", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia."],
                     tips_despues=["🔄 Estiramiento suave.", "❌ No cargar peso.", "🚿 Ducha normal."],
@@ -197,14 +197,14 @@ def obtener_catalogo():
         .set_incompatibilidades("No infiltración <5 días."),
         
         # --- MÚSCULO ---
-        Tratamiento("arm_d", "Antebrazo D (Recuperación)", "Antebrazo", "NIR + RED", "RED 100% | NIR 100%", "CW (0Hz) o 10Hz", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno",
+        Tratamiento("arm_d", "Antebrazo D (Recuperación)", "Antebrazo", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz) o 10Hz", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"], 
                     tips_antes=["🚿 Quitar sudor.", "💧 Beber agua."],
                     tips_despues=["🥩 Proteína.", "🚿 Ducha contraste (Frío/Calor).", "🛌 Descansar zona."],
                     incompatible_with=["forearm_inj_d"])
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
-        Tratamiento("arm_i", "Antebrazo I (Recuperación)", "Antebrazo", "NIR + RED", "RED 100% | NIR 100%", "CW (0Hz) o 10Hz", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno",
+        Tratamiento("arm_i", "Antebrazo I (Recuperación)", "Antebrazo", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz) o 10Hz", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"],
                     tips_antes=["🚿 Quitar sudor.", "💧 Beber agua."],
                     tips_despues=["🥩 Proteína.", "🚿 Ducha contraste.", "🛌 Descansar zona."],
@@ -212,20 +212,20 @@ def obtener_catalogo():
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
         # --- PERMANENTES ---
-        Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "RED 100% | NIR 100%", "CW (0Hz)", "100%", "15 cm", 5, 1, 7, "PERMANENTE", ['All'], "MORNING", "Mañana",
+        Tratamiento("testo", "Boost Testosterona", "Testículos", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "100%", "15 cm", 5, 1, 7, "PERMANENTE", ['All'], "MORNING", "Mañana",
                     momentos_prohibidos=["🌙 Noche", "⛅ Tarde", "🚿 Post-Entreno / Mañana"], 
                     tips_antes=["🚿 Piel limpia.", "❄️ Zona fresca (no calentar)."],
                     tips_despues=["🚿 Ducha fría obligatoria/recomendada.", "❌ Ropa holgada.", "🏋️ Pesas luego ayuda."])
         .set_incompatibilidades("Varicocele."),
         
-        Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "RED 20% | NIR 0%", "CW (0Hz)", "20%", ">50 cm", 15, 1, 7, "PERMANENTE", ['All'], "NIGHT", "Noche",
+        Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "Solo 630nm/660nm", "630nm: 20% | 850nm: 0%", "CW (0Hz)", "20%", ">50 cm", 15, 1, 7, "PERMANENTE", ['All'], "NIGHT", "Noche",
                     momentos_prohibidos=["🌞 Mañana", "⛅ Tarde", "🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana"],
                     tips_antes=["📵 Apagar pantallas/móvil.", "💡 Luces apagadas."],
                     tips_despues=["🛌 Dormir inmediatamente.", "❌ PROHIBIDO mirar móvil.", "🚿 Ducha tibia relaja."],
                     incompatible_with=["brain"])
         .set_incompatibilidades("⛔ NO USAR PULSOS."),
         
-        Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "RED 0% | NIR 100%", "40Hz (Gamma)", "100%", "30 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Mañana/Tarde",
+        Tratamiento("brain", "Salud Cerebral", "Cabeza", "Solo 810nm/850nm", "660nm: 0% | 850nm: 100%", "40Hz (Gamma)", "100%", "30 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Mañana/Tarde",
                     momentos_prohibidos=["🌙 Noche"],
                     tips_antes=["🕶️ GAFAS PUESTAS OBLIGATORIAS."],
                     tips_despues=["🧠 Tarea cognitiva/Trabajo.", "🛑 No dormir siesta inmediata."],
@@ -277,23 +277,23 @@ def obtener_rutina_y_tags(fecha_obj, db_global, db_usuario):
     tags_calculados.add('All')
     return rutina_nombres, tags_calculados, list(config_tags.keys()), es_manual
 
-# --- HELPERS FALTANTES AÑADIDOS ---
+# --- HELPERS ---
 def mostrar_definiciones_ondas():
-    with st.expander("ℹ️ Guía: Ondas y Frecuencias"):
+    with st.expander("ℹ️ Guía: Frecuencias y Ondas (nm/Hz)"):
         st.markdown("""
-        **🔴 RED (Luz Roja - 630/660nm):**
-        * **Piel:** Regeneración, colágeno, cicatrización superficial.
-        * **Modo:** Generalmente CW (Continuo).
-
-        **🟣 NIR (Infrarrojo Cercano - 810/850nm):**
-        * **Profundidad:** Músculo, hueso, articulación, cerebro.
-        * **Modo:** Pulsado (Hz) para penetración y efectos específicos.
+        **🔴 630nm / 660nm (Luz Roja):**
+        * **Objetivo:** Piel Superficial (Dermis).
+        * **Efectos:** Regeneración celular, colágeno, cicatrización superficial.
         
-        **⚡ Frecuencias (Hz):**
-        * **CW (0Hz):** Dosis máxima (Piel/Superficial).
-        * **10Hz (Alfa):** Regeneración general, relajación.
-        * **40Hz (Gamma):** Cognición, memoria.
-        * **50Hz:** Analgesia, dolor agudo.
+        **🟣 810nm / 830nm / 850nm (Infrarrojo Cercano - NIR):**
+        * **Objetivo:** Tejidos Profundos (Músculo, Hueso, Articulación, Cerebro).
+        * **Efectos:** Antiinflamatorio potente, función mitocondrial, recuperación profunda.
+        
+        **⚡ Pulsos (Hz):**
+        * **CW (0Hz):** Dosis máxima continua (Ideal Piel/Grasa).
+        * **10Hz (Alfa):** Regeneración ósea/muscular, relajación.
+        * **40Hz (Gamma):** Cognición cerebral.
+        * **50Hz:** Analgesia rápida (Dolor agudo).
         """)
 
 def mostrar_ficha_tecnica(t, lista_completa):
@@ -303,9 +303,9 @@ def mostrar_ficha_tecnica(t, lista_completa):
         st.markdown(f"**Config:** {t.config_energia}")
         st.markdown(f"**Ondas:** {t.ondas_txt}")
     with c2:
-        st.markdown(f"**Hz:** {t.herzios}")
+        st.markdown(f"**Frec:** {t.herzios}")
         st.markdown(f"**Potencia:** {t.intensidad}")
-        st.markdown(f"**Tiempo:** {t.duracion} min ({t.distancia})")
+        st.markdown(f"**Uso:** {t.duracion} min a {t.distancia}")
     
     st.markdown("---")
     st.caption("🚫 **Restricciones y Consejos:**")
@@ -317,6 +317,7 @@ def mostrar_ficha_tecnica(t, lista_completa):
         mapa = {tr.id: tr.nombre for tr in lista_completa}
         nombres = [mapa.get(x, x) for x in t.incompatible_with]
         st.write(f"⚔️ **Incompatible con:** {', '.join(nombres)}")
+    if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
         
     c_ant, c_des = st.columns(2)
     with c_ant:
@@ -362,7 +363,7 @@ with st.sidebar:
                     st.success("Procesado (Simulado)")
                 except: st.error("Error Excel")
     st.divider()
-    mostrar_definiciones_ondas() # FUNCION AHORA SÍ DEFINIDA
+    mostrar_definiciones_ondas()
     st.divider()
     if st.button("Cerrar Sesión"): st.session_state.logged_in = False; st.rerun()
 
@@ -547,7 +548,7 @@ elif menu_navegacion == "📅 Panel Diario":
         if t.tipo == "LESION":
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
             if ciclo and ciclo.get('activo') and ciclo.get('estado') == 'activo': aplica = True
-            else: continue
+            else: continue 
         elif clave_usuario == "usuario_rutina":
             if t.tipo == "PERMANENTE": aplica = True
             elif t.tipo == "GRASA" and "Active" in tags_dia: aplica = True
@@ -583,7 +584,7 @@ elif menu_navegacion == "📅 Panel Diario":
 
         with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_ex}"):
             if modo=="discarded":
-                mostrar_ficha_tecnica(t, lista_tratamientos) # AHORA SÍ FUNCIONA
+                mostrar_ficha_tecnica(t, lista_tratamientos)
                 if st.button("Recuperar", key=f"rec_{t.id}"):
                     db_usuario["descartados"][fecha_str].remove(t.id)
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
@@ -591,7 +592,7 @@ elif menu_navegacion == "📅 Panel Diario":
             
             if modo!="readonly":
                 st.success(f"💡 {t.momento_ideal_txt}")
-                mostrar_ficha_tecnica(t, lista_tratamientos) # AHORA SÍ FUNCIONA
+                mostrar_ficha_tecnica(t, lista_tratamientos)
 
             if hechos > 0:
                 st.markdown("---")
@@ -648,4 +649,4 @@ elif menu_navegacion == "📅 Panel Diario":
         with st.expander("Inactivos / Ocultos Hoy (Ver Detalles)"):
             for t in grupos["HIDDEN"]: 
                 with st.expander(f"{t.nombre}"):
-                    mostrar_ficha_tecnica(t, lista_tratamientos) # AHORA SÍ FUNCIONA
+                    mostrar_ficha_tecnica(t, lista_tratamientos)
