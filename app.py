@@ -3,6 +3,7 @@ import datetime
 from datetime import timedelta
 import json
 import os
+import pandas as pd # NUEVA DEPENDENCIA
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(
@@ -14,26 +15,18 @@ st.set_page_config(
 # --- ARCHIVO DE DATOS ---
 ARCHIVO_DATOS = 'historial_mega_panel_pro.json'
 
-# --- CONSTANTES DE RUTINA ---
-RUTINA_SEMANAL_DEFECTO = {
-    0: ["FULLBODY I"],           # Lunes
-    1: ["TORSO I"],              # Martes
-    2: ["FULLBODY II"],          # Miércoles
-    3: ["TORSO II / CIRCUITO"],  # Jueves
-    4: ["PREVENTIVO I"],         # Viernes
-    5: ["PREVENTIVO II"],        # Sábado
-    6: ["Descanso Total"]        # Domingo
+# --- RUTINA POR DEFECTO (BACKUP) ---
+RUTINA_BACKUP = {
+    "0": ["FULLBODY I"], "1": ["TORSO I"], "2": ["FULLBODY II"],
+    "3": ["TORSO II / CIRCUITO"], "4": ["PREVENTIVO I"], "5": ["PREVENTIVO II"],
+    "6": ["Descanso Total"]
 }
 
-TAGS_RUTINA = {
-    "FULLBODY I": ["Upper", "Lower", "Active"],
-    "TORSO I": ["Upper", "Active"],
-    "FULLBODY II": ["Upper", "Lower", "Active"],
-    "TORSO II / CIRCUITO": ["Upper", "Active", "Cardio"],
-    "PREVENTIVO I": ["Active"],
-    "PREVENTIVO II": ["Active"],
-    "Cardio Genérico": ["Active"],
-    "Caminar 10.000 pasos": ["Active"], # ¡NUEVO! Habilita quema de grasas
+TAGS_BACKUP = {
+    "FULLBODY I": ["Upper", "Lower", "Active"], "TORSO I": ["Upper", "Active"],
+    "FULLBODY II": ["Upper", "Lower", "Active"], "TORSO II / CIRCUITO": ["Upper", "Active", "Cardio"],
+    "PREVENTIVO I": ["Active"], "PREVENTIVO II": ["Active"],
+    "Cardio Genérico": ["Active"], "Caminar 10.000 pasos": ["Active"],
     "Descanso Total": []
 }
 
@@ -64,7 +57,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO DETALLADO ---
+# --- CATÁLOGO ---
 @st.cache_data
 def obtener_catalogo():
     fases_lesion = [
@@ -73,192 +66,170 @@ def obtener_catalogo():
         {"nombre": "🧱 Fase 3: Remodelación", "dias_fin": 60, "min_sesiones": 20}
     ]
     
-    # NUEVOS NOMBRES DE FRANJAS PARA PROHIBICIONES
-    # "🏋️ Entrenamiento (Pre)"
-    # "🚿 Post-Entreno / Mañana"
-    # "⛅ Tarde"
-    # "🌙 Noche"
-
     catalogo = [
         # --- GRASA ---
-        Tratamiento("fat_glutes", "Glúteos (Grasa)", "Glúteos/Caderas", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active', 'Lower'], "PRE", "Ideal: Antes de Caminar/Entrenar",
+        Tratamiento("fat_glutes", "Glúteos (Grasa)", "Glúteos", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active', 'Lower'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"], 
-                    tips_antes=["💧 Beber agua.", "🧴 Piel limpia.", "🍽️ Ideal en ayunas o digestión hecha."],
-                    tips_despues=["🏃‍♂️ OBLIGATORIO: Caminar 10k o Entrenar YA.", "🛑 PROHIBIDO: Sentarse/Descansar en 45 min.", "🍽️ COMIDA: Esperar 1h (para seguir quemando).", "🚿 DUCHA: Esperar a terminar el ejercicio."],
+                    tips_antes=["💧 Beber agua.", "🧴 Piel limpia.", "👖 Ropa mínima."],
+                    tips_despues=["🏃‍♂️ ACTIVIDAD YA.", "❌ NO sentarse.", "🚿 Ducha."],
                     incompatible_with=["fat_front", "fat_d", "fat_i"])
         .set_incompatibilidades("Tatuajes oscuros. Embarazo."),
 
-        Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Caminar/Entrenar",
+        Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"],
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia."],
-                    tips_despues=["🏃‍♂️ OBLIGATORIO: Caminar/Entrenar YA.", "🛑 PROHIBIDO: Sofá/Descanso inmediato.", "🍽️ COMIDA: Ayuno 1h post-sesión.", "🚿 DUCHA: Después del ejercicio."],
-                    incompatible_with=["fat_glutes"])
-        .set_incompatibilidades("Tatuajes oscuros."),
+                    tips_despues=["🏃‍♂️ ENTRENA YA.", "❌ Ayuno 1h."],
+                    incompatible_with=["fat_glutes"]),
         
-        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Caminar/Entrenar",
+        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"],
-                    tips_antes=["💧 Beber agua.", "🧴 Piel limpia."],
-                    tips_despues=["🏃‍♂️ OBLIGATORIO: Caminar/Entrenar.", "🛑 NO Descansar.", "🍽️ NO comer en 1h."],
-                    incompatible_with=["fat_glutes"])
-        .set_incompatibilidades("Tatuajes oscuros."),
+                    tips_antes=["💧 Beber agua."],
+                    tips_despues=["🏃‍♂️ ENTRENA YA."],
+                    incompatible_with=["fat_glutes"]),
         
-        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Caminar/Entrenar",
+        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"],
-                    tips_antes=["💧 Beber agua.", "🧴 Piel limpia."],
-                    tips_despues=["🏃‍♂️ OBLIGATORIO: Caminar/Entrenar.", "🛑 NO Descansar.", "🍽️ NO comer en 1h."],
-                    incompatible_with=["fat_glutes"])
-        .set_incompatibilidades("Tatuajes oscuros."),
+                    tips_antes=["💧 Beber agua."],
+                    tips_despues=["🏃‍♂️ ENTRENA YA."],
+                    incompatible_with=["fat_glutes"]),
 
         # --- ESTÉTICA ---
-        Tratamiento("face_rejuv", "Rejuvenecimiento Facial", "Cara/Cuello", "RED + NIR", "50%", "30-50 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Cualquier hora (Piel Limpia)",
+        Tratamiento("face_rejuv", "Rejuvenecimiento Facial", "Cara", "RED + NIR", "50%", "30-50 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Cualquier hora",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"],
-                    tips_antes=["🧼 DOBLE LIMPIEZA OBLIGATORIA.", "🕶️ GAFAS PUESTAS.", "🧴 NO usar Retinol antes."],
-                    tips_despues=["🚿 DUCHA: Lavar cara con agua fría OK.", "🧴 APLICAR SERUM INMEDIATO.", "☀️ NO sol directo."],
+                    tips_antes=["🧼 DOBLE LIMPIEZA.", "🕶️ GAFAS."],
+                    tips_despues=["🧴 Serum.", "❌ No sol."],
                     incompatible_with=[])
-        .set_incompatibilidades("Melasma (Calor empeora), Fotosensibilidad."),
+        .set_incompatibilidades("Melasma, Fotosensibilidad."),
 
         # --- LESIONES ---
-        Tratamiento("foot_d", "Pie Derecho (Plantar/Lateral)", "Pie", "NIR + RED", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("foot_d", "Pie Derecho (Plantar)", "Pie", "NIR + RED", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["🦶 Piel limpia.", "❌ Quitar calcetín."],
-                    tips_despues=["🎾 RODAR PELOTA: Suave (Fascia).", "🛑 IMPACTO: Prohibido saltar/correr 1h.", "🚿 DUCHA: Agua fría OK.", "🧊 HIELO: OK si hay dolor."],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Implantes metálicos."),
+                    tips_antes=["🦶 Piel limpia."],
+                    tips_despues=["🎾 Rodar pelota.", "❌ Evitar saltos."],
+                    fases_config=fases_lesion),
 
-        Tratamiento("foot_i", "Pie Izquierdo (Plantar/Lateral)", "Pie", "NIR + RED", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+        Tratamiento("foot_i", "Pie Izquierdo (Plantar)", "Pie", "NIR + RED", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["🦶 Piel limpia.", "❌ Quitar calcetín."],
-                    tips_despues=["🎾 RODAR PELOTA: Suave.", "🛑 IMPACTO: Prohibido saltar.", "🚿 DUCHA: Agua fría OK."],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Implantes metálicos."),
+                    tips_antes=["🦶 Piel limpia."],
+                    tips_despues=["🎾 Rodar pelota.", "❌ Evitar saltos."],
+                    fases_config=fases_lesion),
 
         Tratamiento("epi_d", "Epicondilitis Dcha", "Codo", "NIR + RED", "100%", "10 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["🧴 Piel limpia.", "❌ Quitar cincha."],
-                    tips_despues=["🛑 PROHIBIDO: Hacer pinza con dedos o girar pomos.", "🚿 DUCHA: Normal.", "🧊 HIELO: Local OK."],
+                    tips_antes=["🧴 Piel limpia."],
+                    tips_despues=["🛑 NO pinza.", "🚫 No rotaciones."],
                     incompatible_with=["codo_d"], 
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Infiltración <5 días."),
+                    fases_config=fases_lesion),
 
         Tratamiento("epi_i", "Epicondilitis Izq", "Codo", "NIR + RED", "100%", "10 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["🧴 Piel limpia.", "❌ Quitar cincha."],
-                    tips_despues=["🛑 PROHIBIDO: Hacer pinza o girar.", "🚿 DUCHA: Normal.", "🧊 HIELO: Local OK."],
+                    tips_antes=["🧴 Piel limpia."],
+                    tips_despues=["🛑 NO pinza.", "🚫 No rotaciones."],
                     incompatible_with=["codo_i"],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Infiltración <5 días."),
+                    fases_config=fases_lesion),
 
         Tratamiento("forearm_inj_d", "Tendinitis Antebrazo D", "Muñeca", "NIR + RED", "100%", "10 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["⌚ Quitar reloj.", "🧴 Piel limpia."],
-                    tips_despues=["👋 MOVILIDAD: Suave muñeca.", "🛑 CARGA: Prohibido peso muerto.", "🚿 DUCHA: Normal."],
+                    tips_antes=["⌚ Quitar reloj."],
+                    tips_despues=["👋 Movilidad suave.", "❌ No cargar."],
                     incompatible_with=["arm_d"],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Implantes."),
+                    fases_config=fases_lesion),
 
         Tratamiento("forearm_inj_i", "Tendinitis Antebrazo I", "Muñeca", "NIR + RED", "100%", "10 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["⌚ Quitar reloj.", "🧴 Piel limpia."],
-                    tips_despues=["👋 MOVILIDAD: Suave.", "🛑 CARGA: Prohibido peso.", "🚿 DUCHA: Normal."],
+                    tips_antes=["⌚ Quitar reloj."],
+                    tips_despues=["👋 Movilidad suave.", "❌ No cargar."],
                     incompatible_with=["arm_i"],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Implantes."),
+                    fases_config=fases_lesion),
 
         Tratamiento("shoulder_d", "Hombro Dcho (Lesión)", "Hombro", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["👕 Sin ropa compresiva."],
-                    tips_despues=["🔄 MOVILIDAD: Pendulares suaves.", "🛑 ELEVACIÓN: Prohibido brazo sobre cabeza.", "🚿 DUCHA: Normal."],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Marcapasos. Implantes."),
+                    tips_antes=["👕 Sin ropa."],
+                    tips_despues=["🔄 Pendulares.", "❌ No elevar brazo."],
+                    fases_config=fases_lesion),
 
         Tratamiento("shoulder_i", "Hombro Izq (Lesión)", "Hombro", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["👕 Sin ropa compresiva."],
-                    tips_despues=["🔄 MOVILIDAD: Pendulares.", "🛑 ELEVACIÓN: Prohibido brazo sobre cabeza.", "🚿 DUCHA: Normal."],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Marcapasos. Implantes."),
+                    tips_antes=["👕 Sin ropa."],
+                    tips_despues=["🔄 Pendulares.", "❌ No elevar brazo."],
+                    fases_config=fases_lesion),
 
         Tratamiento("rodilla_d", "Rodilla Dcha (Lesión)", "Rodilla", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
-                    tips_antes=["❄️ NO hielo antes (vasoconstricción mala)."],
-                    tips_despues=["🦶 MOVILIDAD: Sin carga.", "🚿 DUCHA: Agua fría OK.", "🧊 HIELO: OK si hay dolor."],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Implantes metálicos."),
+                    tips_antes=["❄️ NO hielo antes."],
+                    tips_despues=["🦶 Movilidad."],
+                    fases_config=fases_lesion),
         
         Tratamiento("rodilla_i", "Rodilla Izq (Lesión)", "Rodilla", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["❄️ NO hielo antes."],
-                    tips_despues=["🦶 MOVILIDAD: Sin carga.", "🚿 DUCHA: Agua fría OK."],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("Implantes metálicos."),
+                    tips_despues=["🦶 Movilidad."],
+                    fases_config=fases_lesion),
         
         Tratamiento("codo_d", "Codo Dcho (Genérico)", "Codo", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia."],
-                    tips_despues=["🔄 ESTIRAMIENTO: Suave.", "🛑 CARGA: No coger peso.", "🚿 DUCHA: Normal."],
+                    tips_despues=["🔄 Estiramiento."],
                     incompatible_with=["epi_d"],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("No infiltración <5 días."),
+                    fases_config=fases_lesion),
         
         Tratamiento("codo_i", "Codo Izq (Genérico)", "Codo", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia."],
-                    tips_despues=["🔄 ESTIRAMIENTO: Suave.", "🛑 CARGA: No coger peso.", "🚿 DUCHA: Normal."],
+                    tips_despues=["🔄 Estiramiento."],
                     incompatible_with=["epi_i"],
-                    fases_config=fases_lesion)
-        .set_incompatibilidades("No infiltración <5 días."),
+                    fases_config=fases_lesion),
         
-        # --- MÚSCULO (RECUPERACIÓN) ---
+        # --- MÚSCULO ---
         Tratamiento("arm_d", "Antebrazo D (Recuperación)", "Antebrazo", "NIR + RED", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"], 
                     tips_antes=["🚿 Quitar sudor."],
-                    tips_despues=["🥩 COMIDA: Proteína recomendada.", "🚿 DUCHA: Contraste Frío/Calor muy bueno.", "🛌 DESCANSO: Recomendado."],
-                    incompatible_with=["forearm_inj_d"])
-        .set_incompatibilidades("Opcional: Pulsos 50Hz."),
+                    tips_despues=["🥩 Proteína."],
+                    incompatible_with=["forearm_inj_d"]),
         
         Tratamiento("arm_i", "Antebrazo I (Recuperación)", "Antebrazo", "NIR + RED", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"],
                     tips_antes=["🚿 Quitar sudor."],
-                    tips_despues=["🥩 COMIDA: Proteína.", "🚿 DUCHA: Contraste.", "🛌 DESCANSO: Sí."],
-                    incompatible_with=["forearm_inj_i"])
-        .set_incompatibilidades("Opcional: Pulsos 50Hz."),
+                    tips_despues=["🥩 Proteína."],
+                    incompatible_with=["forearm_inj_i"]),
         
         # --- PERMANENTES ---
         Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15 cm", 5, 1, 7, "PERMANENTE", ['All'], "MORNING", "Mañana",
                     momentos_prohibidos=["🌙 Noche", "⛅ Tarde", "🚿 Post-Entreno / Mañana"], 
-                    tips_antes=["🚿 Piel limpia.", "❄️ Zona fresca (no calentar)."],
-                    tips_despues=["🚿 DUCHA: Fría recomendada.", "❌ ROPA: Holgada, no slip apretado.", "🏋️ ACTIVIDAD: Pesas después es ideal."])
-        .set_incompatibilidades("Varicocele."),
+                    tips_antes=["❄️ Zona fresca."],
+                    tips_despues=["🚿 Ducha fría."]),
         
         Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "20%", ">50 cm", 15, 1, 7, "PERMANENTE", ['All'], "NIGHT", "Noche",
                     momentos_prohibidos=["🌞 Mañana", "⛅ Tarde", "🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana"],
-                    tips_antes=["📵 APAGAR PANTALLAS.", "💡 LUCES: Apagadas."],
-                    tips_despues=["🛌 ACTIVIDAD: Dormir inmediatamente.", "❌ PROHIBIDO: Volver a mirar móvil.", "🚿 DUCHA: Tibia/Caliente (Relaja)."],
-                    incompatible_with=["brain"])
-        .set_incompatibilidades("⛔ NO USAR PULSOS."),
+                    tips_antes=["📵 Apagar pantallas."],
+                    tips_despues=["🛌 A DORMIR."],
+                    incompatible_with=["brain"]),
         
         Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Mañana/Tarde",
                     momentos_prohibidos=["🌙 Noche"],
-                    tips_antes=["🕶️ GAFAS PUESTAS OBLIGATORIAS."],
-                    tips_despues=["🧠 ACTIVIDAD: Tarea cognitiva/Trabajo.", "🛑 PROHIBIDO: Dormir siesta inmediata."],
+                    tips_antes=["🕶️ GAFAS."],
+                    tips_despues=["🧠 Tarea cognitiva."],
                     incompatible_with=["sleep"])
-        .set_incompatibilidades("⛔ GAFAS OBLIGATORIAS.")
     ]
     return catalogo
 
 # --- GESTIÓN DE DATOS ---
 def cargar_datos_completos():
     if not os.path.exists(ARCHIVO_DATOS):
-        return {"usuario_rutina": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}, 
+        return {"configuracion_rutina": {"semana": RUTINA_BACKUP, "tags": TAGS_BACKUP},
+                "usuario_rutina": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}, 
                 "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}}
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
             datos = json.load(f)
+            if "configuracion_rutina" not in datos:
+                datos["configuracion_rutina"] = {"semana": RUTINA_BACKUP, "tags": TAGS_BACKUP}
             for user in ["usuario_rutina", "usuario_libre"]:
                 if user not in datos: datos[user] = {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
             return datos
     except:
-        return {"usuario_rutina": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}, 
+        return {"configuracion_rutina": {"semana": RUTINA_BACKUP, "tags": TAGS_BACKUP},
+                "usuario_rutina": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}, 
                 "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}}
 
 def guardar_datos_completos(datos):
@@ -266,19 +237,51 @@ def guardar_datos_completos(datos):
         json.dump(datos, f, indent=4)
 
 # --- HELPER: OBTENER RUTINA ---
-def obtener_rutina_y_tags(fecha_obj, db_usuario):
+def obtener_rutina_y_tags(fecha_obj, db_global, db_usuario):
     fecha_iso = fecha_obj.isoformat()
-    dia_semana = fecha_obj.weekday()
+    dia_semana = str(fecha_obj.weekday())
     
     rutina_manual = db_usuario.get("meta_diaria", {}).get(fecha_iso, None)
-    rutina_nombres = rutina_manual if rutina_manual is not None else RUTINA_SEMANAL_DEFECTO[dia_semana]
+    config_semana = db_global.get("configuracion_rutina", {}).get("semana", RUTINA_BACKUP)
+    config_tags = db_global.get("configuracion_rutina", {}).get("tags", TAGS_BACKUP)
+    
+    rutina_nombres = rutina_manual if rutina_manual is not None else config_semana.get(dia_semana, [])
     
     tags_calculados = set()
     for nombre in rutina_nombres:
-        if nombre in TAGS_RUTINA:
-            tags_calculados.update(TAGS_RUTINA[nombre])
+        if nombre in config_tags:
+            tags_calculados.update(config_tags[nombre])
     tags_calculados.add('All')
-    return rutina_nombres, tags_calculados
+    return rutina_nombres, tags_calculados, list(config_tags.keys())
+
+# --- FUNCION IMPORTAR EXCEL ---
+def procesar_excel_rutina(uploaded_file):
+    try:
+        # 1. Leer Semana
+        df_semana = pd.read_excel(uploaded_file, sheet_name='Semana')
+        mapa_dias = {"lunes": "0", "martes": "1", "miércoles": "2", "miercoles": "2", "jueves": "3", "viernes": "4", "sábado": "5", "sabado": "5", "domingo": "6"}
+        
+        nueva_semana = {}
+        for _, row in df_semana.iterrows():
+            d = str(row.iloc[0]).lower().strip()
+            r = str(row.iloc[1]).strip()
+            if d in mapa_dias:
+                nueva_semana[mapa_dias[d]] = [x.strip() for x in r.split(',')]
+
+        # 2. Leer Tags
+        df_tags = pd.read_excel(uploaded_file, sheet_name='Tags')
+        nuevos_tags = {}
+        for _, row in df_tags.iterrows():
+            r = str(row.iloc[0]).strip()
+            t = str(row.iloc[1])
+            if t.lower() == 'nan' or not t.strip():
+                nuevos_tags[r] = []
+            else:
+                nuevos_tags[r] = [x.strip() for x in t.split(',')]
+        
+        return {"semana": nueva_semana, "tags": nuevos_tags}
+    except Exception as e:
+        return None
 
 # --- LOGIN ---
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
@@ -313,6 +316,22 @@ lista_tratamientos = obtener_catalogo()
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
     menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🚑 Clínica de Lesiones"])
+    
+    # --- IMPORTADOR EXCEL ---
+    if clave_usuario == "usuario_rutina":
+        with st.expander("⚙️ Importar Rutina (Excel)"):
+            uploaded_file = st.file_uploader("Arrastra tu Excel (Hojas: Semana, Tags)", type=['xlsx'])
+            if uploaded_file is not None:
+                nueva_conf = procesar_excel_rutina(uploaded_file)
+                if nueva_conf:
+                    if st.button("💾 Aplicar Nueva Rutina"):
+                        st.session_state.db_global["configuracion_rutina"] = nueva_conf
+                        guardar_datos_completos(st.session_state.db_global)
+                        st.success("¡Rutina actualizada!")
+                        st.rerun()
+                else:
+                    st.error("Error al leer el Excel. Verifica el formato.")
+
     st.divider()
     if st.button("Cerrar Sesión"):
         st.session_state.logged_in = False
@@ -327,7 +346,7 @@ if menu_navegacion == "🚑 Clínica de Lesiones":
     def comprobar_inicio_seguro(tratamiento_nuevo, fecha_inicio_obj, ciclos_activos, historial_usuario):
         fecha_inicio_str = fecha_inicio_obj.isoformat()
         
-        # A) Conflicto CICLOS ACTIVOS
+        # A) Conflicto CICLOS
         for id_activo, datos in ciclos_activos.items():
             if datos.get('activo') and id_activo in tratamiento_nuevo.incompatible_with:
                 nom = next((t.nombre for t in lista_tratamientos if t.id == id_activo), id_activo)
@@ -335,7 +354,7 @@ if menu_navegacion == "🚑 Clínica de Lesiones":
         
         # B) Conflicto RUTINA DEL DÍA
         if clave_usuario == "usuario_rutina":
-            rutina, tags_dia_inicio = obtener_rutina_y_tags(fecha_inicio_obj, db_usuario)
+            rutina, tags_dia_inicio, _ = obtener_rutina_y_tags(fecha_inicio_obj, st.session_state.db_global, db_usuario)
             for tag_req in tratamiento_nuevo.tags_entreno:
                 if tag_req != 'All' and tag_req not in tags_dia_inicio:
                     return False, f"⚠️ INCOMPATIBLE CON RUTINA: El {fecha_inicio_str} toca {rutina}. Falta '{tag_req}'."
@@ -402,11 +421,15 @@ elif menu_navegacion == "📅 Panel Diario":
     fecha_seleccionada = c_f.date_input("Fecha", datetime.date.today())
     fecha_str = fecha_seleccionada.isoformat()
     
-    rutina_hoy_nombres, tags_dia = obtener_rutina_y_tags(fecha_seleccionada, db_usuario)
+    rutina_hoy_nombres, tags_dia, todas_rutinas_posibles = obtener_rutina_y_tags(fecha_seleccionada, st.session_state.db_global, db_usuario)
+    
+    # SELECCIÓN RUTINA
+    ids_seleccionados_libre = []
     
     if clave_usuario == "usuario_rutina":
         st.info(f"🏋️ **Rutina:** {', '.join(rutina_hoy_nombres)}")
-        sel = st.multiselect("Modificar Rutina:", list(TAGS_RUTINA.keys()), default=rutina_hoy_nombres)
+        
+        sel = st.multiselect("Modificar Rutina:", todas_rutinas_posibles, default=rutina_hoy_nombres)
         
         if set(sel) != set(rutina_hoy_nombres):
             if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
@@ -414,8 +437,10 @@ elif menu_navegacion == "📅 Panel Diario":
             guardar_datos_completos(st.session_state.db_global)
             st.rerun()
         
+        config_tags = st.session_state.db_global.get("configuracion_rutina", {}).get("tags", TAGS_BACKUP)
         tags_dia = set()
-        for r in sel: tags_dia.update(TAGS_RUTINA[r])
+        for r in sel: 
+            if r in config_tags: tags_dia.update(config_tags[r])
         tags_dia.add('All')
 
     else:
@@ -426,7 +451,6 @@ elif menu_navegacion == "📅 Panel Diario":
         sel_nombres = st.multiselect("Tratamientos hoy:", list(mapa_n.keys()), default=[mapa_i[i] for i in ids_guardados if i in mapa_i])
         nuevos_ids = [mapa_n[n] for n in sel_nombres]
         
-        # Check conflictos simple para usuario libre
         if set(nuevos_ids) != set(ids_guardados):
             if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
             db_usuario["meta_diaria"][fecha_str] = nuevos_ids
@@ -438,18 +462,15 @@ elif menu_navegacion == "📅 Panel Diario":
     st.divider()
     
     def analizar_bloqueos(tratamiento, momento_elegido, historial_usuario, tratamientos_hoy, fecha_actual_str, tags_del_dia):
-        # 1. Rutina
         if clave_usuario == "usuario_rutina":
             if 'Active' in tratamiento.tags_entreno and 'Active' not in tags_del_dia:
                 return True, "⚠️ FALTA ACTIVIDAD: Requiere ejercicio (Grasa)."
             if 'Upper' in tratamiento.tags_entreno and 'Upper' not in tags_del_dia:
                 return True, "⚠️ SINERGIA BAJA: Requiere entreno de torso."
 
-        # 2. Horario
         if momento_elegido in tratamiento.momentos_prohibidos:
             return True, f"⛔ HORARIO PROHIBIDO: '{tratamiento.nombre}' no apto en '{momento_elegido}'."
         
-        # 3. Frecuencia
         dias_hechos = 0
         fecha_dt = datetime.date.fromisoformat(fecha_actual_str)
         for i in range(7):
@@ -460,7 +481,6 @@ elif menu_navegacion == "📅 Panel Diario":
         if not hoy_hecho and dias_hechos >= tratamiento.max_semanal:
             return True, f"⛔ LÍMITE SEMANAL ({tratamiento.max_semanal}/sem)."
 
-        # 4. Choques
         ids_hoy = list(tratamientos_hoy.keys())
         for inc in tratamiento.incompatible_with:
             if inc in ids_hoy: return True, "⛔ INCOMPATIBLE con otro tratamiento."
