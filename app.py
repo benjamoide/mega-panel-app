@@ -126,9 +126,7 @@ def obtener_catalogo():
 
 # --- GESTIÓN DE DATOS MULTI-USUARIO ---
 def cargar_datos_completos():
-    """Carga todo el JSON (todos los usuarios)"""
     if not os.path.exists(ARCHIVO_DATOS):
-        # Estructura base para usuarios
         return {
             "usuario_rutina": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}},
             "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
@@ -136,7 +134,6 @@ def cargar_datos_completos():
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
             datos = json.load(f)
-            # Migración simple si el archivo era de versión anterior (sin claves de usuario)
             if "usuario_rutina" not in datos:
                 datos_antiguos = datos.copy()
                 datos = {
@@ -154,7 +151,7 @@ def guardar_datos_completos(datos_completos):
     with open(ARCHIVO_DATOS, 'w') as f:
         json.dump(datos_completos, f, indent=4)
 
-# --- FUNCIÓN DE CONFLICTOS (COMPARTIDA) ---
+# --- FUNCIÓN DE CONFLICTOS ---
 def verificar_conflicto(tratamiento, momento_elegido, tratamientos_hechos_hoy):
     msg = ""
     conflicto = False
@@ -183,7 +180,7 @@ st.title(f"🧠 Mega Panel AI")
 if 'db_global' not in st.session_state:
     st.session_state.db_global = cargar_datos_completos()
 
-# 1. SELECTOR DE USUARIO (SIDEBAR O TOP)
+# 1. SELECTOR DE USUARIO
 usuario_activo = st.sidebar.selectbox(
     "👤 Seleccionar Perfil",
     ["Usuario Rutina", "Usuario Libre (Sin Rutina)"],
@@ -206,7 +203,7 @@ with c_fecha:
 tags_dia = set()
 
 if clave_usuario == "usuario_rutina":
-    # MODO RUTINA: Pregunta por entrenamiento y filtra
+    # MODO RUTINA
     entreno_guardado = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
     
     opciones_rutinas = {
@@ -236,10 +233,8 @@ if clave_usuario == "usuario_rutina":
         st.rerun()
 
 else:
-    # MODO LIBRE: No filtra por rutina, permite todo.
+    # MODO LIBRE
     st.info(f"🔓 Modo Libre: Tienes acceso a todo el catálogo de tratamientos.")
-    # Asignamos tags 'comodín' para que los filtros internos (que buscan 'Active' o 'Upper')
-    # dejen pasar todo, o simplemente ignoramos los tags en el bucle principal.
     tags_dia = {'Active', 'Upper', 'All'} 
 
 st.divider()
@@ -267,26 +262,22 @@ for t in lista_tratamientos:
     es_ciclo_activo = False
     
     if clave_usuario == "usuario_rutina":
-        # FILTRO ESTRICTO PARA USUARIO RUTINA
         if t.tipo == "PERMANENTE": aplica_hoy = True
         elif t.tipo == "LESION":
-            # Requiere ciclo activo
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
             if ciclo and ciclo['activo']: aplica_hoy = True; es_ciclo_activo = True
         elif t.tipo == "GRASA" and "Active" in tags_dia: aplica_hoy = True
         elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: aplica_hoy = True
     else:
-        # FILTRO LIBRE PARA USUARIO SIN RUTINA
-        # Muestra todo, excepto Lesiones que requieren activación manual
+        # Modo Libre
         if t.tipo == "LESION":
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
             if ciclo and ciclo['activo']: 
                 aplica_hoy = True; es_ciclo_activo = True
             else:
-                # En modo libre, mostramos las lesiones en "Inactivos" para que pueda activarlas cuando quiera
                 aplica_hoy = False 
         else:
-            aplica_hoy = True # Muestra Grasa, Músculo, Permanente siempre
+            aplica_hoy = True 
 
     # Estado
     sesiones_hechas = registros_dia.get(t.id, [])
@@ -299,7 +290,7 @@ for t in lista_tratamientos:
     elif not aplica_hoy: grupos["HIDDEN"].append((t, False))
     elif esta_completo: grupos["COMPLETED"].append((t, es_ciclo_activo))
     else:
-        key_radio = f"rad_{t.id}_{clave_usuario}" # Key única por usuario
+        key_radio = f"rad_{t.id}_{clave_usuario}"
         grupo_destino = t.default_visual_group
         
         if key_radio in st.session_state and st.session_state[key_radio] in mapa_seleccion:
@@ -314,7 +305,6 @@ for t in lista_tratamientos:
 
 # --- RENDERIZADO DE TARJETAS ---
 def render_tratamiento(t, es_ciclo_activo, modo="normal"):
-    # Info Fase
     info_fase = ""
     bloqueado_por_fin = False
     if t.tipo == "LESION" and es_ciclo_activo:
@@ -355,10 +345,19 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
             c1, c2 = st.columns(2)
             c1.markdown(f"**Zona:** {t.zona}\n\n**Ondas:** {t.ondas}")
             c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
+            
             st.markdown("---")
+            # --- CONSEJOS VISUALES LIMPIOS ---
             ca, cb = st.columns(2)
-            ca.markdown("**🏁 ANTES**"); [ca.caption(f"• {x}") for x in t.tips_antes]
-            cb.markdown("**🏁 DESPUÉS**"); [cb.caption(f"• {x}") for x in t.tips_despues]
+            with ca:
+                st.markdown("**🏁 ANTES**")
+                for x in t.tips_antes:
+                    st.caption(f"• {x}")
+            with cb:
+                st.markdown("**🏁 DESPUÉS**")
+                for x in t.tips_despues:
+                    st.caption(f"• {x}")
+            
             if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
         # HISTORIAL DE HOY
