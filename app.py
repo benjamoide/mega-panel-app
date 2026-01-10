@@ -13,9 +13,9 @@ st.set_page_config(
 # --- ARCHIVO DE DATOS ---
 ARCHIVO_DATOS = 'historial_mega_panel_final.json'
 
-# --- CLASE DE TRATAMIENTO ---
+# --- CLASE DE TRATAMIENTO (CON GUÍA DE ESTILO DE VIDA) ---
 class Tratamiento:
-    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, tags_entreno, default_visual_group, momento_ideal_txt, fases_info=None):
+    def __init__(self, id_t, nombre, zona, ondas, intensidad, distancia, duracion, max_diario, tiempo_espera_horas, tipo, tags_entreno, default_visual_group, momento_ideal_txt, tips_antes, tips_despues, fases_info=None):
         self.id = id_t
         self.nombre = nombre
         self.zona = zona
@@ -29,6 +29,8 @@ class Tratamiento:
         self.tags_entreno = tags_entreno 
         self.default_visual_group = default_visual_group 
         self.momento_ideal_txt = momento_ideal_txt 
+        self.tips_antes = tips_antes     # Lista de consejos PRE
+        self.tips_despues = tips_despues # Lista de consejos POST
         self.incompatibilidades = "" 
         self.fases_info = fases_info if fases_info else {}
 
@@ -36,7 +38,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO ---
+# --- CATÁLOGO EXPERTO (Instrucciones de Vida) ---
 @st.cache_data
 def obtener_catalogo():
     fases_articulacion = {
@@ -46,44 +48,72 @@ def obtener_catalogo():
     }
     
     catalogo = [
-        # --- GRASA ---
-        Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen Frente", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar")
+        # --- GRASA (Protocolo Estricto) ---
+        Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen Frente", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+                    tips_antes=["💧 Beber 1 vaso de agua.", "🧴 Piel limpia (sin cremas/sudor).", "🍽️ Mejor en ayunas o 2h sin comer."],
+                    tips_despues=["🏃‍♂️ ¡CORRE/ENTRENA YA! (Ventana <45 min).", "❌ NO comer hasta 1h después.", "🚿 Ducha: Esperar a terminar el ejercicio."])
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
         
-        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar")
+        Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen Dcho", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+                    tips_antes=["💧 Hidratación clave.", "🧴 Retirar lociones corporales."],
+                    tips_despues=["🏋️ Ejercicio Cardio/Pesas inmediato.", "❌ Evitar ducha fría directa en la zona (dejar circular sangre).", "❌ NO comer carbohidratos inmediato."])
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
         
-        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar")
+        Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen Izq", "NIR + RED", "100%", "10-15 cm", 10, 1, 0, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
+                    tips_antes=["💧 Hidratación clave.", "🧴 Retirar lociones corporales."],
+                    tips_despues=["🏋️ Ejercicio Cardio/Pesas inmediato.", "❌ Evitar ducha fría directa en la zona.", "❌ NO comer carbohidratos inmediato."])
         .set_incompatibilidades("Tatuajes oscuros. Embarazo prohibido."),
 
-        # --- LESIONES ---
-        Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después", fases_articulacion)
-        .set_incompatibilidades("Implantes metálicos, Cáncer activo."),
+        # --- LESIONES (Protocolo Inflamación) ---
+        Tratamiento("rodilla_d", "Rodilla Derecha (Lesión)", "Rodilla Dcha", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después",
+                    tips_antes=["🧴 Piel limpia.", "❄️ NO aplicar hielo justo antes (vasoconstricción bloquea llegada de luz)."],
+                    tips_despues=["🦶 Movilidad suave sin carga.", "🚿 Ducha normal OK.", "🧊 Hielo OK solo si hay mucho dolor (pero espera 20 min)."],
+                    fases_info=fases_articulacion)
+        .set_incompatibilidades("Implantes metálicos (vigilar calor). Cáncer activo."),
         
-        Tratamiento("rodilla_i", "Rodilla Izquierda (Lesión)", "Rodilla Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después", fases_articulacion)
-        .set_incompatibilidades("Implantes metálicos, Cáncer activo."),
+        Tratamiento("rodilla_i", "Rodilla Izquierda (Lesión)", "Rodilla Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después",
+                    tips_antes=["🧴 Piel limpia.", "❄️ NO hielo antes."],
+                    tips_despues=["🦶 Movilidad suave.", "🚿 Ducha normal OK.", "❌ Evitar impacto fuerte inmediato."],
+                    fases_info=fases_articulacion)
+        .set_incompatibilidades("Implantes metálicos. Cáncer activo."),
         
-        Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después", fases_articulacion)
+        Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después",
+                    tips_antes=["🧴 Piel limpia.", "🦾 Quitar coderas compresivas."],
+                    tips_despues=["🔄 Estiramiento muy suave.", "🚿 Ducha normal OK.", "❌ No cargar peso muerto inmediato."],
+                    fases_info=fases_articulacion)
         .set_incompatibilidades("No usar si infiltración <5 días."),
         
-        Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después", fases_articulacion)
+        Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15-20 cm", 10, 2, 6, "LESION", ['All'], "FLEX", "Flexible: Antes o Después",
+                    tips_antes=["🧴 Piel limpia.", "🦾 Quitar coderas."],
+                    tips_despues=["🔄 Estiramiento suave.", "🚿 Ducha normal OK.", "❌ No cargar peso inmediato."],
+                    fases_info=fases_articulacion)
         .set_incompatibilidades("No usar si infiltración <5 días."),
         
-        # --- MÚSCULO ---
-        Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar")
+        # --- MÚSCULO (Recuperación) ---
+        Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar",
+                    tips_antes=["🚿 Ducha post-entreno (quitar sudor).", "💧 Beber agua."],
+                    tips_despues=["🥩 Comer Proteína.", "🚿 Ducha de contraste (Frío/Calor) OK pasados 20 min.", "🛌 Descansar la zona."])
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
-        Tratamiento("arm_i", "Antebrazo Izquierdo (Recuperación)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar")
+        Tratamiento("arm_i", "Antebrazo Izquierdo (Recuperación)", "Antebrazo Izq", "NIR + RED", "100%", "15-30 cm", 10, 1, 0, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar",
+                    tips_antes=["🚿 Ducha post-entreno (quitar sudor).", "💧 Beber agua."],
+                    tips_despues=["🥩 Comer Proteína.", "🚿 Ducha contraste OK.", "🛌 Descansar zona."])
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
         
         # --- PERMANENTES ---
-        Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, 1, 0, "PERMANENTE", ['All'], "MORNING", "Mañana (Al despertar)")
+        Tratamiento("testo", "Boost Testosterona", "Testículos", "NIR + RED", "100%", "15-20 cm", 5, 1, 0, "PERMANENTE", ['All'], "MORNING", "Mañana (Al despertar)",
+                    tips_antes=["🚿 Piel limpia.", "❄️ Zona fresca (no calentar antes)."],
+                    tips_despues=["🚿 Ducha fría recomendada.", "❌ NO usar ropa interior ajustada/térmica.", "🏋️ Entrenamiento de fuerza ayuda."])
         .set_incompatibilidades("No exceder tiempo. Varicocele."),
         
-        Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "10-20%", "> 50 cm", 15, 1, 0, "PERMANENTE", ['All'], "NIGHT", "Noche (30 min antes dormir)")
+        Tratamiento("sleep", "Sueño y Ritmo", "Ambiente", "SOLO RED", "10-20%", "> 50 cm", 15, 1, 0, "PERMANENTE", ['All'], "NIGHT", "Noche (30 min antes dormir)",
+                    tips_antes=["📵 Apagar pantallas/móvil.", "🧘 Respiración relajada.", "💡 Luces casa apagadas."],
+                    tips_despues=["🛌 A DORMIR INMEDIATAMENTE.", "❌ No volver a mirar el móvil.", "❌ No comer pesado."])
         .set_incompatibilidades("⛔ NO USAR PULSOS."),
         
-        Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 0, "PERMANENTE", ['All'], "FLEX", "Mañana o Tarde (Con Gafas)")
+        Tratamiento("brain", "Salud Cerebral", "Cabeza", "SOLO NIR", "100%", "30 cm", 10, 1, 0, "PERMANENTE", ['All'], "FLEX", "Mañana o Tarde (Con Gafas)",
+                    tips_antes=["🕶️ GAFAS PUESTAS.", "🧴 Frente limpia (sin maquillaje)."],
+                    tips_despues=["🧠 Tarea cognitiva o Meditación.", "❌ NO DORMIR (Puede desvelar).", "☕ Café OK."])
         .set_incompatibilidades("⛔ GAFAS OBLIGATORIAS. Evitar muy tarde.")
     ]
     return catalogo
@@ -91,12 +121,10 @@ def obtener_catalogo():
 # --- GESTIÓN DE DATOS ---
 def cargar_datos():
     if not os.path.exists(ARCHIVO_DATOS):
-        # Estructura: historial, meta_diaria, ciclos_activos, descartados
         return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
             datos = json.load(f)
-            # Asegurar compatibilidad
             if "descartados" not in datos: datos["descartados"] = {}
             return datos
     except:
@@ -149,7 +177,7 @@ if seleccion_rutinas != entreno_guardado:
 
 st.divider()
 
-# --- INTELIGENCIA DE COMBINACIONES ---
+# --- INTELIGENCIA ---
 tratamientos_activos_ids = []
 registros_dia = st.session_state.db["historial"].get(fecha_str, {})
 descartados_dia = st.session_state.db.get("descartados", {}).get(fecha_str, [])
@@ -161,17 +189,15 @@ for t in lista_tratamientos:
     elif t.tipo == "GRASA" and "Active" in tags_dia: activo = True
     elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: activo = True
     
-    if activo and t.id not in descartados_dia: # Solo cuenta si no está descartado
+    if activo and t.id not in descartados_dia:
         tratamientos_activos_ids.append(t.id)
 
 if "brain" in tratamientos_activos_ids and "sleep" in tratamientos_activos_ids:
     st.info("💡 **Consejo:** Separa 'Salud Cerebral' (Mañana) y 'Sueño' (Noche).")
-if "fat_d" in tratamientos_activos_ids and "fat_front" in tratamientos_activos_ids:
-    st.info("💡 **Consejo Fat Loss:** Alterna zonas antes y después del entreno.")
 
 st.subheader(f"📋 Tu Plan del Día")
 
-# --- CLASIFICACIÓN DINÁMICA ---
+# --- CLASIFICACIÓN ---
 grupos = {
     "PRE": [],       
     "POST": [],      
@@ -181,7 +207,7 @@ grupos = {
     "FLEX": [],      
     "COMPLETED": [], 
     "HIDDEN": [],
-    "DISCARDED": [] # Nuevo grupo para papelera
+    "DISCARDED": []
 }
 
 mapa_seleccion = {
@@ -193,7 +219,7 @@ mapa_seleccion = {
 }
 
 for t in lista_tratamientos:
-    # 1. Filtros de validez
+    # 1. Filtros
     aplica_hoy = False
     es_ciclo_activo = False
     if t.tipo == "LESION":
@@ -222,16 +248,14 @@ for t in lista_tratamientos:
     elif esta_completo:
         grupos["COMPLETED"].append((t, es_ciclo_activo))
     else:
-        # Lógica de movimiento en tiempo real
+        # Dinámica
         key_radio = f"rad_{t.id}"
         grupo_destino = t.default_visual_group
         
-        # Prioridad 1: Interacción
         if key_radio in st.session_state:
             seleccion_actual = st.session_state[key_radio]
             if seleccion_actual in mapa_seleccion:
                 grupo_destino = mapa_seleccion[seleccion_actual]
-        # Prioridad 2: Historial
         elif num_hechos > 0:
             ultimo = sesiones_hechas[-1]['detalle']
             if "Antes" in ultimo: grupo_destino = "PRE"
@@ -268,7 +292,6 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
     num_hechos = len(sesiones_hechas)
     completo = num_hechos >= t.max_diario
     
-    # Iconos según modo
     if modo == "discarded":
         icono = "❌"
         estado_txt = "(Descartado)"
@@ -284,26 +307,40 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
     with st.expander(titulo):
         if info_fase: st.info(info_fase)
         
-        # Si está descartado, mostrar botón de recuperar
         if modo == "discarded":
-            st.caption("Este tratamiento ha sido omitido hoy.")
-            if st.button("↩️ Recuperar y Realizar", key=f"rest_{t.id}"):
+            st.caption("Tratamiento omitido.")
+            if st.button("↩️ Recuperar", key=f"rest_{t.id}"):
                 if fecha_str in st.session_state.db["descartados"]:
-                    if t.id in st.session_state.db["descartados"][fecha_str]:
-                        st.session_state.db["descartados"][fecha_str].remove(t.id)
-                        guardar_datos(st.session_state.db)
-                        st.rerun()
-            return # Salimos, no mostramos el resto de opciones
+                    st.session_state.db["descartados"][fecha_str].remove(t.id)
+                    guardar_datos(st.session_state.db)
+                    st.rerun()
+            return
 
-        # MODO NORMAL / COMPLETADO
         if modo != "readonly":
             st.caption(f"📍 Sugerido: {t.momento_ideal_txt}")
+            
+            # --- SECCIÓN TÉCNICA ---
             c1, c2 = st.columns(2)
             c1.markdown(f"**Zona:** {t.zona}\n\n**Ondas:** {t.ondas}")
             c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
-            if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
+            
+            # --- SECCIÓN CONSEJOS ANTES/DESPUÉS ---
+            st.markdown("---")
+            col_antes, col_desp = st.columns(2)
+            with col_antes:
+                st.markdown("##### 🏁 ANTES")
+                for tip in t.tips_antes:
+                    st.markdown(f"- {tip}")
+            with col_desp:
+                st.markdown("##### 🏁 DESPUÉS")
+                for tip in t.tips_despues:
+                    st.markdown(f"- {tip}")
+            
+            if t.incompatibilidades: 
+                st.markdown("---")
+                st.warning(f"⚠️ {t.incompatibilidades}")
 
-        # Historial y Borrado de Sesiones
+        # Historial y Borrado
         if num_hechos > 0:
             st.markdown("---")
             for i, reg in enumerate(sesiones_hechas):
@@ -317,7 +354,7 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
                         guardar_datos(st.session_state.db)
                         st.rerun()
 
-        # Registro de Nueva Sesión
+        # Registro
         if modo == "normal" and not completo and not bloqueado_por_fin:
             # Validar 6h
             bloqueado_tiempo = False
@@ -333,7 +370,7 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
                 st.markdown("---")
                 permitir = True
                 
-                # Selector Momento
+                # Selector
                 opciones = []
                 if t.tipo == "PERMANENTE" and "Testosterona" in t.nombre:
                     opciones = ["🌞 Mañana", "⛅ Tarde"]
@@ -345,11 +382,10 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
                 detalle_sel = st.radio("¿Cuándo?", options=opciones, key=f"rad_{t.id}")
                 
                 if t.tipo == "GRASA" and "Después" in detalle_sel:
-                    st.warning("⚠️ Recuerda moverte un poco después.")
+                    st.warning("⚠️ Recuerda moverte después.")
 
-                # BOTONES DE ACCIÓN: REGISTRAR O DESCARTAR
+                # BOTONES
                 c_reg, c_discard = st.columns([3, 1])
-                
                 with c_reg:
                     if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}"):
                         ahora = datetime.datetime.now().strftime('%H:%M')
@@ -360,19 +396,16 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
                         st.session_state.db["historial"][fecha_str][t.id].append({"hora": ahora, "detalle": detalle_sel})
                         guardar_datos(st.session_state.db)
                         st.rerun()
-                
                 with c_discard:
-                    # Botón para descartar
-                    if st.button("🚫 Omitir", key=f"disc_{t.id}", help="Mover a descartados por hoy"):
+                    if st.button("🚫 Omitir", key=f"disc_{t.id}"):
                         if "descartados" not in st.session_state.db: st.session_state.db["descartados"] = {}
                         if fecha_str not in st.session_state.db["descartados"]: st.session_state.db["descartados"][fecha_str] = []
-                        
                         if t.id not in st.session_state.db["descartados"][fecha_str]:
                             st.session_state.db["descartados"][fecha_str].append(t.id)
                             guardar_datos(st.session_state.db)
                             st.rerun()
 
-        # Reinicio Ciclo
+        # Reinicio
         if t.tipo == "LESION" and bloqueado_por_fin:
             if st.button("🔄 Reiniciar Ciclo", key=f"rst_{t.id}"):
                  st.session_state.db["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
@@ -399,9 +432,8 @@ if grupos["COMPLETED"]:
     st.markdown("### ✅ Completados Hoy")
     for t, ciclo in grupos["COMPLETED"]: render_tratamiento(t, ciclo, modo="readonly")
 
-# SECCIÓN DE DESCARTADOS (NUEVA)
 if grupos["DISCARDED"]:
-    st.markdown("### ❌ Tratamientos Descartados")
+    st.markdown("### ❌ Descartados")
     for t, ciclo in grupos["DISCARDED"]: render_tratamiento(t, ciclo, modo="discarded")
 
 if grupos["HIDDEN"]:
