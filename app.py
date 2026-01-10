@@ -61,8 +61,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO ---
-@st.cache_data
+# --- CATÁLOGO (SIN CACHÉ PARA EVITAR ERROR) ---
 def obtener_catalogo():
     fases_lesion = [
         {"nombre": "🔥 Fase 1: Inflamatoria/Aguda", "dias_fin": 7, "min_sesiones": 5},
@@ -340,7 +339,6 @@ if menu_navegacion == "🚑 Clínica":
         with container:
             c1, c2 = st.columns([3, 1])
             c1.subheader(f"{t.nombre}")
-            # --- DATOS TÉCNICOS RESTAURADOS ---
             c1.caption(f"📍 {t.zona} | 📏 {t.distancia} | ⚡ {t.intensidad}")
             
             if activo:
@@ -409,7 +407,7 @@ elif menu_navegacion == "📅 Panel Diario":
     
     if clave_usuario == "usuario_rutina":
         st.info(f"Rutina Automática: {', '.join(rutina_hoy_nombres)}")
-        # SELECTOR RESTAURADO
+        # SELECTOR DE RUTINAS RESTAURADO
         sel = st.multiselect("📝 Modificar Rutina / Actividad:", todas_rutinas, default=rutina_hoy_nombres)
         if set(sel) != set(rutina_hoy_nombres):
             if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
@@ -511,7 +509,6 @@ elif menu_navegacion == "📅 Panel Diario":
             
             if modo!="readonly":
                 st.success(f"💡 {t.momento_ideal_txt}")
-                # --- DATOS TÉCNICOS VISIBLES (RESTAURADOS) ---
                 c_t1, c_t2 = st.columns(2)
                 with c_t1:
                     st.markdown(f"**Zona:** {t.zona}")
