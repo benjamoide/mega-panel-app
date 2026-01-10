@@ -62,7 +62,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO CIENTÍFICO (V29/V30) ---
+# --- CATÁLOGO ---
 def obtener_catalogo():
     fases_lesion = [
         {"nombre": "🔥 Fase 1: Inflamatoria/Aguda", "dias_fin": 7, "min_sesiones": 5},
@@ -71,7 +71,7 @@ def obtener_catalogo():
     ]
     
     catalogo = [
-        # --- GRASA (CW) ---
+        # --- GRASA ---
         Tratamiento("fat_glutes", "Glúteos (Grasa)", "Glúteos/Caderas", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "10-15 cm", 10, 1, 7, "GRASA", ['Active', 'Lower'], "PRE", "Ideal: Antes de Entrenar Pierna",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"], 
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia.", "👖 Ropa mínima."],
@@ -97,14 +97,14 @@ def obtener_catalogo():
                     tips_despues=["🏃‍♂️ ENTRENA YA."],
                     incompatible_with=["fat_glutes"]),
 
-        # --- ESTÉTICA (CW) ---
+        # --- ESTÉTICA ---
         Tratamiento("face_rejuv", "Rejuvenecimiento Facial", "Cara", "630nm/660nm (+850nm Opcional)", "630nm: 100% | 850nm: 50% (Opc)", "CW (0Hz)", "30-50 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Cualquier hora (Piel Limpia)",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"],
                     tips_antes=["🧼 DOBLE LIMPIEZA.", "🕶️ GAFAS OBLIGATORIAS.", "🧴 No Retinol."],
                     tips_despues=["🧴 Serum hidratante.", "❌ No sol directo.", "🚿 Ducha agua fría en cara OK."])
         .set_incompatibilidades("Melasma (Calor 850nm empeora, usar solo 630nm). Fotosensibilidad."),
 
-        # --- LESIONES (50Hz Analgesia) ---
+        # --- LESIONES ---
         Tratamiento("foot_d", "Pie Derecho (Plantar/Lateral)", "Pie", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "50Hz (Dolor)", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🦶 Piel limpia.", "❌ Quitar calcetín."],
@@ -195,7 +195,7 @@ def obtener_catalogo():
                     fases_config=fases_lesion)
         .set_incompatibilidades("No infiltración <5 días."),
         
-        # --- MÚSCULO (10Hz - Alfa) ---
+        # --- MÚSCULO ---
         Tratamiento("arm_d", "Antebrazo D (Recuperación)", "Antebrazo", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "10Hz (Recuperación)", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno",
                     momentos_prohibidos=["🏋️ Entrenamiento (Pre)"], 
                     tips_antes=["🚿 Quitar sudor.", "💧 Beber agua."],
@@ -276,7 +276,7 @@ def obtener_rutina_y_tags(fecha_obj, db_global, db_usuario):
     tags_calculados.add('All')
     return rutina_nombres, tags_calculados, list(config_tags.keys()), es_manual
 
-# --- HELPERS VISUALIZACIÓN ---
+# --- HELPERS ---
 def mostrar_definiciones_ondas():
     with st.expander("ℹ️ Guía Técnica (nm/Hz)"):
         st.markdown("""
@@ -318,7 +318,6 @@ def mostrar_ficha_tecnica(t, lista_completa):
         st.markdown("**Después:**")
         for tip in t.tips_despues: st.caption(f"• {tip}")
 
-# --- ANALIZADOR DE BLOQUEOS (Global) ---
 def analizar_bloqueos(tratamiento, momento, historial, registros_hoy, fecha_str, tags_dia, clave_usuario):
     if clave_usuario == "usuario_rutina":
         if 'Active' in tratamiento.tags_entreno and 'Active' not in tags_dia: return True, "⚠️ FALTA ACTIVIDAD: Requiere ejercicio."
@@ -335,22 +334,19 @@ def analizar_bloqueos(tratamiento, momento, historial, registros_hoy, fecha_str,
         if inc in registros_hoy: return True, "⛔ INCOMPATIBLE."
     return False, ""
 
-# --- COMPONENTE RENDERIZAR DÍA (REUTILIZABLE) ---
+# --- COMPONENTE RENDERIZAR DÍA ---
 def renderizar_dia(fecha_obj):
     fecha_str = fecha_obj.isoformat()
     rutina_hoy_nombres, tags_dia, todas_rutinas, es_manual = obtener_rutina_y_tags(fecha_obj, st.session_state.db_global, db_usuario)
     
-    # 1. SELECCIÓN DE RUTINA
     if clave_usuario == "usuario_rutina":
         defaults_seguros = [x for x in rutina_hoy_nombres if x in todas_rutinas]
         key_sel = f"sel_rut_{fecha_str}"
         sel = st.multiselect(f"Rutina ({'Manual' if es_manual else 'Auto'}):", todas_rutinas, default=defaults_seguros, key=key_sel)
-        
         if set(sel) != set(rutina_hoy_nombres):
             if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
             db_usuario["meta_diaria"][fecha_str] = sel
             guardar_datos_completos(st.session_state.db_global); st.rerun()
-        
         config_tags = st.session_state.db_global.get("configuracion_rutina", {}).get("tags", TAGS_BACKUP)
         tags_dia = set()
         for r in sel: 
@@ -370,17 +366,11 @@ def renderizar_dia(fecha_obj):
         tags_dia = {'All', 'Active', 'Upper', 'Lower'}
 
     st.divider()
-    
-    # 2. CARGAR DATOS DÍA
     registros_dia = db_usuario["historial"].get(fecha_str, {})
     descartados = db_usuario.get("descartados", {}).get(fecha_str, [])
-    
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "HIDDEN": [], "DISCARDED": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
-    # 3. CLASIFICAR
-    ids_seleccionados_libre = db_usuario.get("meta_diaria", {}).get(fecha_str, []) if clave_usuario != "usuario_rutina" else []
-    
     for t in lista_tratamientos:
         aplica = False
         if t.tipo == "LESION":
@@ -410,7 +400,6 @@ def renderizar_dia(fecha_obj):
             if g in grupos: grupos[g].append(t)
             else: grupos["FLEX"].append(t)
 
-    # 4. RENDERIZAR TARJETAS
     def render_tarjeta(t, modo="normal"):
         hechos = len(registros_dia.get(t.id, []))
         icon = "❌" if modo=="discarded" else ("✅" if hechos>=t.max_diario else "⬜")
@@ -428,11 +417,9 @@ def renderizar_dia(fecha_obj):
                     db_usuario["descartados"][fecha_str].remove(t.id)
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
                 return
-            
             if modo!="readonly":
                 st.success(f"💡 {t.momento_ideal_txt}")
                 mostrar_ficha_tecnica(t, lista_tratamientos)
-
             if hechos > 0:
                 st.markdown("---")
                 for i, r in enumerate(registros_dia.get(t.id, [])):
@@ -442,15 +429,12 @@ def renderizar_dia(fecha_obj):
                         registros_dia[t.id].pop(i)
                         if not registros_dia[t.id]: del registros_dia[t.id]
                         guardar_datos_completos(st.session_state.db_global); st.rerun()
-
             if modo=="normal":
                 st.markdown("---")
                 opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
                 valid = [o for o in opts if o not in t.momentos_prohibidos]
                 sel = st.radio("Momento:", valid, key=f"rad_{t.id}_{fecha_str}")
-                
                 bloq, mot = analizar_bloqueos(t, sel, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
-                
                 c_go, c_no = st.columns([3,1])
                 with c_go:
                     if bloq:
@@ -475,15 +459,12 @@ def renderizar_dia(fecha_obj):
         if grupos[c]:
             st.subheader(c)
             for t in grupos[c]: render_tarjeta(t)
-            
     if grupos["COMPLETED"]:
         st.markdown("### ✅ Completados")
         for t in grupos["COMPLETED"]: render_tarjeta(t, "readonly")
-        
     if grupos["DISCARDED"]:
         st.markdown("### ❌ Descartados")
         for t in grupos["DISCARDED"]: render_tarjeta(t, "discarded")
-        
     if grupos["HIDDEN"] and clave_usuario == "usuario_rutina":
         with st.expander("Inactivos / Ocultos Hoy (Ver Detalles)"):
             for t in grupos["HIDDEN"]: 
@@ -520,7 +501,11 @@ with st.sidebar:
         with st.expander("⚙️ Importar Excel"):
             uploaded_file = st.file_uploader("Subir .xlsx", type=['xlsx'])
             if uploaded_file and st.button("Procesar"):
-                st.success("Simulado.")
+                try:
+                    df_sem = pd.read_excel(uploaded_file, sheet_name='Semana')
+                    df_tag = pd.read_excel(uploaded_file, sheet_name='Tags')
+                    st.success("Simulado")
+                except: st.error("Error Excel")
     st.divider()
     mostrar_definiciones_ondas()
     st.divider()
@@ -540,8 +525,7 @@ elif menu_navegacion == "🗓️ Panel Semanal":
     st.title("🗓️ Panel Semanal")
     hoy = datetime.date.today()
     inicio_sem = hoy - timedelta(days=hoy.weekday())
-    
-    tabs = st.tabs(["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"])
+    tabs = st.tabs(["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"])
     for i, tab in enumerate(tabs):
         with tab:
             dia_tab = inicio_sem + timedelta(days=i)
@@ -565,7 +549,6 @@ elif menu_navegacion == "🚑 Clínica":
         return True, ""
 
     tratamientos_lesion = [t for t in lista_tratamientos if t.tipo == "LESION"]
-    
     for t in tratamientos_lesion:
         ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
         estado_actual = ciclo.get('estado', 'activo') if ciclo else 'inactivo'
@@ -574,7 +557,6 @@ elif menu_navegacion == "🚑 Clínica":
             c1, c2 = st.columns([3, 1])
             c1.subheader(f"{t.nombre}")
             c1.caption(f"📍 {t.zona} | {t.herzios}")
-            
             if ciclo and estado_actual != 'inactivo':
                 inicio = datetime.date.fromisoformat(ciclo['fecha_inicio'])
                 hoy = datetime.date.today()
@@ -584,17 +566,14 @@ elif menu_navegacion == "🚑 Clínica":
                 else:
                     dias = (hoy - inicio).days
                     status_txt = f"✅ ACTIVO (Día {dias})"
-                
                 fase_txt = "Mantenimiento"
                 progreso = 0.0
                 if ciclo.get('modo') == 'fases':
                     for f in t.fases_config:
                         if dias <= f['dias_fin']: fase_txt = f['nombre']; progreso = max(0.0, min(dias/60, 1.0)); break
                     if dias > 60: fase_txt="Finalizado"; progreso=1.0
-                
                 c1.info(f"{status_txt} | {fase_txt}")
                 c1.progress(progreso)
-                
                 cc = c1.columns(3)
                 if estado_actual == 'activo':
                     if cc[0].button("⏸️ Pausar", key=f"p_{t.id}"):
@@ -606,7 +585,6 @@ elif menu_navegacion == "🚑 Clínica":
                         ciclo['fecha_inicio'] = (fr - timedelta(days=ciclo['dias_acumulados'])).isoformat()
                         ciclo['estado']='activo'; ciclo['activo']=True; del ciclo['dias_acumulados']
                         guardar_datos_completos(st.session_state.db_global); st.rerun()
-                
                 if cc[1].button("🔄 Reiniciar", key=f"r_{t.id}"):
                     db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True, "modo": "fases", "estado": "activo"}
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
@@ -623,22 +601,82 @@ elif menu_navegacion == "🚑 Clínica":
                     else: st.error(m)
 
 elif menu_navegacion == "📊 Historial":
-    st.title("📊 Tu Progreso")
-    st.subheader("📅 Semana Actual")
-    hoy = datetime.date.today()
-    inicio_semana = hoy - timedelta(days=hoy.weekday())
-    dias_semana = [inicio_semana + timedelta(days=i) for i in range(7)]
-    hist = db_usuario.get("historial", {})
-    used = set()
-    for f, r in hist.items():
-        for k in r.keys(): used.add(k)
-    data = []
-    mapa = {t.id: t.nombre for t in lista_tratamientos}
-    for uid in used:
-        row = {"Tratamiento": mapa.get(uid, uid)}
-        for i, d in enumerate(dias_semana):
-            c = len(hist.get(d.isoformat(), {}).get(uid, []))
-            row[["L","M","X","J","V","S","D"][i]] = "✅"*c if c>0 else ""
-        data.append(row)
-    if data: st.dataframe(pd.DataFrame(data), hide_index=True, use_container_width=True)
-    else: st.info("Sin datos.")
+    st.title("📊 Historial y Progreso")
+    
+    # Selector de Vista Principal
+    vista_historial = st.radio("Vista:", ["Semana", "Mes", "Año"], horizontal=True)
+    historial = db_usuario.get("historial", {})
+    
+    # Preparar tratamientos
+    mapa_ids = {t.id: t.nombre for t in lista_tratamientos}
+    tratamientos_usados = set()
+    for f, regs in historial.items():
+        for tid in regs.keys(): tratamientos_usados.add(tid)
+    
+    if vista_historial == "Semana":
+        st.subheader("📅 Vista Semanal")
+        d_ref = st.date_input("Seleccionar semana (por día):", datetime.date.today())
+        start_week = d_ref - timedelta(days=d_ref.weekday())
+        days_week = [start_week + timedelta(days=i) for i in range(7)]
+        headers = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        
+        data = []
+        for tid in tratamientos_usados:
+            row = {"Tratamiento": mapa_ids.get(tid, tid), "Total": 0}
+            total_sem = 0
+            for i, d in enumerate(days_week):
+                d_str = d.isoformat()
+                count = len(historial.get(d_str, {}).get(tid, []))
+                row[headers[i]] = "✅" * count if count > 0 else ""
+                total_sem += count
+            row["Total"] = total_sem
+            if total_sem > 0: data.append(row) # Solo mostrar si hay actividad
+            
+        if data: st.dataframe(pd.DataFrame(data).set_index("Tratamiento"), use_container_width=True)
+        else: st.info("No hay datos en esta semana.")
+
+    elif vista_historial == "Mes":
+        st.subheader("📆 Vista Mensual")
+        # Selector mes/año (simplificado con date_input)
+        d_ref = st.date_input("Seleccionar Mes (día cualquiera):", datetime.date.today())
+        mes_str = d_ref.strftime("%Y-%m")
+        
+        counts = {}
+        for f_str, regs in historial.items():
+            if f_str.startswith(mes_str):
+                for tid, sessions in regs.items():
+                    nom = mapa_ids.get(tid, tid)
+                    counts[nom] = counts.get(nom, 0) + len(sessions)
+        
+        if counts:
+            df = pd.DataFrame(list(counts.items()), columns=["Tratamiento", "Sesiones"]).sort_values("Sesiones", ascending=False)
+            c1, c2 = st.columns([1, 2])
+            c1.dataframe(df, hide_index=True, use_container_width=True)
+            c2.bar_chart(df.set_index("Tratamiento"))
+        else: st.info("No hay datos en este mes.")
+
+    elif vista_historial == "Año":
+        st.subheader("📈 Vista Anual")
+        year_sel = st.number_input("Año:", value=datetime.date.today().year, step=1)
+        year_str = str(year_sel)
+        
+        months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        data_anual = []
+        
+        for tid in tratamientos_usados:
+            row = {"Tratamiento": mapa_ids.get(tid, tid)}
+            total_anual = 0
+            for m_idx in range(1, 13):
+                m_str = f"{year_str}-{m_idx:02d}"
+                count_mes = 0
+                for f_str, regs in historial.items():
+                    if f_str.startswith(m_str):
+                        count_mes += len(regs.get(tid, []))
+                row[months[m_idx-1]] = count_mes if count_mes > 0 else 0
+                total_anual += count_mes
+            row["Total"] = total_anual
+            if total_anual > 0: data_anual.append(row)
+            
+        if data_anual:
+            st.dataframe(pd.DataFrame(data_anual).set_index("Tratamiento"), use_container_width=True)
+        else: st.info("No hay datos en este año.")
