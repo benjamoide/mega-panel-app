@@ -33,7 +33,7 @@ class Tratamiento:
         self.momentos_prohibidos = momentos_prohibidos 
         self.tips_antes = tips_antes
         self.tips_despues = tips_despues
-        self.incompatible_with = incompatible_with if incompatible_with else [] # Lista de IDs incompatibles
+        self.incompatible_with = incompatible_with if incompatible_with else []
         self.incompatibilidades = "" 
         self.fases_config = fases_config if fases_config else []
 
@@ -56,7 +56,7 @@ def obtener_catalogo():
                     momentos_prohibidos=["🌙 Noche", "🧘 Después de Entrenar"], 
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia.", "👖 Ropa mínima."],
                     tips_despues=["🏃‍♂️ ACTIVIDAD YA.", "❌ NO sentarse en 45 min.", "🚿 Ducha post-ejercicio."],
-                    incompatible_with=["fat_front", "fat_d", "fat_i"]) # No hacer demasiada quema global el mismo día
+                    incompatible_with=["fat_front", "fat_d", "fat_i"])
         .set_incompatibilidades("Tatuajes oscuros. Embarazo."),
 
         Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
@@ -107,7 +107,7 @@ def obtener_catalogo():
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia.", "❌ Quitar cincha."],
                     tips_despues=["🛑 NO hacer pinza.", "🚫 Evitar rotaciones.", "🧊 Hielo local."],
-                    incompatible_with=["codo_d"], # No tratar mismo codo dos veces por cosas distintas mismo dia
+                    incompatible_with=["codo_d"], 
                     fases_config=fases_lesion)
         .set_incompatibilidades("Infiltración <5 días."),
 
@@ -124,7 +124,7 @@ def obtener_catalogo():
                     momentos_prohibidos=[],
                     tips_antes=["⌚ Quitar reloj.", "🧴 Piel limpia."],
                     tips_despues=["👋 Movilidad suave.", "❌ No cargar peso.", "🧊 Hielo local."],
-                    incompatible_with=["arm_d"], # Conflicto con recuperacion muscular normal
+                    incompatible_with=["arm_d"],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes."),
 
@@ -283,25 +283,21 @@ with st.sidebar:
 if menu_navegacion == "🚑 Clínica de Lesiones":
     st.title("🚑 Gestión de Recuperación")
     
-    # 1. VERIFICAR COMPATIBILIDAD ANTES DE INICIAR
     def comprobar_inicio_seguro(tratamiento_nuevo, fecha_inicio_str, ciclos_activos, historial_usuario):
-        # A) Conflicto con CICLOS ACTIVOS (Largo plazo)
+        # A) Conflicto CICLOS
         for id_activo, datos in ciclos_activos.items():
             if datos.get('activo'):
-                # Si el nuevo tratamiento es incompatible con uno ya activo
                 if id_activo in tratamiento_nuevo.incompatible_with:
-                    # Recuperar nombre del activo
                     nom_activo = next((t.nombre for t in lista_tratamientos if t.id == id_activo), id_activo)
-                    return False, f"⚠️ CONFLICTO DE PROTOCOLO: No puedes iniciar '{tratamiento_nuevo.nombre}' porque tienes activo '{nom_activo}'. Finaliza uno antes."
+                    return False, f"⚠️ CONFLICTO PROTOCOLO: Ya tienes activo '{nom_activo}'."
         
-        # B) Conflicto con HISTORIAL DEL DÍA ELEGIDO (Corto plazo)
+        # B) Conflicto DIARIO
         if fecha_inicio_str in historial_usuario:
-            tratamientos_ese_dia = historial_usuario[fecha_inicio_str].keys()
-            for id_hecho in tratamientos_ese_dia:
+            hechos = historial_usuario[fecha_inicio_str].keys()
+            for id_hecho in hechos:
                 if id_hecho in tratamiento_nuevo.incompatible_with:
                     nom_hecho = next((t.nombre for t in lista_tratamientos if t.id == id_hecho), id_hecho)
-                    return False, f"⚠️ CONFLICTO DE DÍA: En la fecha {fecha_inicio_str} ya realizaste '{nom_hecho}'. Elige otra fecha para empezar."
-        
+                    return False, f"⚠️ CONFLICTO DÍA: En esa fecha ya hiciste '{nom_hecho}'."
         return True, ""
 
     tratamientos_lesion = [t for t in lista_tratamientos if t.tipo == "LESION"]
@@ -317,26 +313,29 @@ if menu_navegacion == "🚑 Clínica de Lesiones":
             c1.caption(f"Zona: {t.zona}")
             
             if activo:
-                # MODO SEGUIMIENTO
                 inicio = datetime.date.fromisoformat(ciclo['fecha_inicio'])
                 dias = (datetime.date.today() - inicio).days
                 
+                # --- CORRECCIÓN ERROR PROGRESS NEGATIVO ---
                 fase_txt = "Mantenimiento"
                 progreso = 0.0
                 
-                if ciclo.get('modo') == 'fases':
+                if dias < 0:
+                    fase_txt = f"⏳ Planificado para el {inicio.strftime('%d/%m/%Y')}"
+                    progreso = 0.0
+                elif ciclo.get('modo') == 'fases':
                     for f in t.fases_config:
                         if dias <= f['dias_fin']:
                             fase_txt = f['nombre']
-                            progreso = min(dias / 60, 1.0)
+                            progreso = max(0.0, min(dias / 60, 1.0)) # Safe progress
                             break
                     if dias > 60: fase_txt = "Ciclo Finalizado"; progreso = 1.0
                 
-                c1.info(f"✅ **ACTIVO** | {fase_txt} | Día {dias}")
+                c1.info(f"✅ **ACTIVO** | {fase_txt} | Día {dias if dias >=0 else 'Pendiente'}")
                 c1.progress(progreso)
                 
                 col_stop, col_restart = c1.columns(2)
-                if col_stop.button("🛑 Finalizar/Cancelar", key=f"stop_{t.id}"):
+                if col_stop.button("🛑 Cancelar", key=f"stop_{t.id}"):
                     del db_usuario["ciclos_activos"][t.id]
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
@@ -345,30 +344,19 @@ if menu_navegacion == "🚑 Clínica de Lesiones":
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
             else:
-                # MODO INICIO CON FECHA Y CHECK
                 c2.write("**Iniciar Protocolo**")
-                fecha_inicio_input = c2.date_input("Empezar el:", datetime.date.today(), key=f"d_ini_{t.id}")
+                fecha_inicio_input = c2.date_input("Empezar:", datetime.date.today(), key=f"d_ini_{t.id}")
                 
-                if c2.button("Verificar y Comenzar", key=f"btn_start_{t.id}"):
-                    es_seguro, motivo = comprobar_inicio_seguro(
-                        t, 
-                        fecha_inicio_input.isoformat(), 
-                        db_usuario.get("ciclos_activos", {}), 
-                        db_usuario.get("historial", {})
-                    )
-                    
-                    if es_seguro:
+                if c2.button("Comenzar", key=f"btn_start_{t.id}"):
+                    seguro, mot = comprobar_inicio_seguro(t, fecha_inicio_input.isoformat(), db_usuario.get("ciclos_activos",{}), db_usuario.get("historial",{}))
+                    if seguro:
                         if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                        db_usuario["ciclos_activos"][t.id] = {
-                            "fecha_inicio": fecha_inicio_input.isoformat(), 
-                            "activo": True, 
-                            "modo": "fases"
-                        }
+                        db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": fecha_inicio_input.isoformat(), "activo": True, "modo": "fases"}
                         guardar_datos_completos(st.session_state.db_global)
-                        st.success(f"Protocolo iniciado para el {fecha_inicio_input}")
+                        st.success("Iniciado.")
                         st.rerun()
                     else:
-                        st.error(motivo)
+                        st.error(mot)
 
 # ==========================================
 # PANTALLA 2: PANEL DIARIO
@@ -376,11 +364,9 @@ if menu_navegacion == "🚑 Clínica de Lesiones":
 elif menu_navegacion == "📅 Panel Diario":
     
     def analizar_bloqueos(tratamiento, momento_elegido, historial_usuario, tratamientos_hoy, fecha_actual_str):
-        # 1. Horario
         if momento_elegido in tratamiento.momentos_prohibidos:
             return True, f"⛔ HORARIO PROHIBIDO: '{tratamiento.nombre}' no apto en '{momento_elegido}'."
         
-        # 2. Frecuencia Semanal
         dias_hechos = 0
         fecha_dt = datetime.date.fromisoformat(fecha_actual_str)
         for i in range(7):
@@ -390,25 +376,20 @@ elif menu_navegacion == "📅 Panel Diario":
         
         hoy_hecho = (fecha_actual_str in historial_usuario and tratamiento.id in historial_usuario[fecha_actual_str])
         if not hoy_hecho and dias_hechos >= tratamiento.max_semanal:
-            return True, f"⛔ LÍMITE SEMANAL ({tratamiento.max_semanal}/sem). Descansa hoy."
+            return True, f"⛔ LÍMITE SEMANAL ({tratamiento.max_semanal}/sem)."
 
-        # 3. Choques directos hoy
         ids_hoy = list(tratamientos_hoy.keys())
         for inc in tratamiento.incompatible_with:
             if inc in ids_hoy:
-                nom_inc = next((tr.nombre for tr in lista_tratamientos if tr.id == inc), inc)
-                return True, f"⛔ INCOMPATIBLE: Ya hiciste '{nom_inc}' hoy."
+                return True, f"⛔ INCOMPATIBLE: Ya hiciste algo contradictorio hoy."
         
         return False, ""
 
     def check_cross_compatibility(nuevo_id, lista_ids_actuales):
-        # Buscar el objeto tratamiento nuevo
         t_nuevo = next((t for t in lista_tratamientos if t.id == nuevo_id), None)
         if not t_nuevo: return False, None, None
-        
         for inc in t_nuevo.incompatible_with:
-            if inc in lista_ids_actuales:
-                return True, inc, "Incompatible según catálogo."
+            if inc in lista_ids_actuales: return True, inc, "Incompatible."
         return False, None, None
 
     st.title("📅 Panel Diario")
@@ -416,7 +397,6 @@ elif menu_navegacion == "📅 Panel Diario":
     fecha_seleccionada = c_f.date_input("Fecha", datetime.date.today())
     fecha_str = fecha_seleccionada.isoformat()
     
-    # SELECCIÓN
     tags_dia = set()
     ids_seleccionados_libre = []
     
@@ -440,13 +420,12 @@ elif menu_navegacion == "📅 Panel Diario":
                                      default=[mapa_i[i] for i in ids_guardados if i in mapa_i])
         
         nuevos_ids = [mapa_n[n] for n in sel_nombres]
-        
         agregados = set(nuevos_ids) - set(ids_guardados)
         if agregados:
             for nid in agregados:
                 bad, rival, mot = check_cross_compatibility(nid, ids_guardados)
                 if bad:
-                    st.error(f"⛔ Conflicto entre {mapa_i[nid]} y {mapa_i[rival]}.")
+                    st.error(f"⛔ Conflicto con {mapa_i[rival]}.")
                     c1, c2 = st.columns(2)
                     if c1.button(f"Mantener {mapa_i[rival]}"): st.rerun()
                     if c2.button(f"Cambiar a {mapa_i[nid]}"):
@@ -466,7 +445,6 @@ elif menu_navegacion == "📅 Panel Diario":
 
     st.divider()
     
-    # RENDERIZADO
     registros_dia = db_usuario["historial"].get(fecha_str, {})
     descartados = db_usuario.get("descartados", {}).get(fecha_str, [])
     
@@ -511,7 +489,7 @@ elif menu_navegacion == "📅 Panel Diario":
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
             if ciclo and ciclo['activo']:
                 dias = (datetime.date.fromisoformat(fecha_str) - datetime.date.fromisoformat(ciclo['fecha_inicio'])).days
-                info_extra = f" (Día {dias})"
+                info_extra = f" (Día {dias})" if dias >= 0 else " (Planificado)"
         
         with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_extra}"):
             if modo=="discarded":
