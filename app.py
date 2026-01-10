@@ -61,7 +61,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO (SIN CACHÉ PARA EVITAR ERROR) ---
+# --- CATÁLOGO (SIN CACHÉ PARA EVITAR ERRORES) ---
 def obtener_catalogo():
     fases_lesion = [
         {"nombre": "🔥 Fase 1: Inflamatoria/Aguda", "dias_fin": 7, "min_sesiones": 5},
@@ -407,8 +407,10 @@ elif menu_navegacion == "📅 Panel Diario":
     
     if clave_usuario == "usuario_rutina":
         st.info(f"Rutina Automática: {', '.join(rutina_hoy_nombres)}")
-        # SELECTOR DE RUTINAS RESTAURADO
-        sel = st.multiselect("📝 Modificar Rutina / Actividad:", todas_rutinas, default=rutina_hoy_nombres)
+        # VALIDACIÓN SEGURA DEL SELECTOR
+        defaults_seguros = [x for x in rutina_hoy_nombres if x in todas_rutinas]
+        sel = st.multiselect("📝 Modificar Rutina / Actividad:", todas_rutinas, default=defaults_seguros)
+        
         if set(sel) != set(rutina_hoy_nombres):
             if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
             db_usuario["meta_diaria"][fecha_str] = sel
