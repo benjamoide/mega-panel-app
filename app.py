@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # --- ARCHIVO DE DATOS ---
-ARCHIVO_DATOS = 'historial_mega_panel_final.json'
+ARCHIVO_DATOS = 'historial_mega_panel_multiuser.json'
 
 # --- CLASE DE TRATAMIENTO ---
 class Tratamiento:
@@ -38,7 +38,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO COMPLETO ---
+# --- CATÁLOGO ---
 @st.cache_data
 def obtener_catalogo():
     fases_articulacion = {
@@ -124,90 +124,129 @@ def obtener_catalogo():
     ]
     return catalogo
 
-# --- GESTIÓN DE DATOS ---
-def cargar_datos():
+# --- GESTIÓN DE DATOS MULTI-USUARIO ---
+def cargar_datos_completos():
+    """Carga todo el JSON (todos los usuarios)"""
     if not os.path.exists(ARCHIVO_DATOS):
-        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
+        # Estructura base para usuarios
+        return {
+            "usuario_rutina": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}},
+            "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
+        }
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
             datos = json.load(f)
-            if "descartados" not in datos: datos["descartados"] = {}
+            # Migración simple si el archivo era de versión anterior (sin claves de usuario)
+            if "usuario_rutina" not in datos:
+                datos_antiguos = datos.copy()
+                datos = {
+                    "usuario_rutina": datos_antiguos,
+                    "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
+                }
             return datos
     except:
-        return {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
+        return {
+            "usuario_rutina": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}},
+            "usuario_libre": {"historial": {}, "meta_diaria": {}, "ciclos_activos": {}, "descartados": {}}
+        }
 
-def guardar_datos(datos):
+def guardar_datos_completos(datos_completos):
     with open(ARCHIVO_DATOS, 'w') as f:
-        json.dump(datos, f, indent=4)
+        json.dump(datos_completos, f, indent=4)
 
-# --- DETECCIÓN DE CONFLICTOS ---
+# --- FUNCIÓN DE CONFLICTOS (COMPARTIDA) ---
 def verificar_conflicto(tratamiento, momento_elegido, tratamientos_hechos_hoy):
     msg = ""
     conflicto = False
 
-    # Conflictos de Hora
+    # Cronobiología
     if tratamiento.id == "brain" and momento_elegido == "🌙 Noche":
-        return True, "⛔ PELIGRO: Usar NIR en la cabeza de noche suprime la melatonina. Hazlo de día."
+        return True, "⛔ PELIGRO: NIR cerebral de noche te desvelará."
     if tratamiento.id == "sleep" and momento_elegido != "🌙 Noche":
-        return True, "⚠️ CUIDADO: El protocolo de Sueño induce relajación. No recomendado si vas a estar activo."
+        return True, "⚠️ CUIDADO: El protocolo Sueño induce relajación."
     if tratamiento.id == "face_rejuv" and momento_elegido == "🏋️ Antes de Entrenar":
-        return True, "⚠️ SUBÓPTIMO: El sudor irritará la piel y perderás el efecto de los serums."
+        return True, "⚠️ SUBÓPTIMO: El sudor irritará la piel post-tratamiento."
     if tratamiento.tipo == "GRASA" and momento_elegido == "🧘 Después de Entrenar":
-        msg = "⚠️ RECUERDA: Si lo haces después, debes mantener actividad ligera para oxidar la grasa."
+        msg = "⚠️ RECUERDA: Mantén actividad ligera después para oxidar grasa."
 
-    # Conflictos de Combinación
+    # Combinaciones
     ids_hechos = list(tratamientos_hechos_hoy.keys())
     if tratamiento.id == "brain" and "sleep" in ids_hechos:
-        return True, "⛔ CONTRADICTORIO: Ya has hecho Sueño. Activar el cerebro ahora romperá el descanso."
+        return True, "⛔ CONTRADICTORIO: Ya has hecho Sueño. No actives cerebro ahora."
 
     return conflicto, msg
 
-# --- INTERFAZ ---
+# --- INTERFAZ PRINCIPAL ---
 st.title(f"🧠 Mega Panel AI")
 
-if 'db' not in st.session_state:
-    st.session_state.db = cargar_datos()
+# CARGA DE DATOS GLOBAL
+if 'db_global' not in st.session_state:
+    st.session_state.db_global = cargar_datos_completos()
+
+# 1. SELECTOR DE USUARIO (SIDEBAR O TOP)
+usuario_activo = st.sidebar.selectbox(
+    "👤 Seleccionar Perfil",
+    ["Usuario Rutina", "Usuario Libre (Sin Rutina)"],
+    index=0
+)
+
+# Mapeo a claves internas
+clave_usuario = "usuario_rutina" if usuario_activo == "Usuario Rutina" else "usuario_libre"
+db_usuario = st.session_state.db_global[clave_usuario]
 
 lista_tratamientos = obtener_catalogo()
 
-# 1. FECHA
+# 2. FECHA
 c_fecha, c_resumen = st.columns([2, 1])
 with c_fecha:
     fecha_seleccionada = st.date_input("📅 Fecha de Registro", datetime.date.today())
     fecha_str = fecha_seleccionada.isoformat()
 
-# 2. RUTINAS
-entreno_guardado = st.session_state.db.get("meta_diaria", {}).get(fecha_str, [])
-opciones_rutinas = {
-    "Descanso Total": [],
-    "Cardio Genérico": ["Active"],
-    "FULLBODY I": ["Upper", "Active"],  
-    "TORSO I": ["Upper", "Active"],     
-    "PREVENTIVO I": ["Active"],         
-    "FULLBODY II": ["Upper", "Active"], 
-    "TORSO II / CIRCUITO": ["Upper", "Active"], 
-    "PREVENTIVO II": ["Active"]         
-}
-nombres_rutinas = list(opciones_rutinas.keys())
-default_options = [x for x in entreno_guardado if x in nombres_rutinas]
-seleccion_rutinas = st.multiselect("Rutinas realizadas hoy:", nombres_rutinas, default=default_options)
-
+# --- LÓGICA DIFERENCIADA POR USUARIO ---
 tags_dia = set()
-if seleccion_rutinas:
-    for rutina in seleccion_rutinas:
-        tags_dia.update(opciones_rutinas[rutina])
 
-if seleccion_rutinas != entreno_guardado:
-    if "meta_diaria" not in st.session_state.db: st.session_state.db["meta_diaria"] = {}
-    st.session_state.db["meta_diaria"][fecha_str] = seleccion_rutinas
-    guardar_datos(st.session_state.db)
-    st.rerun()
+if clave_usuario == "usuario_rutina":
+    # MODO RUTINA: Pregunta por entrenamiento y filtra
+    entreno_guardado = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
+    
+    opciones_rutinas = {
+        "Descanso Total": [],
+        "Cardio Genérico": ["Active"],
+        "FULLBODY I": ["Upper", "Active"],  
+        "TORSO I": ["Upper", "Active"],     
+        "PREVENTIVO I": ["Active"],         
+        "FULLBODY II": ["Upper", "Active"], 
+        "TORSO II / CIRCUITO": ["Upper", "Active"], 
+        "PREVENTIVO II": ["Active"]         
+    }
+    nombres_rutinas = list(opciones_rutinas.keys())
+    default_options = [x for x in entreno_guardado if x in nombres_rutinas]
+    
+    seleccion_rutinas = st.multiselect("🏋️ Rutinas realizadas hoy:", nombres_rutinas, default=default_options)
+    
+    if seleccion_rutinas:
+        for rutina in seleccion_rutinas:
+            tags_dia.update(opciones_rutinas[rutina])
+    
+    # Guardar selección de rutina
+    if seleccion_rutinas != entreno_guardado:
+        if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
+        db_usuario["meta_diaria"][fecha_str] = seleccion_rutinas
+        guardar_datos_completos(st.session_state.db_global)
+        st.rerun()
+
+else:
+    # MODO LIBRE: No filtra por rutina, permite todo.
+    st.info(f"🔓 Modo Libre: Tienes acceso a todo el catálogo de tratamientos.")
+    # Asignamos tags 'comodín' para que los filtros internos (que buscan 'Active' o 'Upper')
+    # dejen pasar todo, o simplemente ignoramos los tags en el bucle principal.
+    tags_dia = {'Active', 'Upper', 'All'} 
 
 st.divider()
 
-# --- CLASIFICACIÓN ---
-registros_dia = st.session_state.db["historial"].get(fecha_str, {})
-descartados_dia = st.session_state.db.get("descartados", {}).get(fecha_str, [])
+# --- CLASIFICACIÓN DE TARJETAS ---
+registros_dia = db_usuario["historial"].get(fecha_str, {})
+descartados_dia = db_usuario.get("descartados", {}).get(fecha_str, [])
 
 grupos = {
     "PRE": [], "POST": [], "MORNING": [], "AFTERNOON": [], "NIGHT": [],
@@ -222,48 +261,49 @@ mapa_seleccion = {
     "🌙 Noche": "NIGHT"
 }
 
-# CONSEJOS GENERALES
-ids_activos_hoy = []
+# Bucle de filtrado
 for t in lista_tratamientos:
-    activo = False
-    if t.tipo == "PERMANENTE": activo = True
-    elif t.tipo == "LESION" and st.session_state.db["ciclos_activos"].get(t.id, {}).get('activo'): activo = True
-    elif t.tipo == "GRASA" and "Active" in tags_dia: activo = True
-    elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: activo = True
-    
-    if activo: ids_activos_hoy.append(t.id)
-
-if "brain" in ids_activos_hoy and "sleep" in ids_activos_hoy:
-    st.info("💡 **Consejo:** Separa mucho 'Salud Cerebral' (Mañana) y 'Sueño' (Noche).")
-
-# LOOP PRINCIPAL
-for t in lista_tratamientos:
-    # Filtros
     aplica_hoy = False
     es_ciclo_activo = False
-    if t.tipo == "LESION":
-        ciclo = st.session_state.db["ciclos_activos"].get(t.id)
-        if ciclo and ciclo['activo']: aplica_hoy = True; es_ciclo_activo = True
-    elif t.tipo == "PERMANENTE": aplica_hoy = True
-    elif t.tipo == "GRASA" and "Active" in tags_dia: aplica_hoy = True
-    elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: aplica_hoy = True
+    
+    if clave_usuario == "usuario_rutina":
+        # FILTRO ESTRICTO PARA USUARIO RUTINA
+        if t.tipo == "PERMANENTE": aplica_hoy = True
+        elif t.tipo == "LESION":
+            # Requiere ciclo activo
+            ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+            if ciclo and ciclo['activo']: aplica_hoy = True; es_ciclo_activo = True
+        elif t.tipo == "GRASA" and "Active" in tags_dia: aplica_hoy = True
+        elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: aplica_hoy = True
+    else:
+        # FILTRO LIBRE PARA USUARIO SIN RUTINA
+        # Muestra todo, excepto Lesiones que requieren activación manual
+        if t.tipo == "LESION":
+            ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+            if ciclo and ciclo['activo']: 
+                aplica_hoy = True; es_ciclo_activo = True
+            else:
+                # En modo libre, mostramos las lesiones en "Inactivos" para que pueda activarlas cuando quiera
+                aplica_hoy = False 
+        else:
+            aplica_hoy = True # Muestra Grasa, Músculo, Permanente siempre
 
+    # Estado
     sesiones_hechas = registros_dia.get(t.id, [])
     num_hechos = len(sesiones_hechas)
     esta_completo = num_hechos >= t.max_diario
     esta_descartado = t.id in descartados_dia
 
+    # Clasificación
     if esta_descartado: grupos["DISCARDED"].append((t, es_ciclo_activo))
     elif not aplica_hoy: grupos["HIDDEN"].append((t, False))
     elif esta_completo: grupos["COMPLETED"].append((t, es_ciclo_activo))
     else:
-        key_radio = f"rad_{t.id}"
+        key_radio = f"rad_{t.id}_{clave_usuario}" # Key única por usuario
         grupo_destino = t.default_visual_group
         
-        # 1. Interacción en tiempo real
         if key_radio in st.session_state and st.session_state[key_radio] in mapa_seleccion:
             grupo_destino = mapa_seleccion[st.session_state[key_radio]]
-        # 2. Historial previo
         elif num_hechos > 0:
             ultimo = sesiones_hechas[-1]['detalle']
             for k, v in mapa_seleccion.items():
@@ -272,12 +312,13 @@ for t in lista_tratamientos:
         if grupo_destino in grupos: grupos[grupo_destino].append((t, es_ciclo_activo))
         else: grupos["FLEX"].append((t, es_ciclo_activo))
 
-# --- RENDERIZADO ---
+# --- RENDERIZADO DE TARJETAS ---
 def render_tratamiento(t, es_ciclo_activo, modo="normal"):
+    # Info Fase
     info_fase = ""
     bloqueado_por_fin = False
     if t.tipo == "LESION" and es_ciclo_activo:
-        ciclo = st.session_state.db["ciclos_activos"].get(t.id)
+        ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
         start = datetime.date.fromisoformat(ciclo['fecha_inicio'])
         dias_trans = (fecha_seleccionada - start).days
         if dias_trans > 60: info_fase = "🏁 Ciclo Completado"; bloqueado_por_fin = True
@@ -297,58 +338,57 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
     with st.expander(titulo):
         if info_fase: st.info(info_fase)
         
+        # MODO RECUPERAR (PAPELERA)
         if modo == "discarded":
             st.caption("Tratamiento omitido.")
-            if st.button("↩️ Recuperar", key=f"rec_{t.id}"):
-                if fecha_str in st.session_state.db["descartados"]:
-                    st.session_state.db["descartados"][fecha_str].remove(t.id)
-                    guardar_datos(st.session_state.db)
+            if st.button("↩️ Recuperar", key=f"rec_{t.id}_{clave_usuario}"):
+                if "descartados" not in db_usuario: db_usuario["descartados"] = {}
+                if fecha_str in db_usuario["descartados"]:
+                    db_usuario["descartados"][fecha_str].remove(t.id)
+                    guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
             return
 
+        # INFO TÉCNICA
         if modo != "readonly":
             st.caption(f"📍 Sugerido: {t.momento_ideal_txt}")
-            
             c1, c2 = st.columns(2)
             c1.markdown(f"**Zona:** {t.zona}\n\n**Ondas:** {t.ondas}")
             c2.markdown(f"**Distancia:** {t.distancia}\n\n**Tiempo:** {t.duracion} min")
-            
             st.markdown("---")
             ca, cb = st.columns(2)
             ca.markdown("**🏁 ANTES**"); [ca.caption(f"• {x}") for x in t.tips_antes]
             cb.markdown("**🏁 DESPUÉS**"); [cb.caption(f"• {x}") for x in t.tips_despues]
-            
             if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
-        # Historial y Borrado
+        # HISTORIAL DE HOY
         if num_hechos > 0:
             st.markdown("---")
             for i, reg in enumerate(sesiones_hechas):
                 ct, cd = st.columns([5,1])
                 ct.success(f"✅ {reg['hora']} - {reg['detalle']}")
-                if cd.button("🗑️", key=f"del_{t.id}_{i}_{modo}"):
+                if cd.button("🗑️", key=f"del_{t.id}_{i}_{modo}_{clave_usuario}"):
                     registros_dia[t.id].pop(i)
                     if not registros_dia[t.id]: del registros_dia[t.id]
-                    guardar_datos(st.session_state.db)
+                    guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
 
-        # Registro
+        # REGISTRO
         if modo == "normal" and not completo and not bloqueado_por_fin:
             st.markdown("---")
             
-            # Selector de Momento
             opciones = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
             if t.id == "face_rejuv": opciones = ["🌞 Mañana", "⛅ Tarde", "🌙 Noche", "🏋️ Antes de Entrenar"]
             
-            seleccion = st.radio("Momento:", opciones, key=f"rad_{t.id}")
+            seleccion = st.radio("Momento:", opciones, key=f"rad_{t.id}_{clave_usuario}")
             
-            # VERIFICAR CONFLICTOS
+            # CONFLICTOS
             hay_conflicto, msg_conflicto = verificar_conflicto(t, seleccion, registros_dia)
             permitir_guardar = True
             
             if hay_conflicto:
                 st.error(msg_conflicto)
-                if not st.checkbox("Entiendo el riesgo, confirmar.", key=f"conf_{t.id}"):
+                if not st.checkbox("Entiendo el riesgo, confirmar.", key=f"conf_{t.id}_{clave_usuario}"):
                     permitir_guardar = False
             elif msg_conflicto:
                 st.warning(msg_conflicto)
@@ -356,34 +396,36 @@ def render_tratamiento(t, es_ciclo_activo, modo="normal"):
             c_reg, c_disc = st.columns([3, 1])
             with c_reg:
                 if permitir_guardar:
-                    if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}"):
+                    if st.button(f"Registrar Sesión {num_hechos+1}", key=f"btn_{t.id}_{clave_usuario}"):
                         ahora = datetime.datetime.now().strftime('%H:%M')
-                        if "historial" not in st.session_state.db: st.session_state.db["historial"] = {}
-                        if fecha_str not in st.session_state.db["historial"]: st.session_state.db["historial"][fecha_str] = {}
-                        if t.id not in st.session_state.db["historial"][fecha_str]: st.session_state.db["historial"][fecha_str][t.id] = []
+                        if "historial" not in db_usuario: db_usuario["historial"] = {}
+                        if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
+                        if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
                         
-                        st.session_state.db["historial"][fecha_str][t.id].append({"hora": ahora, "detalle": seleccion})
-                        guardar_datos(st.session_state.db)
+                        db_usuario["historial"][fecha_str][t.id].append({"hora": ahora, "detalle": seleccion})
+                        guardar_datos_completos(st.session_state.db_global)
                         st.rerun()
                 else:
-                    st.button("🚫 Bloqueado", disabled=True, key=f"blk_{t.id}")
+                    st.button("🚫 Bloqueado", disabled=True, key=f"blk_{t.id}_{clave_usuario}")
             
             with c_disc:
-                if st.button("🚫 Omitir", key=f"omit_{t.id}"):
-                    if "descartados" not in st.session_state.db: st.session_state.db["descartados"] = {}
-                    if fecha_str not in st.session_state.db["descartados"]: st.session_state.db["descartados"][fecha_str] = []
-                    if t.id not in st.session_state.db["descartados"][fecha_str]:
-                        st.session_state.db["descartados"][fecha_str].append(t.id)
-                        guardar_datos(st.session_state.db)
+                if st.button("🚫 Omitir", key=f"omit_{t.id}_{clave_usuario}"):
+                    if "descartados" not in db_usuario: db_usuario["descartados"] = {}
+                    if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
+                    
+                    if t.id not in db_usuario["descartados"][fecha_str]:
+                        db_usuario["descartados"][fecha_str].append(t.id)
+                        guardar_datos_completos(st.session_state.db_global)
                         st.rerun()
         
         if t.tipo == "LESION" and bloqueado_por_fin:
-            if st.button("🔄 Reiniciar Ciclo", key=f"rst_{t.id}"):
-                 st.session_state.db["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
-                 guardar_datos(st.session_state.db)
+            if st.button("🔄 Reiniciar Ciclo", key=f"rst_{t.id}_{clave_usuario}"):
+                 if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                 db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True}
+                 guardar_datos_completos(st.session_state.db_global)
                  st.rerun()
 
-# --- SECCIONES ---
+# --- SECCIONES VISUALES ---
 sections_order = [
     ("MORNING", "🌞 Rutinas de Mañana"),
     ("PRE", "🔥 Antes de Entrenar"),
@@ -393,7 +435,7 @@ sections_order = [
     ("FLEX", "⚖️ Flexible / Sin Asignar")
 ]
 
-st.subheader("📋 Plan del Día")
+st.subheader(f"📋 Plan del Día: {usuario_activo}")
 for k, t in sections_order:
     if grupos[k]:
         st.markdown(f"### {t}")
@@ -409,13 +451,14 @@ if grupos["DISCARDED"]:
 
 if grupos["HIDDEN"]:
     st.markdown("---")
-    with st.expander("📂 Inactivos"):
+    with st.expander("📂 Inactivos / No Prioritarios"):
         for tr, _ in grupos["HIDDEN"]:
             c1, c2 = st.columns([3, 1])
             c1.write(f"**{tr.nombre}**")
             if tr.tipo == "LESION":
-                if c2.button("Activar", key=f"act_{tr.id}"):
-                    st.session_state.db["ciclos_activos"][tr.id] = {"fecha_inicio": fecha_str, "activo": True}
-                    guardar_datos(st.session_state.db)
+                if c2.button("Activar", key=f"act_{tr.id}_{clave_usuario}"):
+                    if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                    db_usuario["ciclos_activos"][tr.id] = {"fecha_inicio": fecha_str, "activo": True}
+                    guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
             else: c2.caption("-")
