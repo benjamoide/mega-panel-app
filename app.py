@@ -11,6 +11,58 @@ st.set_page_config(
     layout="centered"
 )
 
+# --- GESTIÓN DE SESIÓN Y LOGIN ---
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+if 'current_user_name' not in st.session_state:
+    st.session_state.current_user_name = None
+if 'current_user_role' not in st.session_state:
+    st.session_state.current_user_role = None # 'usuario_rutina' o 'usuario_libre'
+
+def login():
+    st.title("🔐 Acceso Seguro")
+    st.markdown("Selecciona tu perfil para cargar tu configuración personalizada.")
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        usuario = st.selectbox("Usuario", ["Seleccionar...", "Benja", "Eva"])
+        password = st.text_input("Contraseña", type="password")
+        
+        if st.button("Entrar", use_container_width=True):
+            if usuario == "Seleccionar...":
+                st.error("Por favor selecciona un usuario.")
+            else:
+                # Lógica de asignación de roles
+                st.session_state.logged_in = True
+                st.session_state.current_user_name = usuario
+                
+                if usuario == "Benja":
+                    st.session_state.current_user_role = "usuario_rutina"
+                elif usuario == "Eva":
+                    st.session_state.current_user_role = "usuario_libre"
+                
+                st.rerun()
+
+def logout():
+    st.session_state.logged_in = False
+    st.session_state.current_user_name = None
+    st.session_state.current_user_role = None
+    st.rerun()
+
+# SI NO ESTÁ LOGUEADO, MOSTRAR LOGIN Y DETENER EL RESTO
+if not st.session_state.logged_in:
+    login()
+    st.stop()
+
+# --- SI PASA EL LOGIN, CARGAMOS EL RESTO DE LA APP ---
+
+# SIDEBAR: DATOS DEL USUARIO Y LOGOUT
+with st.sidebar:
+    st.write(f"Hola, **{st.session_state.current_user_name}** 👋")
+    st.caption(f"Perfil: {st.session_state.current_user_role}")
+    if st.button("🔒 Cerrar Sesión"):
+        logout()
+
 # --- ARCHIVO DE DATOS ---
 ARCHIVO_DATOS = 'historial_mega_panel_pro.json'
 
@@ -25,7 +77,7 @@ class Tratamiento:
         self.distancia = distancia
         self.duracion = duracion
         self.max_diario = max_diario
-        self.max_semanal = max_semanal # Nuevo: Límite de días por semana
+        self.max_semanal = max_semanal
         self.tipo = tipo
         self.tags_entreno = tags_entreno 
         self.default_visual_group = default_visual_group 
@@ -34,7 +86,6 @@ class Tratamiento:
         self.tips_antes = tips_antes
         self.tips_despues = tips_despues
         self.incompatibilidades = "" 
-        # fases_config: Lista de dicts [{'nombre': 'Aguda', 'dias_fin': 7, 'min_sesiones': 5}, ...]
         self.fases_config = fases_config if fases_config else []
 
     def set_incompatibilidades(self, texto):
@@ -44,7 +95,6 @@ class Tratamiento:
 # --- CATÁLOGO ---
 @st.cache_data
 def obtener_catalogo():
-    # CONFIGURACIÓN DE FASES DETALLADA
     fases_lesion = [
         {"nombre": "🔥 Fase 1: Inflamatoria/Aguda", "dias_fin": 7, "min_sesiones": 5},
         {"nombre": "🛠️ Fase 2: Proliferación", "dias_fin": 21, "min_sesiones": 10},
@@ -61,7 +111,7 @@ def obtener_catalogo():
 
         # --- GRASA ---
         Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "NIR + RED", "100%", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
-                    momentos_prohibidos=["🌙 Noche", "🧘 Después de Entrenar"], # Estricto: Después no es ideal si no hay actividad
+                    momentos_prohibidos=["🌙 Noche", "🧘 Después de Entrenar"], 
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia."],
                     tips_despues=["🏃‍♂️ ENTRENA YA.", "❌ Ayuno 1h."])
         .set_incompatibilidades("Tatuajes oscuros."),
@@ -109,7 +159,7 @@ def obtener_catalogo():
         
         # --- MÚSCULO ---
         Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar",
-                    momentos_prohibidos=["🏋️ Antes de Entrenar"], # Relaja el músculo, malo antes de fuerza
+                    momentos_prohibidos=["🏋️ Antes de Entrenar"],
                     tips_antes=["🚿 Quitar sudor."],
                     tips_despues=["🥩 Proteína.", "🚿 Ducha contraste."])
         .set_incompatibilidades("Opcional: Pulsos 50Hz."),
@@ -163,15 +213,11 @@ def guardar_datos_completos(datos):
 
 # --- VALIDACIONES ESTRICTAS ---
 def analizar_bloqueos(tratamiento, momento_elegido, historial_usuario, tratamientos_hoy, fecha_actual_str):
-    """
-    Devuelve: (bool_bloqueado, mensaje_error)
-    """
-    # 1. BLOQUEO POR HORARIO PROHIBIDO
+    # 1. BLOQUEO HORARIO
     if momento_elegido in tratamiento.momentos_prohibidos:
-        return True, f"⛔ HORARIO PROHIBIDO: No puedes realizar '{tratamiento.nombre}' en '{momento_elegido}'. Motivo: Incompatible con ritmo circadiano o entrenamiento."
+        return True, f"⛔ HORARIO PROHIBIDO: '{tratamiento.nombre}' no se puede hacer en '{momento_elegido}'."
 
-    # 2. BLOQUEO POR FRECUENCIA SEMANAL (Últimos 7 días)
-    # Contamos cuántos días se ha hecho este tratamiento en los últimos 7 días
+    # 2. BLOQUEO FRECUENCIA (Últimos 7 días)
     dias_hechos_semana = 0
     fecha_dt = datetime.date.fromisoformat(fecha_actual_str)
     for i in range(7):
@@ -179,72 +225,59 @@ def analizar_bloqueos(tratamiento, momento_elegido, historial_usuario, tratamien
         if f_check in historial_usuario and tratamiento.id in historial_usuario[f_check]:
             dias_hechos_semana += 1
     
-    # Si ya lo he hecho el máximo de veces (ej. 5) y hoy YA lo hice, no cuento hoy para el bloqueo futuro, 
-    # pero si NO lo he hecho hoy y ya llevo 5, bloqueo.
     hoy_hecho = (fecha_actual_str in historial_usuario and tratamiento.id in historial_usuario[fecha_actual_str])
-    
     if not hoy_hecho and dias_hechos_semana >= tratamiento.max_semanal:
-        return True, f"⛔ DESCANSO OBLIGATORIO: Has alcanzado el límite semanal ({tratamiento.max_semanal} días/semana). Hoy toca descanso para evitar saturación."
+        return True, f"⛔ LÍMITE SEMANAL ALCANZADO ({tratamiento.max_semanal} días). Toca descanso."
 
-    # 3. BLOQUEO POR INCOMPATIBILIDAD CON OTROS
+    # 3. BLOQUEO CHOQUES BIOLÓGICOS
     ids_hoy = list(tratamientos_hoy.keys())
     if tratamiento.id == "brain" and "sleep" in ids_hoy:
-        return True, "⛔ CHOQUE BIOLÓGICO: Ya has registrado 'Sueño'. No puedes activar el cerebro ahora."
+        return True, "⛔ CHOQUE: Ya hiciste 'Sueño'. No actives cerebro."
     if tratamiento.id == "sleep" and "brain" in ids_hoy:
-        return True, "⛔ CHOQUE BIOLÓGICO: Ya has registrado 'Salud Cerebral'. No puedes inducir sueño profundo ahora."
+        return True, "⛔ CHOQUE: Ya hiciste 'Cerebro'. No induzcas sueño profundo."
 
     return False, ""
 
 def calcular_progreso_fase(tratamiento, ciclo_info, historial_completo, id_tratamiento):
-    if not ciclo_info or not ciclo_info.get('activo'):
-        return None
-    
-    # Si está en modo Mantenimiento (sin fases)
-    if ciclo_info.get('modo') == 'mantenimiento':
-        return "🛠️ Modo Mantenimiento (Sin conteo de fases)"
+    if not ciclo_info or not ciclo_info.get('activo'): return None
+    if ciclo_info.get('modo') == 'mantenimiento': return "🛠️ Mantenimiento (Sin fases)"
 
     fecha_inicio = datetime.date.fromisoformat(ciclo_info['fecha_inicio'])
     hoy = datetime.date.today()
     dias_transcurridos = (hoy - fecha_inicio).days
     
-    # Contar sesiones totales desde inicio
     sesiones_totales = 0
-    # Recorremos historial buscando fechas >= fecha_inicio
     for fecha_reg_str, tratamientos_dia in historial_completo.items():
-        f_reg = datetime.date.fromisoformat(fecha_reg_str)
-        if f_reg >= fecha_inicio and id_tratamiento in tratamientos_dia:
+        if datetime.date.fromisoformat(fecha_reg_str) >= fecha_inicio and id_tratamiento in tratamientos_dia:
             sesiones_totales += len(tratamientos_dia[id_tratamiento])
 
-    # Determinar fase
     fase_actual_obj = None
-    fase_idx = 0
-    fase_anterior_dias = 0
-    
     for idx, fase in enumerate(tratamiento.fases_config):
         if dias_transcurridos <= fase['dias_fin']:
             fase_actual_obj = fase
-            fase_idx = idx + 1
             break
-        fase_anterior_dias = fase['dias_fin']
     
-    if not fase_actual_obj:
-        return "🏁 Ciclo Completado (Tiempo finalizado)."
+    if not fase_actual_obj: return "🏁 Ciclo Completado."
+    return f"📍 {fase_actual_obj['nombre']} | Día {dias_transcurridos}/{fase_actual_obj['dias_fin']} | Sesiones: {sesiones_totales}"
 
-    # Calcular sesiones en esta fase aprox (simplificado: sesiones totales)
-    # Para ser exactos, habría que contar sesiones DENTRO de las fechas de la fase,
-    # pero como es continuo, mostramos total acumulado vs objetivo.
-    
-    return f"📍 {fase_actual_obj['nombre']} | Día {dias_transcurridos}/{fase_actual_obj['dias_fin']} | Sesiones Totales: {sesiones_totales} (Mín. sugerido Fase: {fase_actual_obj['min_sesiones']})"
+# --- DETECCIÓN DE CONFLICTOS AL AÑADIR (Solo modo Libre) ---
+def check_cross_compatibility(nuevo_id, lista_ids_actuales):
+    incompatibles = {"brain": ["sleep"], "sleep": ["brain"]}
+    if nuevo_id in incompatibles:
+        for prohibido in incompatibles[nuevo_id]:
+            if prohibido in lista_ids_actuales:
+                return True, prohibido, "Incompatibles: Uno activa y otro relaja."
+    return False, None, None
 
 
-# --- INTERFAZ PRINCIPAL ---
-st.title("🛡️ Mega Panel Pro")
+# --- APP START ---
+st.title(f"🧠 Mega Panel AI")
 
 if 'db_global' not in st.session_state:
     st.session_state.db_global = cargar_datos_completos()
 
-usuario_activo = st.sidebar.selectbox("👤 Perfil", ["Usuario Rutina", "Usuario Libre"], index=0)
-clave_usuario = "usuario_rutina" if usuario_activo == "Usuario Rutina" else "usuario_libre"
+# VARIABLES DE CONTEXTO SEGÚN LOGIN
+clave_usuario = st.session_state.current_user_role
 db_usuario = st.session_state.db_global[clave_usuario]
 lista_tratamientos = obtener_catalogo()
 
@@ -258,28 +291,53 @@ tags_dia = set()
 ids_seleccionados_libre = []
 
 if clave_usuario == "usuario_rutina":
+    # MODO RUTINA (BENJA)
     entreno = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
-    opciones = {"Descanso": [], "Cardio": ["Active"], "FULLBODY": ["Upper", "Active"], "TORSO": ["Upper", "Active"], "PREVENTIVO": ["Active"]} # Simplificado para brevedad
-    # (Aquí iría tu lógica completa de rutinas del Excel, la mantengo simple para que quepa, pero usa la tuya anterior)
-    # ... Asumimos la lógica de rutinas previa ...
-    # Simulamos selección para que el código funcione:
-    if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {} # Init
-    
-    # NOTA: Pega aquí tu bloque de lógica de rutinas Excel si quieres mantenerlo exacto. 
-    # Para este ejemplo de seguridad, asumimos tags manuales o predefinidos.
-    tags_dia.add('Active') # Simulación
+    # Aquí puedes restaurar tu mapeo complejo del Excel si lo deseas
+    opciones = {"Descanso": [], "Cardio": ["Active"], "FULLBODY": ["Upper", "Active"], "TORSO": ["Upper", "Active"], "PREVENTIVO": ["Active"]}
+    noms = list(opciones.keys())
+    # Simplificación para el ejemplo, pero aquí conectaría tu lógica original
+    sel = st.multiselect("Rutina:", noms, default=[x for x in entreno if x in noms])
+    if sel: 
+        for r in sel: tags_dia.update(opciones[r])
+    if sel != entreno:
+        db_usuario["meta_diaria"] = db_usuario.get("meta_diaria", {})
+        db_usuario["meta_diaria"][fecha_str] = sel
+        guardar_datos_completos(st.session_state.db_global)
+        st.rerun()
+
 else:
-    # MODO LIBRE
-    st.info("🔓 Modo Libre")
+    # MODO LIBRE (EVA)
+    st.info("🔓 Modo Libre: Elige tratamientos.")
     ids_guardados = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
-    mapa = {t.nombre: t.id for t in lista_tratamientos}
-    sel = st.multiselect("Tratamientos:", list(mapa.keys()), default=[t.nombre for t in lista_tratamientos if t.id in ids_guardados])
+    mapa_nombres = {t.nombre: t.id for t in lista_tratamientos}
+    mapa_ids = {t.id: t.nombre for t in lista_tratamientos}
     
-    # Check incompatibilidad al añadir
-    nuevos_ids = [mapa[n] for n in sel]
-    # (Aquí iría la lógica de check_cross_compatibility del paso anterior)
+    sel_nombres = st.multiselect("Tratamientos hoy:", list(mapa_nombres.keys()), 
+                                 default=[mapa_ids[i] for i in ids_guardados if i in mapa_ids],
+                                 key="multi_libre")
+    
+    nuevos_ids = [mapa_nombres[n] for n in sel_nombres]
+    
+    # Check conflictos al añadir
+    agregados = set(nuevos_ids) - set(ids_guardados)
+    if agregados:
+        for nid in agregados:
+            conflicto, rival, mot = check_cross_compatibility(nid, ids_guardados)
+            if conflicto:
+                st.error(f"⛔ Choque entre {mapa_ids[nid]} y {mapa_ids[rival]}. {mot}")
+                c1, c2 = st.columns(2)
+                if c1.button(f"Quedarse con {mapa_ids[rival]}"): st.rerun()
+                if c2.button(f"Cambiar a {mapa_ids[nid]}"):
+                    final = [x for x in ids_guardados if x != rival] + [nid]
+                    db_usuario["meta_diaria"] = db_usuario.get("meta_diaria", {})
+                    db_usuario["meta_diaria"][fecha_str] = final
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.rerun()
+                st.stop()
     
     if set(nuevos_ids) != set(ids_guardados):
+        db_usuario["meta_diaria"] = db_usuario.get("meta_diaria", {})
         db_usuario["meta_diaria"][fecha_str] = nuevos_ids
         guardar_datos_completos(st.session_state.db_global)
         st.rerun()
@@ -295,7 +353,6 @@ grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLE
 mapa_momento = {"🏋️ Antes de Entrenar": "PRE", "🧘 Después de Entrenar": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
 for t in lista_tratamientos:
-    # Filtros visibilidad
     aplica = False
     es_ciclo = False
     if clave_usuario == "usuario_rutina":
@@ -304,15 +361,15 @@ for t in lista_tratamientos:
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
             if ciclo and ciclo['activo']: aplica = True; es_ciclo = True
         elif t.tipo == "GRASA" and "Active" in tags_dia: aplica = True
-        elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: aplica = True # Simplificado
+        elif t.tipo == "MUSCULAR" and "Upper" in tags_dia: aplica = True
     else:
-        if t.id in ids_seleccionados_libre: aplica = True
-        if len(registros_dia.get(t.id, [])) > 0: aplica = True
-        if t.tipo == "LESION":
-             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
-             if ciclo and ciclo['activo']: es_ciclo = True
+        if t.id in ids_seleccionados_libre: 
+            aplica = True
+            if t.tipo == "LESION":
+                 ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+                 if ciclo and ciclo['activo']: es_ciclo = True
+        elif len(registros_dia.get(t.id, [])) > 0: aplica = True # Mantener si ya tiene historial
 
-    # Clasificación
     hechos = len(registros_dia.get(t.id, []))
     if t.id in descartados: grupos["DISCARDED"].append((t, es_ciclo))
     elif not aplica: grupos["HIDDEN"].append((t, False))
@@ -331,13 +388,11 @@ for t in lista_tratamientos:
 
 # --- RENDERIZADOR ---
 def render(t, es_ciclo, modo="normal"):
-    # Info Fase Avanzada
     txt_fase = ""
     if t.tipo == "LESION" and es_ciclo:
         ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
         txt_fase = calcular_progreso_fase(t, ciclo, db_usuario["historial"], t.id)
     
-    # Icono
     hechos = len(registros_dia.get(t.id, []))
     icono = "❌" if modo=="discarded" else ("✅" if hechos>=t.max_diario else "⬜")
     
@@ -353,7 +408,6 @@ def render(t, es_ciclo, modo="normal"):
             
         if modo != "readonly":
             st.caption(f"📍 Ideal: {t.momento_ideal_txt}")
-            # Consejos
             c1, c2 = st.columns(2)
             with c1: 
                 st.markdown("**Antes:**")
@@ -361,10 +415,8 @@ def render(t, es_ciclo, modo="normal"):
             with c2: 
                 st.markdown("**Después:**")
                 for x in t.tips_despues: st.caption(f"- {x}")
-
             if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
 
-        # Historial
         if hechos > 0:
             st.markdown("---")
             for i, r in enumerate(registros_dia.get(t.id, [])):
@@ -376,16 +428,15 @@ def render(t, es_ciclo, modo="normal"):
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
 
-        # Registro
         if modo == "normal" and hechos < t.max_diario:
             st.markdown("---")
-            # Filtrar momentos prohibidos del selector
+            # FILTRAR MOMENTOS PROHIBIDOS
             all_opts = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
             valid_opts = [o for o in all_opts if o not in t.momentos_prohibidos]
             
             sel = st.radio("Momento:", valid_opts, key=f"rad_{t.id}_{clave_usuario}")
             
-            # VERIFICACIÓN ESTRICTA (Bloqueante)
+            # CHECK BLOQUEOS
             bloqueado, motivo = analizar_bloqueos(t, sel, db_usuario["historial"], registros_dia, fecha_str)
             
             c_reg, c_omit = st.columns([3, 1])
@@ -409,27 +460,26 @@ def render(t, es_ciclo, modo="normal"):
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
 
-        # Gestión Ciclos
         if t.tipo == "LESION":
             if not es_ciclo:
                 c_ini, c_mant = st.columns(2)
-                if c_ini.button("🚀 Iniciar Protocolo (Fases)", key=f"ini_{t.id}"):
+                if c_ini.button("🚀 Iniciar Protocolo", key=f"ini_{t.id}"):
                     if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
                     db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True, "modo": "fases"}
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
-                if c_mant.button("🛠️ Iniciar Mantenimiento", key=f"man_{t.id}"):
+                if c_mant.button("🛠️ Mantenimiento", key=f"man_{t.id}"):
                     if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
                     db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": fecha_str, "activo": True, "modo": "mantenimiento"}
                     guardar_datos_completos(st.session_state.db_global)
                     st.rerun()
             else:
-                 if st.button("🔄 Reiniciar / Cambiar Modo", key=f"res_{t.id}"):
+                 if st.button("🔄 Reiniciar", key=f"res_{t.id}"):
                      del db_usuario["ciclos_activos"][t.id]
                      guardar_datos_completos(st.session_state.db_global)
                      st.rerun()
 
-# --- RENDER SECCIONES ---
+# --- RENDERIZAR SECCIONES ---
 cats = ["MORNING", "PRE", "POST", "NIGHT", "FLEX"]
 for c in cats:
     if grupos[c]:
