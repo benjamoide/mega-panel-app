@@ -82,7 +82,22 @@ def obtener_catalogo():
                     tips_despues=["🧴 Serum hidratante.", "❌ No sol directo."])
         .set_incompatibilidades("Melasma, Fotosensibilidad."),
 
-        # --- LESIONES: EPICONDILITIS (CODO) - NUEVO ---
+        # --- LESIONES: PIE (NUEVO) ---
+        Tratamiento("foot_d", "Pie Derecho (Plantar/Lateral)", "Planta/Fascia/Lat", "NIR + RED", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
+                    tips_antes=["🦶 Piel limpia.", "❌ Quitar calcetín."],
+                    tips_despues=["🎾 Rodar pelota suave (fascia).", "❌ Evitar saltos/impacto 1h.", "🧊 Hielo si dolor agudo."],
+                    fases_config=fases_lesion)
+        .set_incompatibilidades("Implantes metálicos."),
+
+        Tratamiento("foot_i", "Pie Izquierdo (Plantar/Lateral)", "Planta/Fascia/Lat", "NIR + RED", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
+                    tips_antes=["🦶 Piel limpia.", "❌ Quitar calcetín."],
+                    tips_despues=["🎾 Rodar pelota suave.", "❌ Evitar saltos.", "🧊 Hielo si dolor."],
+                    fases_config=fases_lesion)
+        .set_incompatibilidades("Implantes metálicos."),
+
+        # --- LESIONES: EPICONDILITIS (CODO) ---
         Tratamiento("epi_d", "Epicondilitis Dcha (Codo Tenista)", "Codo Lateral/Medial", "NIR + RED", "100%", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
                     momentos_prohibidos=[],
                     tips_antes=["🧴 Piel limpia.", "❌ Quitar cincha/codera."],
@@ -141,6 +156,20 @@ def obtener_catalogo():
                     tips_despues=["🦶 Movilidad.", "🧊 Hielo OK después."],
                     fases_config=fases_lesion)
         .set_incompatibilidades("Implantes metálicos."),
+        
+        Tratamiento("codo_d", "Codo Derecho (Lesión)", "Codo Dcho", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
+                    tips_antes=["🧴 Piel limpia."],
+                    tips_despues=["🔄 Estiramiento suave.", "❌ No cargar."],
+                    fases_config=fases_lesion)
+        .set_incompatibilidades("No infiltración <5 días."),
+        
+        Tratamiento("codo_i", "Codo Izquierdo (Lesión)", "Codo Izq", "NIR + RED", "100%", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible",
+                    momentos_prohibidos=[],
+                    tips_antes=["🧴 Piel limpia."],
+                    tips_despues=["🔄 Estiramiento suave.", "❌ No cargar."],
+                    fases_config=fases_lesion)
+        .set_incompatibilidades("No infiltración <5 días."),
         
         # --- MÚSCULO (RECUPERACIÓN) ---
         Tratamiento("arm_d", "Antebrazo Derecho (Recuperación)", "Antebrazo Dcho", "NIR + RED", "100%", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Después de Entrenar",
@@ -452,7 +481,6 @@ elif menu_navegacion == "📅 Panel Diario":
 
             if modo=="normal" and hechos < t.max_diario:
                 st.markdown("---")
-                # Filtro de horas prohibidas
                 opts = ["🏋️ Antes de Entrenar", "🧘 Después de Entrenar", "🌞 Mañana", "⛅ Tarde", "🌙 Noche"]
                 valid = [o for o in opts if o not in t.momentos_prohibidos]
                 
@@ -481,7 +509,7 @@ elif menu_navegacion == "📅 Panel Diario":
                         guardar_datos_completos(st.session_state.db_global)
                         st.rerun()
 
-        # Botón Fast-Start para Lesiones
+        # Botón Fast-Start
         if t.tipo == "LESION":
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
             if not (ciclo and ciclo.get('activo')):
