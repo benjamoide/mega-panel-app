@@ -62,7 +62,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- CATÁLOGO ---
+# --- CATÁLOGO CIENTÍFICO ---
 def obtener_catalogo():
     fases_lesion = [
         {"nombre": "🔥 Fase 1: Inflamatoria/Aguda", "dias_fin": 7, "min_sesiones": 5},
@@ -77,7 +77,7 @@ def obtener_catalogo():
                     tips_antes=["💧 Beber agua.", "🧴 Piel limpia.", "👖 Ropa mínima."],
                     tips_despues=["🏃‍♂️ ACTIVIDAD YA: Sentadillas/Caminar.", "❌ NO sentarse en 45 min.", "🚿 Ducha post-ejercicio."],
                     incompatible_with=["fat_front", "fat_d", "fat_i"])
-        .set_incompatibilidades("Tatuajes oscuros (absorben calor). Embarazo."),
+        .set_incompatibilidades("Tatuajes oscuros. Embarazo."),
 
         Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar",
                     momentos_prohibidos=["🌙 Noche", "🚿 Post-Entreno / Mañana"],
@@ -276,7 +276,35 @@ def obtener_rutina_y_tags(fecha_obj, db_global, db_usuario):
     tags_calculados.add('All')
     return rutina_nombres, tags_calculados, list(config_tags.keys()), es_manual
 
-# --- HELPERS ---
+# --- FUNCIÓN DE IMPORTACIÓN DE EXCEL REAL (RESTAURADA) ---
+def procesar_excel_rutina(uploaded_file):
+    try:
+        # Leer hoja Semana
+        df_semana = pd.read_excel(uploaded_file, sheet_name='Semana')
+        mapa_dias = {"lunes": "0", "martes": "1", "miércoles": "2", "miercoles": "2", "jueves": "3", "viernes": "4", "sábado": "5", "sabado": "5", "domingo": "6"}
+        nueva_semana = {}
+        for _, row in df_semana.iterrows():
+            d = str(row.iloc[0]).lower().strip()
+            r = str(row.iloc[1]).strip()
+            if d in mapa_dias:
+                nueva_semana[mapa_dias[d]] = [x.strip() for x in r.split(',')]
+
+        # Leer hoja Tags
+        df_tags = pd.read_excel(uploaded_file, sheet_name='Tags')
+        nuevos_tags = {}
+        for _, row in df_tags.iterrows():
+            r = str(row.iloc[0]).strip()
+            t = str(row.iloc[1])
+            if pd.isna(t) or str(t).lower() == 'nan' or not str(t).strip():
+                nuevos_tags[r] = []
+            else:
+                nuevos_tags[r] = [x.strip() for x in str(t).split(',')]
+        
+        return {"semana": nueva_semana, "tags": nuevos_tags}
+    except Exception as e:
+        return None
+
+# --- HELPERS VISUALES ---
 def mostrar_definiciones_ondas():
     with st.expander("ℹ️ Guía Técnica (nm/Hz)"):
         st.markdown("""
@@ -297,10 +325,8 @@ def mostrar_ficha_tecnica(t, lista_completa):
     with c2:
         st.markdown(f"**Hz:** {t.herzios}")
         st.markdown(f"**Tiempo:** {t.duracion} min ({t.distancia})")
-    
     st.markdown("---")
     st.caption("🚫 **Restricciones y Consejos:**")
-    
     if t.momentos_prohibidos: st.write(f"⏰ **No usar:** {', '.join(t.momentos_prohibidos)}")
     reqs = [tag for tag in t.tags_entreno if tag != 'All']
     if reqs: st.write(f"🏋️ **Requiere:** {', '.join(reqs)}")
@@ -309,7 +335,6 @@ def mostrar_ficha_tecnica(t, lista_completa):
         nombres = [mapa.get(x, x) for x in t.incompatible_with]
         st.write(f"⚔️ **Incompatible con:** {', '.join(nombres)}")
     if t.incompatibilidades: st.warning(f"⚠️ {t.incompatibilidades}")
-        
     c_ant, c_des = st.columns(2)
     with c_ant:
         st.markdown("**Antes:**")
@@ -338,7 +363,8 @@ def analizar_bloqueos(tratamiento, momento, historial, registros_hoy, fecha_str,
 def renderizar_dia(fecha_obj):
     fecha_str = fecha_obj.isoformat()
     rutina_hoy_nombres, tags_dia, todas_rutinas, es_manual = obtener_rutina_y_tags(fecha_obj, st.session_state.db_global, db_usuario)
-    
+    ids_seleccionados_libre = []
+
     if clave_usuario == "usuario_rutina":
         defaults_seguros = [x for x in rutina_hoy_nombres if x in todas_rutinas]
         key_sel = f"sel_rut_{fecha_str}"
@@ -354,6 +380,7 @@ def renderizar_dia(fecha_obj):
         tags_dia.add('All')
     else:
         ids_guardados = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
+        ids_seleccionados_libre = ids_guardados
         mapa_n = {t.nombre: t.id for t in lista_tratamientos}
         mapa_i = {t.id: t.nombre for t in lista_tratamientos}
         key_multi = f"multi_lib_{fecha_str}"
@@ -501,11 +528,14 @@ with st.sidebar:
         with st.expander("⚙️ Importar Excel"):
             uploaded_file = st.file_uploader("Subir .xlsx", type=['xlsx'])
             if uploaded_file and st.button("Procesar"):
-                try:
-                    df_sem = pd.read_excel(uploaded_file, sheet_name='Semana')
-                    df_tag = pd.read_excel(uploaded_file, sheet_name='Tags')
-                    st.success("Simulado")
-                except: st.error("Error Excel")
+                nueva_conf = procesar_excel_rutina(uploaded_file)
+                if nueva_conf:
+                    st.session_state.db_global["configuracion_rutina"] = nueva_conf
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Rutina Importada Correctamente")
+                    st.rerun()
+                else:
+                    st.error("Error al leer el archivo. Verifica el formato.")
     st.divider()
     mostrar_definiciones_ondas()
     st.divider()
@@ -602,12 +632,8 @@ elif menu_navegacion == "🚑 Clínica":
 
 elif menu_navegacion == "📊 Historial":
     st.title("📊 Historial y Progreso")
-    
-    # Selector de Vista Principal
     vista_historial = st.radio("Vista:", ["Semana", "Mes", "Año"], horizontal=True)
     historial = db_usuario.get("historial", {})
-    
-    # Preparar tratamientos
     mapa_ids = {t.id: t.nombre for t in lista_tratamientos}
     tratamientos_usados = set()
     for f, regs in historial.items():
@@ -619,7 +645,6 @@ elif menu_navegacion == "📊 Historial":
         start_week = d_ref - timedelta(days=d_ref.weekday())
         days_week = [start_week + timedelta(days=i) for i in range(7)]
         headers = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-        
         data = []
         for tid in tratamientos_usados:
             row = {"Tratamiento": mapa_ids.get(tid, tid), "Total": 0}
@@ -630,24 +655,20 @@ elif menu_navegacion == "📊 Historial":
                 row[headers[i]] = "✅" * count if count > 0 else ""
                 total_sem += count
             row["Total"] = total_sem
-            if total_sem > 0: data.append(row) # Solo mostrar si hay actividad
-            
+            if total_sem > 0: data.append(row)
         if data: st.dataframe(pd.DataFrame(data).set_index("Tratamiento"), use_container_width=True)
         else: st.info("No hay datos en esta semana.")
 
     elif vista_historial == "Mes":
         st.subheader("📆 Vista Mensual")
-        # Selector mes/año (simplificado con date_input)
         d_ref = st.date_input("Seleccionar Mes (día cualquiera):", datetime.date.today())
         mes_str = d_ref.strftime("%Y-%m")
-        
         counts = {}
         for f_str, regs in historial.items():
             if f_str.startswith(mes_str):
                 for tid, sessions in regs.items():
                     nom = mapa_ids.get(tid, tid)
                     counts[nom] = counts.get(nom, 0) + len(sessions)
-        
         if counts:
             df = pd.DataFrame(list(counts.items()), columns=["Tratamiento", "Sesiones"]).sort_values("Sesiones", ascending=False)
             c1, c2 = st.columns([1, 2])
@@ -659,10 +680,8 @@ elif menu_navegacion == "📊 Historial":
         st.subheader("📈 Vista Anual")
         year_sel = st.number_input("Año:", value=datetime.date.today().year, step=1)
         year_str = str(year_sel)
-        
         months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
         data_anual = []
-        
         for tid in tratamientos_usados:
             row = {"Tratamiento": mapa_ids.get(tid, tid)}
             total_anual = 0
@@ -676,7 +695,6 @@ elif menu_navegacion == "📊 Historial":
                 total_anual += count_mes
             row["Total"] = total_anual
             if total_anual > 0: data_anual.append(row)
-            
         if data_anual:
             st.dataframe(pd.DataFrame(data_anual).set_index("Tratamiento"), use_container_width=True)
         else: st.info("No hay datos en este año.")
