@@ -228,31 +228,30 @@ def obtener_catalogo():
                 catalogo.append(t)
 
     # 2. Generar Grasa (CON NOMBRES ORDENADOS)
-    # [("Glúteos", "glutes"), ("Abdomen", "front"), ("Flanco D", "d"), ("Flanco I", "i")]
     specs = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
     
     # Grasa Abdomen Frontal
-    catalogo.append(Tratamiento("fat_front", "Grasa Abdomen (Frontal)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_glutes", "fat_d", "fat_i"]))
+    catalogo.append(Tratamiento("fat_front", "Grasa Abdomen (Frontal)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
     
     # Grasa Flanco D
-    catalogo.append(Tratamiento("fat_d", "Grasa Abdomen (Flanco D)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_glutes", "fat_front", "fat_i"]))
+    catalogo.append(Tratamiento("fat_d", "Grasa Abdomen (Flanco D)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
     
     # Grasa Flanco I
-    catalogo.append(Tratamiento("fat_i", "Grasa Abdomen (Flanco I)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_glutes", "fat_front", "fat_d"]))
+    catalogo.append(Tratamiento("fat_i", "Grasa Abdomen (Flanco I)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
     
     # Grasa Glúteos
-    catalogo.append(Tratamiento("fat_glutes", "Grasa Glúteos", "Glúteos", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", ["Active", "Lower"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_front", "fat_d", "fat_i"]))
+    catalogo.append(Tratamiento("fat_glutes", "Grasa Glúteos", "Glúteos", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", ["Active", "Lower"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
     
-    # Estética / Facial
+    # 3. Facial
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
     catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], "100%", f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f["momento_txt"], ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"]))
     
-    # Permanentes
+    # 4. Permanentes
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
         id_t = k.lower()
         catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], "100%", v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v["momento_txt"], [], v["tips_ant"], v["tips_des"]))
 
-    # Musculo Recuperación (Legacy)
+    # 5. Musculo Recuperación (Legacy manual add)
     for lado, code in [("Dcho", "d"), ("Izq", "i")]:
         catalogo.append(Tratamiento(f"arm_{code}", f"Antebrazo {lado} (Recup)", "Antebrazo", "660+850", "100%", "10Hz", "15cm", 10, 1, 7, "MUSCULAR", ["Upper"], "POST", "Post-Entreno", ["🏋️ Entrenamiento (Pre)"], ["Quitar sudor"], ["Proteína"]))
 
@@ -364,18 +363,18 @@ def mostrar_ficha_tecnica(t, lista_completa):
 
 def analizar_bloqueos(tratamiento, momento, historial, registros_hoy, fecha_str, tags_dia, clave_usuario):
     if clave_usuario == "usuario_rutina":
-        if 'Active' in tratamiento.tags_entreno and 'Active' not in tags_dia: return True, "⚠️ FALTA ACTIVIDAD"
-        if 'Upper' in tratamiento.tags_entreno and 'Upper' not in tags_dia: return True, "⚠️ FALTA TORSO"
-    if momento in tratamiento.momentos_prohibidos: return True, "⛔ HORARIO PROHIBIDO"
+        if 'Active' in tratamiento.tags_entreno and 'Active' not in tags_dia: return True, "⚠️ FALTA ACTIVIDAD: Requiere ejercicio (Pesas o Cardio)."
+        if 'Upper' in tratamiento.tags_entreno and 'Upper' not in tags_dia: return True, "⚠️ SINERGIA BAJA: Requiere torso."
+    if momento in tratamiento.momentos_prohibidos: return True, "⛔ HORARIO PROHIBIDO."
     dias_hechos = 0
     fecha_dt = datetime.date.fromisoformat(fecha_str)
     for i in range(7):
-        f = (fecha_dt - timedelta(days=i)).isoformat()
-        if f in historial and tratamiento.id in historial[f]: dias_hechos += 1
+        f_check = (fecha_dt - timedelta(days=i)).isoformat()
+        if f_check in historial and tratamiento.id in historial[f_check]: dias_hechos += 1
     hecho_hoy = (fecha_str in historial and tratamiento.id in historial[fecha_str])
-    if not hecho_hoy and dias_hechos >= tratamiento.max_semanal: return True, "⛔ MAX SEMANAL"
+    if not hecho_hoy and dias_hechos >= tratamiento.max_semanal: return True, "⛔ LÍMITE SEMANAL."
     for inc in tratamiento.incompatible_with:
-        if inc in registros_hoy: return True, "⛔ INCOMPATIBLE"
+        if inc in registros_hoy: return True, "⛔ INCOMPATIBLE."
     return False, ""
 
 def obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos):
@@ -464,21 +463,17 @@ def renderizar_dia(fecha_obj):
         with st.expander("➕ Añadir Tratamiento Adicional (Compatible)"):
             compatibles = []
             
-            # IDs que ya están activos, planificados o hechos hoy (para no mostrar en lista)
+            # FILTRO: IDs que ya están activos, planificados o hechos hoy
             ids_existentes = set()
-            # 1. Clinica activa
             for t in lista_tratamientos:
                 c = db_usuario.get("ciclos_activos", {}).get(t.id)
                 if c and c.get('activo') and c.get('estado') == 'activo': ids_existentes.add(t.id)
-            # 2. Planificados ad-hoc
             ids_existentes.update(adhoc_hoy.keys())
-            # 3. Registrados
             ids_existentes.update(registros_dia.keys())
 
             for t in lista_tratamientos:
                 if t.id in ids_existentes: continue # NO MOSTRAR DUPLICADOS
                 
-                # Check Tags
                 compatible_tag = False
                 if 'All' in t.tags_entreno or any(tag in tags_dia for tag in t.tags_entreno): compatible_tag = True
                 
@@ -490,9 +485,7 @@ def renderizar_dia(fecha_obj):
                         if t_pres and t.id in t_pres.incompatible_with: choca = True
                     if not choca: compatibles.append(t)
             
-            # ORDENAR ALFABÉTICAMENTE
             compatibles.sort(key=lambda x: x.nombre)
-            
             mapa_comp = {t.nombre: t for t in compatibles}
             sel_add = st.selectbox("Elegir:", ["--"] + list(mapa_comp.keys()), key=f"sad_{fecha_str}")
             if sel_add != "--":
@@ -502,11 +495,17 @@ def renderizar_dia(fecha_obj):
                 valid = [o for o in opts if o not in t_obj.momentos_prohibidos]
                 mom = st.selectbox("Momento:", valid, key=f"mad_{fecha_str}")
                 
+                # TRIPLE VALIDACIÓN
                 bloq, mot = analizar_bloqueos(t_obj, mom, db_usuario["historial"], {}, fecha_str, tags_dia, clave_usuario)
+                
+                # Verificar conflictos cruzados al momento
+                for pid in presentes_hoy:
+                    if pid in t_obj.incompatible_with: bloq=True; mot=f"Incompatible con activo {pid}"
+                
                 if bloq: st.error(mot)
                 else:
                     c_pl, c_reg = st.columns(2)
-                    if c_pl.button("📅 Planificar", key=f"bad_{fecha_str}"):
+                    if c_pl.button("📅 Planificar", key=f"pl_{fecha_str}"):
                         if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
                         if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
                         db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
@@ -550,11 +549,9 @@ def renderizar_dia(fecha_obj):
                     if pref and pref in valid_opts: momento_a_guardar = pref
                     elif valid_opts: momento_a_guardar = valid_opts[0]
             
-            # BYPASS TAGS PARA MANUALES
-            bloq, _ = analizar_bloqueos(t, momento_a_guardar, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
-            if origen in ["adhoc", "clinica"]: bloq = False 
-            
-            if not bloq and momento_a_guardar:
+            # Al registrar masivamente, confiamos en que si el usuario lo añadió manualmente o es clínico, es válido.
+            # Saltamos la validación de tags estricta aquí para evitar bloqueos si el usuario no ha logueado el entreno aún.
+            if momento_a_guardar:
                 if t.id not in db_usuario["historial"][fecha_str] or not db_usuario["historial"][fecha_str][t.id]:
                     if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
                     db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": momento_a_guardar})
@@ -621,6 +618,7 @@ def renderizar_dia(fecha_obj):
             valid = [o for o in opts if o not in t.momentos_prohibidos]
             idx_def = 0
             if origen == "adhoc" and adhoc_hoy.get(t.id) in valid: idx_def = valid.index(adhoc_hoy[t.id])
+            
             sel = st.radio("Momento:", valid, index=idx_def, key=f"rad_{t.id}_{fecha_str}")
             
             c1, c2, c3 = st.columns([2,1,1])
@@ -807,7 +805,7 @@ elif menu_navegacion == "📊 Historial":
             row = {"Tratamiento": mapa.get(tid, tid), "Total": 0}
             for i, d in enumerate(days):
                 c = len(hist.get(d.isoformat(), {}).get(tid, []))
-                row[["L","M","X","J","V","S","D"][i]] = "✅" * c
+                row[["Lun","Mar","Mie","Jue","Vie","Sab","Dom"][i]] = "✅" * c
                 row["Total"] += c
             if row["Total"] > 0: data.append(row)
         st.dataframe(pd.DataFrame(data), use_container_width=True)
