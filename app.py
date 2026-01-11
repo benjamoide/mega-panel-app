@@ -19,7 +19,6 @@ ARCHIVO_DATOS = 'historial_mega_panel_pro.json'
 # 1. CONSTANTES, RUTINAS Y CONFIGURACIÓN
 # ==============================================================================
 
-# Rutina de Fuerza Base
 RUTINA_SEMANAL = {
     "0": ["FULLBODY I"],           # Lunes
     "1": ["TORSO I"],              # Martes
@@ -30,14 +29,12 @@ RUTINA_SEMANAL = {
     "6": ["Descanso Total"]        # Domingo
 }
 
-# Cardio por Defecto (Día: Actividad)
 CARDIO_DEFAULTS_BY_DAY = {
     "0": {"actividad": "Remo Ergómetro", "tiempo": 8, "ritmo": "Intenso"},
     "2": {"actividad": "Cinta Inclinada", "tiempo": 20, "velocidad": 6.5, "inclinacion": 4},
     "5": {"actividad": "Cinta Inclinada", "tiempo": 15, "velocidad": 6.5, "inclinacion": 4}
 }
 
-# Parámetros Base Cardio
 GENERIC_CARDIO_PARAMS = {
     "Remo Ergómetro": {"tiempo": 8, "ritmo": "Intenso"},
     "Cinta Inclinada": {"tiempo": 15, "velocidad": 6.5, "inclinacion": 4},
@@ -47,18 +44,11 @@ GENERIC_CARDIO_PARAMS = {
     "Descanso Cardio": {}
 }
 
-# Sistema de Tags (Fuerza + Cardio) para calcular compatibilidad
 TAGS_ACTIVIDADES = {
-    # Fuerza
-    "FULLBODY I": ["Upper", "Lower", "Active"], 
-    "TORSO I": ["Upper", "Active"],
-    "PREVENTIVO I": ["Active"], 
-    "FULLBODY II": ["Upper", "Lower", "Active"],
-    "TORSO + CIRCUITO": ["Upper", "Active", "Cardio"], 
-    "PREVENTIVO II": ["Active"],
+    "FULLBODY I": ["Upper", "Lower", "Active"], "TORSO I": ["Upper", "Active"],
+    "PREVENTIVO I": ["Active"], "FULLBODY II": ["Upper", "Lower", "Active"],
+    "TORSO + CIRCUITO": ["Upper", "Active", "Cardio"], "PREVENTIVO II": ["Active"],
     "Descanso Total": [],
-    
-    # Cardio
     "Remo Ergómetro": ["Active", "Cardio", "Upper", "Lower"],
     "Cinta Inclinada": ["Active", "Cardio", "Lower"],
     "Elíptica": ["Active", "Cardio", "Lower"],
@@ -70,66 +60,116 @@ TAGS_ACTIVIDADES = {
 TAGS_BACKUP = TAGS_ACTIVIDADES
 RUTINA_BACKUP = RUTINA_SEMANAL
 
-# --- DEFINICIÓN MAESTRA DE PATOLOGÍAS (CATÁLOGO SEPARADO) ---
+# ==============================================================================
+# 2. DEFINICIÓN MAESTRA DE PATOLOGÍAS (CATÁLOGO COMPLETO)
+# ==============================================================================
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
         "Epicondilitis (Tenista)": {
-            "ondas": "660+850", "hz": "50Hz (Dolor Agudo)", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Piel limpia"], "tips_des": ["Evitar pinza dedos", "Hielo si dolor"]
+            "ondas": "660+850", 
+            "hz": "50Hz (Dolor Agudo)", 
+            "dist": "10cm", 
+            "dur": 10,
+            "tips_ant": ["Piel limpia"], 
+            "tips_des": ["Evitar pinza con dedos", "Hielo si dolor"]
         },
         "Epitrocleitis (Golfista)": {
-            "ondas": "660+850", "hz": "50Hz", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Piel limpia"], "tips_des": ["Estirar flexores", "Hielo si dolor"]
+            "ondas": "660+850", 
+            "hz": "50Hz", 
+            "dist": "10cm", 
+            "dur": 10,
+            "tips_ant": ["Piel limpia"], 
+            "tips_des": ["Estirar flexores", "Hielo si dolor"]
         },
         "Calcificación": {
-            "ondas": "850nm (Profundo)", "hz": "50Hz (Analgesia)", "dist": "5-10cm", "dur": 12,
-            "tips_ant": ["Calor local previo ayuda"], "tips_des": ["Movilidad suave sin carga"]
+            "ondas": "850nm (Profundo)", 
+            "hz": "50Hz (Analgesia)", 
+            "dist": "5-10cm", 
+            "dur": 12,
+            "tips_ant": ["Calor local previo ayuda"], 
+            "tips_des": ["Movilidad suave sin carga"]
         },
         "Bursitis (Apoyo Mesa)": {
-            "ondas": "660+850", "hz": "10Hz (Anti-inflamatorio)", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Zona limpia"], "tips_des": ["Evitar apoyar codo en mesa", "Usar almohadilla"]
+            "ondas": "660+850", 
+            "hz": "10Hz (Anti-inflamatorio)", 
+            "dist": "10cm", 
+            "dur": 10,
+            "tips_ant": ["Zona limpia"], 
+            "tips_des": ["Evitar apoyar codo en mesa", "Usar almohadilla"]
         }
     },
     "Antebrazo": {
         "Sobrecarga/Contractura": {
-            "ondas": "660+850", "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
-            "tips_ant": ["Quitar sudor"], "tips_des": ["Estiramientos suaves", "Calor"]
+            "ondas": "660+850", 
+            "hz": "10Hz (Relajación)", 
+            "dist": "15cm", 
+            "dur": 12,
+            "tips_ant": ["Quitar sudor"], 
+            "tips_des": ["Estiramientos suaves", "Calor"]
         },
         "Tendinitis General": {
-            "ondas": "660+850", "hz": "50Hz", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Quitar reloj"], "tips_des": ["Reposo relativo"]
+            "ondas": "660+850", 
+            "hz": "50Hz", 
+            "dist": "10cm", 
+            "dur": 10,
+            "tips_ant": ["Quitar reloj"], 
+            "tips_des": ["Reposo relativo"]
         }
     },
     "Muñeca": {
         "Túnel Carpiano": {
-            "ondas": "660+850", "hz": "10Hz (Nervio)", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Palma abierta"], "tips_des": ["Movilidad dedos", "No forzar agarre"]
+            "ondas": "660+850", 
+            "hz": "10Hz (Nervio)", 
+            "dist": "10cm", 
+            "dur": 10,
+            "tips_ant": ["Palma abierta"], 
+            "tips_des": ["Movilidad dedos", "No forzar agarre"]
         },
         "Dolor Articular/Abierta": {
-            "ondas": "660+850", "hz": "50Hz", "dist": "5-10cm", "dur": 10,
-            "tips_ant": ["Sin muñequera"], "tips_des": ["Hielo si inflamación"]
+            "ondas": "660+850", 
+            "hz": "50Hz", 
+            "dist": "5-10cm", 
+            "dur": 10,
+            "tips_ant": ["Sin muñequera"], 
+            "tips_des": ["Hielo si inflamación"]
         }
     },
     "Pie": {
         "Plantar (Fascitis/Talón)": {
-            "ondas": "660+850", "hz": "50Hz", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Quitar calcetín"], "tips_des": ["Rodar pelota tenis", "Estirar gemelo"]
+            "ondas": "660+850", 
+            "hz": "50Hz", 
+            "dist": "10cm", 
+            "dur": 10,
+            "tips_ant": ["Quitar calcetín"], 
+            "tips_des": ["Rodar pelota tenis", "Estirar gemelo"]
         },
         "Dorsal/Lateral (Esguince)": {
-            "ondas": "660+850", "hz": "10Hz (Regeneración)", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Piel limpia"], "tips_des": ["Movilidad tobillo", "No impacto"]
+            "ondas": "660+850", 
+            "hz": "10Hz (Regeneración)", 
+            "dist": "10cm", 
+            "dur": 10,
+            "tips_ant": ["Piel limpia"], 
+            "tips_des": ["Movilidad tobillo", "No impacto"]
         }
     },
     "Hombro": {
         "Tendinitis/Manguito": {
-            "ondas": "660+850", "hz": "10-40Hz", "dist": "15cm", "dur": 10,
-            "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos", "No elevar brazo >90º"]
+            "ondas": "660+850", 
+            "hz": "10-40Hz", 
+            "dist": "15cm", 
+            "dur": 10,
+            "tips_ant": ["Sin ropa"], 
+            "tips_des": ["Péndulos", "No elevar brazo >90º"]
         }
     },
     "Rodilla": {
         "General/Menisco": {
-            "ondas": "660+850", "hz": "10Hz (Hueso/Cartílago)", "dist": "15cm", "dur": 10,
-            "tips_ant": ["No hielo antes"], "tips_des": ["Movilidad sin carga"]
+            "ondas": "660+850", 
+            "hz": "10Hz (Hueso/Cartílago)", 
+            "dist": "15cm", 
+            "dur": 10,
+            "tips_ant": ["No hielo antes"], 
+            "tips_des": ["Movilidad sin carga"]
         }
     },
     "Grasa/Estética": {
@@ -165,7 +205,7 @@ DB_TRATAMIENTOS_BASE = {
 }
 
 # ==============================================================================
-# 2. CLASES Y MODELO DE DATOS
+# 3. CLASES Y MODELO DE DATOS
 # ==============================================================================
 class Tratamiento:
     def __init__(self, id_t, nombre, zona, ondas_txt, config_energia, herzios, distancia, duracion, max_diario, max_semanal, tipo, tags_entreno, default_visual_group, momento_ideal_txt, momentos_prohibidos, tips_antes, tips_despues, incompatible_with=None, fases_config=None):
@@ -216,7 +256,8 @@ def obtener_catalogo():
                     herzios=specs.get("hz", "CW"),
                     distancia=specs.get("dist", "10cm"),
                     duracion=specs.get("dur", 10),
-                    max_diario=2, max_semanal=7,
+                    max_diario=1, # Se fija en 1 para que al registrar se complete
+                    max_semanal=7,
                     tipo="LESION", tags_entreno=['All'],
                     default_visual_group=specs.get("visual_group", "FLEX"),
                     momento_ideal_txt=specs.get("momento_txt", "Flexible"),
@@ -227,19 +268,12 @@ def obtener_catalogo():
                 )
                 catalogo.append(t)
 
-    # 2. Generar Grasa (CON NOMBRES ORDENADOS)
+    # 2. Generar Grasa (Con Nombres Claros)
     specs = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
     
-    # Grasa Abdomen Frontal
     catalogo.append(Tratamiento("fat_front", "Grasa Abdomen (Frontal)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
-    
-    # Grasa Flanco D
     catalogo.append(Tratamiento("fat_d", "Grasa Abdomen (Flanco D)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
-    
-    # Grasa Flanco I
     catalogo.append(Tratamiento("fat_i", "Grasa Abdomen (Flanco I)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
-    
-    # Grasa Glúteos
     catalogo.append(Tratamiento("fat_glutes", "Grasa Glúteos", "Glúteos", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", ["Active", "Lower"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=[]))
     
     # 3. Facial
@@ -327,7 +361,7 @@ def procesar_excel_rutina(uploaded_file):
             if pd.isna(t) or not str(t).strip(): nuevos_tags[r] = []
             else: nuevos_tags[r] = [x.strip() for x in str(t).split(',')]
         return {"semana": nueva_semana, "tags": nuevos_tags}
-    except Exception as e: return None
+    except: return None
 
 # --- 5. HELPERS VISUALES Y LÓGICA ---
 def mostrar_definiciones_ondas():
@@ -363,9 +397,9 @@ def mostrar_ficha_tecnica(t, lista_completa):
 
 def analizar_bloqueos(tratamiento, momento, historial, registros_hoy, fecha_str, tags_dia, clave_usuario):
     if clave_usuario == "usuario_rutina":
-        if 'Active' in tratamiento.tags_entreno and 'Active' not in tags_dia: return True, "⚠️ FALTA ACTIVIDAD: Requiere ejercicio (Pesas o Cardio)."
-        if 'Upper' in tratamiento.tags_entreno and 'Upper' not in tags_dia: return True, "⚠️ SINERGIA BAJA: Requiere torso."
-    if momento in tratamiento.momentos_prohibidos: return True, "⛔ HORARIO PROHIBIDO."
+        if 'Active' in tratamiento.tags_entreno and 'Active' not in tags_dia: return True, "⚠️ FALTA ACTIVIDAD"
+        if 'Upper' in tratamiento.tags_entreno and 'Upper' not in tags_dia: return True, "⚠️ FALTA TORSO"
+    if momento in tratamiento.momentos_prohibidos: return True, "⛔ HORARIO PROHIBIDO"
     dias_hechos = 0
     fecha_dt = datetime.date.fromisoformat(fecha_str)
     for i in range(7):
@@ -495,13 +529,7 @@ def renderizar_dia(fecha_obj):
                 valid = [o for o in opts if o not in t_obj.momentos_prohibidos]
                 mom = st.selectbox("Momento:", valid, key=f"mad_{fecha_str}")
                 
-                # TRIPLE VALIDACIÓN
                 bloq, mot = analizar_bloqueos(t_obj, mom, db_usuario["historial"], {}, fecha_str, tags_dia, clave_usuario)
-                
-                # Verificar conflictos cruzados al momento
-                for pid in presentes_hoy:
-                    if pid in t_obj.incompatible_with: bloq=True; mot=f"Incompatible con activo {pid}"
-                
                 if bloq: st.error(mot)
                 else:
                     c_pl, c_reg = st.columns(2)
@@ -520,10 +548,8 @@ def renderizar_dia(fecha_obj):
                         db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
                         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
-    # C. TARJETAS
     descartados = db_usuario.get("descartados", {}).get(fecha_str, [])
     lista_mostrar = []
-    
     for t in lista_tratamientos:
         mostrar = False; origen = ""
         ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
@@ -549,13 +575,14 @@ def renderizar_dia(fecha_obj):
                     if pref and pref in valid_opts: momento_a_guardar = pref
                     elif valid_opts: momento_a_guardar = valid_opts[0]
             
-            # Al registrar masivamente, confiamos en que si el usuario lo añadió manualmente o es clínico, es válido.
-            # Saltamos la validación de tags estricta aquí para evitar bloqueos si el usuario no ha logueado el entreno aún.
-            if momento_a_guardar:
+            # BYPASS TAGS PARA MANUALES
+            bloq, _ = analizar_bloqueos(t, momento_a_guardar, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
+            if origen in ["adhoc", "clinica"]: bloq = False 
+            
+            if not bloq and momento_a_guardar:
                 if t.id not in db_usuario["historial"][fecha_str] or not db_usuario["historial"][fecha_str][t.id]:
                     if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
                     db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": momento_a_guardar})
-        
         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
@@ -589,7 +616,9 @@ def renderizar_dia(fecha_obj):
         if origen == "clinica" and ciclo:
             d = (fecha_obj - datetime.date.fromisoformat(ciclo['fecha_inicio'])).days
             saltos = len([s for s in ciclo.get('dias_saltados', []) if s < fecha_str])
-            info_ex = f" (Día {d - saltos})"
+            info_ex = f" (Día {d - saltos}) [CLÍNICA]"
+        elif origen == "adhoc":
+            info_ex = " [PUNTUAL]"
         
         head_xtra = ""
         if hechos >= t.max_diario:
@@ -618,7 +647,6 @@ def renderizar_dia(fecha_obj):
             valid = [o for o in opts if o not in t.momentos_prohibidos]
             idx_def = 0
             if origen == "adhoc" and adhoc_hoy.get(t.id) in valid: idx_def = valid.index(adhoc_hoy[t.id])
-            
             sel = st.radio("Momento:", valid, index=idx_def, key=f"rad_{t.id}_{fecha_str}")
             
             c1, c2, c3 = st.columns([2,1,1])
@@ -745,17 +773,35 @@ elif menu_navegacion == "🚑 Clínica":
                 l = c3.selectbox("Lado", ["Derecho", "Izquierdo"])
                 if l:
                     fi = st.date_input("Fecha Inicio", datetime.date.today())
-                    if st.button("Comenzar Tratamiento"):
-                        code_lado = "d" if l == "Derecho" else "i"
-                        id_gen = "".join(c for c in f"{z[:3]}_{p[:3]}_{code_lado}".lower() if c.isalnum() or c=="_")
-                        
-                        if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                        db_usuario["ciclos_activos"][id_gen] = {
-                            "fecha_inicio": fi.isoformat(),
-                            "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
-                        }
-                        guardar_datos_completos(st.session_state.db_global)
-                        st.success("Tratamiento Iniciado"); st.rerun()
+                    
+                    # Generar ID temporal para comprobar conflicto
+                    code_lado = "d" if l == "Derecho" else "i"
+                    id_temp = "".join(c for c in f"{z[:3]}_{p[:3]}_{code_lado}".lower() if c.isalnum() or c=="_")
+                    t_obj = next((t for t in lista_tratamientos if t.id == id_temp), None)
+                    
+                    # Comprobar conflicto con HOY en historial/adhoc
+                    conflicto_msg = ""
+                    presentes = obtener_tratamientos_presentes(fi.isoformat(), db_usuario, lista_tratamientos)
+                    
+                    if t_obj:
+                        if t_obj.id in presentes: conflicto_msg = "Ya registrado/planificado para esta fecha."
+                        for pid in presentes:
+                            if pid in t_obj.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
+                    
+                    if conflicto_msg:
+                        st.error(f"🚫 No se puede iniciar: {conflicto_msg}. Borra el registro diario primero.")
+                    else:
+                        # Calcular fin estimado
+                        fin_estimado = fi + timedelta(days=60)
+                        st.info(f"📅 Fin Estimado: {fin_estimado.strftime('%d/%m/%Y')}")
+                        if st.button("Comenzar Tratamiento"):
+                            if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                            db_usuario["ciclos_activos"][id_temp] = {
+                                "fecha_inicio": fi.isoformat(),
+                                "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
+                            }
+                            guardar_datos_completos(st.session_state.db_global)
+                            st.success("Iniciado"); st.rerun()
 
     st.divider()
     st.subheader("Tratamientos Activos")
@@ -771,8 +817,15 @@ elif menu_navegacion == "🚑 Clínica":
                 hoy = datetime.date.today()
                 saltos = len([s for s in ciclo.get('dias_saltados', []) if s < hoy.isoformat()])
                 dias = (hoy - ini).days - saltos
+                
+                # Fases visuales
+                fase_actual = "Mantenimiento"
+                if dias <= 7: fase_actual = "🔥 Inflamatoria"
+                elif dias <= 21: fase_actual = "🛠️ Proliferación"
+                elif dias <= 60: fase_actual = "🧱 Remodelación"
+                
                 c1.progress(min(dias/60, 1.0))
-                c1.caption(f"Día {dias} | Inicio: {ini.strftime('%d/%m')}")
+                c1.caption(f"Día {dias} | {fase_actual} | Inicio: {ini.strftime('%d/%m')}")
                 
                 if estado == 'activo':
                     if c2.button("Pausar", key=f"cp_{t.id}"):
@@ -805,7 +858,7 @@ elif menu_navegacion == "📊 Historial":
             row = {"Tratamiento": mapa.get(tid, tid), "Total": 0}
             for i, d in enumerate(days):
                 c = len(hist.get(d.isoformat(), {}).get(tid, []))
-                row[["Lun","Mar","Mie","Jue","Vie","Sab","Dom"][i]] = "✅" * c
+                row[["L","M","X","J","V","S","D"][i]] = "✅" * c
                 row["Total"] += c
             if row["Total"] > 0: data.append(row)
         st.dataframe(pd.DataFrame(data), use_container_width=True)
