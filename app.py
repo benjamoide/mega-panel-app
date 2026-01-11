@@ -16,14 +16,14 @@ st.set_page_config(
 ARCHIVO_DATOS = 'historial_mega_panel_pro.json'
 
 # ==========================================
-# 1. CONSTANTES Y CONFIGURACIÓN
+# 1. CONSTANTES DE CONFIGURACIÓN
 # ==========================================
 
-# Rutina de Fuerza por Defecto
+# Rutinas de Fuerza Base
 RUTINA_SEMANAL = {
     "0": ["FULLBODY I"],           # Lunes
     "1": ["TORSO I"],              # Martes
-    "2": ["FULLBODY II"],          # Miércoles
+    "2": ["FULLBODY II"],          # Miércoles (Ajustado según tu input previo)
     "3": ["TORSO II / CIRCUITO"],  # Jueves
     "4": ["PREVENTIVO I"],         # Viernes
     "5": ["PREVENTIVO II"],        # Sábado
@@ -101,7 +101,7 @@ class Tratamiento:
         return self
 
 # ==========================================
-# 3. CATÁLOGO COMPLETO (DATOS CIENTÍFICOS)
+# 3. CATÁLOGO CIENTÍFICO COMPLETO
 # ==========================================
 def obtener_catalogo():
     fases_lesion = [
@@ -111,16 +111,16 @@ def obtener_catalogo():
     ]
     
     catalogo = [
-        # GRASA
+        # GRASA (CW)
         Tratamiento("fat_glutes", "Glúteos (Grasa)", "Glúteos/Caderas", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "10-15 cm", 10, 1, 7, "GRASA", ['Active', 'Lower'], "PRE", "Ideal: Antes de Entrenar Pierna", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], ["💧 Beber agua.", "🧴 Piel limpia."], ["🏃‍♂️ ACTIVIDAD YA.", "🚿 Ducha."], ["fat_front", "fat_d", "fat_i"]),
         Tratamiento("fat_front", "Abdomen Frontal (Grasa)", "Abdomen", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], ["💧 Beber agua."], ["🏃‍♂️ ENTRENA YA."], ["fat_glutes"]),
         Tratamiento("fat_d", "Flanco Derecho (Grasa)", "Abdomen", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], ["💧 Beber agua."], ["🏃‍♂️ ENTRENA YA."], ["fat_glutes"]),
         Tratamiento("fat_i", "Flanco Izquierdo (Grasa)", "Abdomen", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "CW (0Hz)", "10-15 cm", 10, 1, 7, "GRASA", ['Active'], "PRE", "Ideal: Antes de Entrenar", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], ["💧 Beber agua."], ["🏃‍♂️ ENTRENA YA."], ["fat_glutes"]),
         
-        # ESTÉTICA
+        # ESTÉTICA (CW)
         Tratamiento("face_rejuv", "Rejuvenecimiento Facial", "Cara", "630nm/660nm (+850nm Opcional)", "630nm: 100% | 850nm: 50% (Opc)", "CW (0Hz)", "30-50 cm", 10, 1, 5, "PERMANENTE", ['All'], "FLEX", "Cualquier hora (Piel Limpia)", ["🏋️ Entrenamiento (Pre)"], ["🧼 DOBLE LIMPIEZA.", "🕶️ GAFAS."], ["🧴 Serum.", "❌ No sol."], []),
         
-        # LESIONES
+        # LESIONES (50Hz Analgesia)
         Tratamiento("foot_d", "Pie Derecho (Plantar/Lateral)", "Pie", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "50Hz (Dolor)", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible", [], ["🦶 Piel limpia."], ["🎾 Rodar pelota."], [], fases_lesion),
         Tratamiento("foot_i", "Pie Izquierdo (Plantar/Lateral)", "Pie", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "50Hz (Dolor)", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible", [], ["🦶 Piel limpia."], ["🎾 Rodar pelota."], [], fases_lesion),
         Tratamiento("epi_d", "Epicondilitis Dcha (Codo)", "Codo Lateral", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "50Hz (Dolor)", "10-15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible", [], ["🧴 Piel limpia."], ["🛑 NO pinza."], ["codo_d"], fases_lesion),
@@ -134,7 +134,7 @@ def obtener_catalogo():
         Tratamiento("codo_d", "Codo Dcho (Genérico)", "Codo", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible", [], ["🧴 Piel limpia."], ["🔄 Estiramiento."], ["epi_d"], fases_lesion),
         Tratamiento("codo_i", "Codo Izq (Genérico)", "Codo", "660nm + 850nm", "660nm: 50% | 850nm: 100%", "10Hz", "15 cm", 10, 2, 7, "LESION", ['All'], "FLEX", "Flexible", [], ["🧴 Piel limpia."], ["🔄 Estiramiento."], ["epi_i"], fases_lesion),
         
-        # MUSCULO
+        # MUSCULO (10Hz Alfa)
         Tratamiento("arm_d", "Antebrazo D (Recuperación)", "Antebrazo", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "10Hz (Recuperación)", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno", ["🏋️ Entrenamiento (Pre)"], ["🚿 Quitar sudor."], ["🥩 Proteína."], ["forearm_inj_d"]),
         Tratamiento("arm_i", "Antebrazo I (Recuperación)", "Antebrazo", "660nm + 850nm", "660nm: 100% | 850nm: 100%", "10Hz (Recuperación)", "15 cm", 10, 1, 6, "MUSCULAR", ['Upper'], "POST", "Ideal: Post-Entreno", ["🏋️ Entrenamiento (Pre)"], ["🚿 Quitar sudor."], ["🥩 Proteína."], ["forearm_inj_i"]),
         
@@ -158,14 +158,15 @@ def cargar_datos_completos():
     try:
         with open(ARCHIVO_DATOS, 'r') as f:
             datos = json.load(f)
-            # Asegurar estructura
+            # Migración de estructura si faltan claves
             if "configuracion_rutina" not in datos: datos["configuracion_rutina"] = default_db["configuracion_rutina"]
             for user in ["usuario_rutina", "usuario_libre"]:
                 if user not in datos: datos[user] = default_db[user]
                 if "meta_cardio" not in datos[user]: datos[user]["meta_cardio"] = {}
                 if "planificados_adhoc" not in datos[user]: datos[user]["planificados_adhoc"] = {}
             return datos
-    except: return default_db
+    except:
+        return default_db
 
 def guardar_datos_completos(datos):
     with open(ARCHIVO_DATOS, 'w') as f:
@@ -175,6 +176,7 @@ def obtener_rutina_completa(fecha_obj, db_global, db_usuario):
     fecha_iso = fecha_obj.isoformat()
     dia_semana_str = str(fecha_obj.weekday())
     
+    # 1. Fuerza
     rutina_manual = db_usuario.get("meta_diaria", {}).get(fecha_iso, None)
     config_semana = db_global.get("configuracion_rutina", {}).get("semana", RUTINA_SEMANAL)
     config_tags = db_global.get("configuracion_rutina", {}).get("tags", TAGS_ACTIVIDADES)
@@ -182,6 +184,7 @@ def obtener_rutina_completa(fecha_obj, db_global, db_usuario):
     rutina_fuerza = rutina_manual if rutina_manual is not None else config_semana.get(dia_semana_str, [])
     es_manual_fuerza = (rutina_manual is not None)
     
+    # 2. Cardio
     cardio_manual = db_usuario.get("meta_cardio", {}).get(fecha_iso, None)
     if cardio_manual:
         rutina_cardio = cardio_manual
@@ -193,6 +196,7 @@ def obtener_rutina_completa(fecha_obj, db_global, db_usuario):
             rutina_cardio = {"actividad": "Descanso Cardio"}
         es_manual_cardio = False
     
+    # 3. Tags Totales
     tags_totales = set(['All'])
     for r in rutina_fuerza:
         if r in config_tags: tags_totales.update(config_tags[r])
@@ -203,6 +207,7 @@ def obtener_rutina_completa(fecha_obj, db_global, db_usuario):
 
 def procesar_excel_rutina(uploaded_file):
     try:
+        # Importación real con Pandas
         df_semana = pd.read_excel(uploaded_file, sheet_name='Semana')
         mapa_dias = {"lunes": "0", "martes": "1", "miércoles": "2", "miercoles": "2", "jueves": "3", "viernes": "4", "sábado": "5", "sabado": "5", "domingo": "6"}
         nueva_semana = {}
@@ -220,7 +225,8 @@ def procesar_excel_rutina(uploaded_file):
             else: nuevos_tags[r] = [x.strip() for x in str(t).split(',')]
         
         return {"semana": nueva_semana, "tags": nuevos_tags}
-    except Exception as e: return None
+    except Exception as e:
+        return None
 
 # ==========================================
 # 5. HELPERS VISUALES Y LÓGICA
@@ -313,7 +319,7 @@ def renderizar_dia(fecha_obj):
                 c_p1, c_p2 = st.columns(2)
                 if "tiempo" in GENERIC_CARDIO_PARAMS.get(sel_c, {}):
                     val_t = params.get("tiempo", GENERIC_CARDIO_PARAMS[sel_c].get("tiempo", 15))
-                    params["tiempo"] = c_p1.number_input("Min:", value=val_t, key=f"t_{fecha_str}")
+                    params["tiempo"] = c_p1.number_input("Minutos:", value=val_t, key=f"t_{fecha_str}")
                 if "velocidad" in GENERIC_CARDIO_PARAMS.get(sel_c, {}):
                     val_v = params.get("velocidad", GENERIC_CARDIO_PARAMS[sel_c].get("velocidad", 6.5))
                     params["velocidad"] = c_p2.number_input("Km/h:", value=val_v, key=f"v_{fecha_str}")
@@ -333,9 +339,10 @@ def renderizar_dia(fecha_obj):
         key_conf = f"conf_{fecha_str}"
         if key_conf not in st.session_state: st.session_state[key_conf] = False
         if not st.session_state[key_conf]:
-            if st.button("✅ Confirmar Rutina", key=f"btn_c_{fecha_str}"):
+            if st.button("✅ Confirmar Rutina del Día", key=f"btn_c_{fecha_str}"):
                 st.session_state[key_conf] = True; st.rerun()
-        else: st.success("Rutina Confirmada")
+        else:
+            st.success("Rutina Confirmada")
     else:
         # Usuario Libre
         ids_guardados = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
@@ -356,7 +363,7 @@ def renderizar_dia(fecha_obj):
     adhoc_hoy = db_usuario.get("planificados_adhoc", {}).get(fecha_str, {})
     
     if clave_usuario == "usuario_rutina" and st.session_state.get(f"conf_{fecha_str}", False):
-        with st.expander("➕ Añadir Tratamiento (Compatible)"):
+        with st.expander("➕ Añadir Tratamiento Adicional (Compatible)"):
             compatibles = []
             for t in lista_tratamientos:
                 ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
@@ -395,7 +402,7 @@ def renderizar_dia(fecha_obj):
         if clave_usuario != "usuario_rutina" and t.id in ids_seleccionados_libre: mostrar = True
         if mostrar: lista_mostrar.append((t, origen))
 
-    # --- BOTÓN REGISTRAR TODO (CORREGIDO PARA AD-HOC) ---
+    # --- BOTÓN REGISTRAR TODO ---
     if lista_mostrar and st.button("⚡ Registrar Todos los Tratamientos del Día", key=f"all_{fecha_str}"):
         now = datetime.datetime.now().strftime('%H:%M')
         if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
@@ -420,11 +427,14 @@ def renderizar_dia(fecha_obj):
                     db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": momento_a_guardar})
         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
-    # --- AGRUPACIÓN VISUAL ---
-    grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": []}
+    # --- AGRUPACIÓN VISUAL (CORREGIDA CON HIDDEN) ---
+    grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
+    # Agrupar activos
+    ids_mostrados = []
     for t, origen in lista_mostrar:
+        ids_mostrados.append(t.id)
         hechos = len(registros_dia.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
@@ -436,6 +446,12 @@ def renderizar_dia(fecha_obj):
             elif origen == "adhoc" and adhoc_hoy.get(t.id) in mapa_vis: g = mapa_vis[adhoc_hoy[t.id]]
             if g in grupos: grupos[g].append((t, origen))
             else: grupos["FLEX"].append((t, origen))
+    
+    # Agrupar Ocultos (para usuario rutina)
+    if clave_usuario == "usuario_rutina":
+        for t in lista_tratamientos:
+            if t.id not in ids_mostrados:
+                grupos["HIDDEN"].append(t)
 
     # --- D. RENDERIZADO TARJETAS ---
     def render_card(item):
@@ -450,15 +466,12 @@ def renderizar_dia(fecha_obj):
             info_ex = f" (Día {d - saltos})"
 
         with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_ex}"):
-            # DESCARTADO
             if t.id in descartados:
                 mostrar_ficha_tecnica(t, lista_tratamientos)
                 if st.button("Recuperar", key=f"rec_{t.id}_{fecha_str}"):
                     db_usuario["descartados"][fecha_str].remove(t.id)
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
                 return
-            
-            # COMPLETADO (Deshacer)
             if hechos >= t.max_diario:
                 st.success("✅ Completado")
                 if st.button("↩️ Deshacer (Borrar Registro)", key=f"undo_{t.id}_{fecha_str}"):
@@ -466,11 +479,9 @@ def renderizar_dia(fecha_obj):
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
                 return
 
-            # PENDIENTE
             st.success(f"💡 {t.momento_ideal_txt}")
             mostrar_ficha_tecnica(t, lista_tratamientos)
             
-            # Selector
             opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
             valid = [o for o in opts if o not in t.momentos_prohibidos]
             idx_def = 0
@@ -480,18 +491,16 @@ def renderizar_dia(fecha_obj):
             
             c1, c2, c3 = st.columns([2,1,1])
             
-            # Validar al vuelo
             bloq, mot = analizar_bloqueos(t, sel, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
             if bloq: c1.warning(mot)
             
-            # Botones
             if c1.button("Registrar", key=f"go_{t.id}_{fecha_str}", disabled=bloq):
                 now = datetime.datetime.now().strftime('%H:%M')
                 if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
                 if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
                 db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": sel})
                 guardar_datos_completos(st.session_state.db_global); st.rerun()
-                
+            
             if c2.button("Omitir", key=f"om_{t.id}_{fecha_str}"):
                 if "descartados" not in db_usuario: db_usuario["descartados"] = {}
                 if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
@@ -512,8 +521,17 @@ def renderizar_dia(fecha_obj):
                 if c3.button("🗑️ Quitar", key=f"del_{t.id}_{fecha_str}"):
                     del db_usuario["planificados_adhoc"][fecha_str][t.id]
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
+            
+            if hechos > 0:
+                st.markdown("---")
+                for i, r in enumerate(registros_dia.get(t.id, [])):
+                    c_t, c_d = st.columns([5,1])
+                    c_t.info(f"✅ {r['hora']} ({r['detalle']})")
+                    if c_d.button("🗑️", key=f"d_{t.id}_{i}_{fecha_str}"):
+                        registros_dia[t.id].pop(i)
+                        if not registros_dia[t.id]: del registros_dia[t.id]
+                        guardar_datos_completos(st.session_state.db_global); st.rerun()
 
-    # Renderizar Grupos
     for g in ["MORNING", "PRE", "POST", "NIGHT", "FLEX"]:
         if grupos[g]:
             st.subheader(g)
@@ -525,11 +543,11 @@ def renderizar_dia(fecha_obj):
         st.markdown("### ❌ Descartados")
         for item in grupos["DISCARDED"]: render_card(item)
     if grupos["HIDDEN"] and clave_usuario == "usuario_rutina":
-        with st.expander("Inactivos / Ocultos Hoy"):
+        with st.expander("Inactivos / Ocultos Hoy (Ver Detalles)"):
             for t in grupos["HIDDEN"]: 
                 with st.expander(f"{t.nombre}"): mostrar_ficha_tecnica(t, lista_tratamientos)
 
-# --- LOGIN Y NAVEGACIÓN ---
+# --- LOGIN ---
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 def login_screen():
     st.title("🔐 Acceso")
@@ -544,11 +562,13 @@ def login_screen():
 
 if not st.session_state.logged_in: login_screen(); st.stop()
 
+# --- CARGA GLOBAL ---
 if 'db_global' not in st.session_state: st.session_state.db_global = cargar_datos_completos()
 clave_usuario = st.session_state.current_user_role
 db_usuario = st.session_state.db_global[clave_usuario]
 lista_tratamientos = obtener_catalogo()
 
+# --- SIDEBAR ---
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
     menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica"])
@@ -561,11 +581,17 @@ with st.sidebar:
                 new_conf = procesar_excel_rutina(uploaded_file)
                 if new_conf:
                     st.session_state.db_global["configuracion_rutina"] = new_conf
-                    guardar_datos_completos(st.session_state.db_global); st.success("OK"); st.rerun()
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Correcto")
+                    st.rerun()
     st.divider()
     mostrar_definiciones_ondas()
     st.divider()
     if st.button("Cerrar Sesión"): st.session_state.logged_in = False; st.rerun()
+
+# ==========================================
+# RUTAS DE NAVEGACIÓN
+# ==========================================
 
 if menu_navegacion == "📅 Panel Diario":
     st.title("📅 Panel Diario")
@@ -646,3 +672,20 @@ elif menu_navegacion == "📊 Historial":
             if f.startswith(m_str):
                 for tid, l in r.items(): counts[mapa.get(tid, tid)] = counts.get(mapa.get(tid, tid), 0) + len(l)
         if counts: st.bar_chart(pd.DataFrame(list(counts.items()), columns=["T", "N"]).set_index("T"))
+    elif vista == "Año":
+        y_ref = st.number_input("Año:", value=datetime.date.today().year)
+        y_str = str(y_ref)
+        meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        data = []
+        for tid in t_usados:
+            row = {"T": mapa.get(tid, tid)}
+            tot = 0
+            for i in range(1, 13):
+                m_key = f"{y_str}-{i:02d}"
+                c = 0
+                for f, r in hist.items():
+                    if f.startswith(m_key): c += len(r.get(tid, []))
+                row[meses[i-1]] = c
+                tot += c
+            if tot > 0: data.append(row)
+        st.dataframe(pd.DataFrame(data), use_container_width=True)
