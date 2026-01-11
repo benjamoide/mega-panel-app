@@ -227,20 +227,32 @@ def obtener_catalogo():
                 )
                 catalogo.append(t)
 
-    # 2. Generar Grasa/Estética/Permanentes
-    for area, code in [("Glúteos", "glutes"), ("Abdomen", "front"), ("Flanco D", "d"), ("Flanco I", "i")]:
-        specs = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
-        t = Tratamiento(f"fat_{code}", f"{area} (Grasa)", area, specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], specs["momento_txt"], ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"])
-        catalogo.append(t)
+    # 2. Generar Grasa (CON NOMBRES ORDENADOS)
+    # [("Glúteos", "glutes"), ("Abdomen", "front"), ("Flanco D", "d"), ("Flanco I", "i")]
+    specs = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
     
+    # Grasa Abdomen Frontal
+    catalogo.append(Tratamiento("fat_front", "Grasa Abdomen (Frontal)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_glutes", "fat_d", "fat_i"]))
+    
+    # Grasa Flanco D
+    catalogo.append(Tratamiento("fat_d", "Grasa Abdomen (Flanco D)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_glutes", "fat_front", "fat_i"]))
+    
+    # Grasa Flanco I
+    catalogo.append(Tratamiento("fat_i", "Grasa Abdomen (Flanco I)", "Abdomen", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", specs["req_tags"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_glutes", "fat_front", "fat_d"]))
+    
+    # Grasa Glúteos
+    catalogo.append(Tratamiento("fat_glutes", "Grasa Glúteos", "Glúteos", specs["ondas"], "100%", specs["hz"], specs["dist"], specs["dur"], 1, 7, "GRASA", ["Active", "Lower"], specs["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], specs["tips_ant"], specs["tips_des"], incompatible_with=["fat_front", "fat_d", "fat_i"]))
+    
+    # Estética / Facial
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
     catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], "100%", f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f["momento_txt"], ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"]))
     
+    # Permanentes
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
         id_t = k.lower()
         catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], "100%", v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v["momento_txt"], [], v["tips_ant"], v["tips_des"]))
 
-    # Musculo Recuperación (Legacy manual add for specific naming consistency if needed)
+    # Musculo Recuperación (Legacy)
     for lado, code in [("Dcho", "d"), ("Izq", "i")]:
         catalogo.append(Tratamiento(f"arm_{code}", f"Antebrazo {lado} (Recup)", "Antebrazo", "660+850", "100%", "10Hz", "15cm", 10, 1, 7, "MUSCULAR", ["Upper"], "POST", "Post-Entreno", ["🏋️ Entrenamiento (Pre)"], ["Quitar sudor"], ["Proteína"]))
 
@@ -279,6 +291,7 @@ def obtener_rutina_completa(fecha_obj, db_global, db_usuario):
     rutina_manual = db_usuario.get("meta_diaria", {}).get(fecha_iso, None)
     config_semana = db_global.get("configuracion_rutina", {}).get("semana", RUTINA_SEMANAL)
     config_tags = db_global.get("configuracion_rutina", {}).get("tags", TAGS_ACTIVIDADES)
+    
     rutina_fuerza = rutina_manual if rutina_manual is not None else config_semana.get(dia_semana_str, [])
     es_manual_fuerza = (rutina_manual is not None)
     
@@ -308,7 +321,6 @@ def procesar_excel_rutina(uploaded_file):
             d = str(row.iloc[0]).lower().strip()
             r = str(row.iloc[1]).strip()
             if d in mapa_dias: nueva_semana[mapa_dias[d]] = [x.strip() for x in r.split(',')]
-        
         df_tags = pd.read_excel(uploaded_file, sheet_name='Tags')
         nuevos_tags = {}
         for _, row in df_tags.iterrows():
@@ -316,7 +328,7 @@ def procesar_excel_rutina(uploaded_file):
             if pd.isna(t) or not str(t).strip(): nuevos_tags[r] = []
             else: nuevos_tags[r] = [x.strip() for x in str(t).split(',')]
         return {"semana": nueva_semana, "tags": nuevos_tags}
-    except: return None
+    except Exception as e: return None
 
 # --- 5. HELPERS VISUALES Y LÓGICA ---
 def mostrar_definiciones_ondas():
@@ -443,16 +455,28 @@ def renderizar_dia(fecha_obj):
 
     st.divider()
     
-    # --- B. PLANIFICACIÓN AD-HOC ---
+    # --- B. PLANIFICACIÓN AD-HOC (FILTRO DUPLICADOS Y ORDEN) ---
     adhoc_hoy = db_usuario.get("planificados_adhoc", {}).get(fecha_str, {})
     presentes_hoy = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
+    registros_dia = db_usuario["historial"].get(fecha_str, {})
     
     if clave_usuario == "usuario_rutina" and st.session_state.get(f"conf_{fecha_str}", False):
         with st.expander("➕ Añadir Tratamiento Adicional (Compatible)"):
             compatibles = []
+            
+            # IDs que ya están activos, planificados o hechos hoy (para no mostrar en lista)
+            ids_existentes = set()
+            # 1. Clinica activa
             for t in lista_tratamientos:
-                ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
-                if ciclo and ciclo.get('activo') and ciclo.get('estado')=='activo': continue
+                c = db_usuario.get("ciclos_activos", {}).get(t.id)
+                if c and c.get('activo') and c.get('estado') == 'activo': ids_existentes.add(t.id)
+            # 2. Planificados ad-hoc
+            ids_existentes.update(adhoc_hoy.keys())
+            # 3. Registrados
+            ids_existentes.update(registros_dia.keys())
+
+            for t in lista_tratamientos:
+                if t.id in ids_existentes: continue # NO MOSTRAR DUPLICADOS
                 
                 # Check Tags
                 compatible_tag = False
@@ -465,6 +489,9 @@ def renderizar_dia(fecha_obj):
                         t_pres = next((tp for tp in lista_tratamientos if tp.id == pid), None)
                         if t_pres and t.id in t_pres.incompatible_with: choca = True
                     if not choca: compatibles.append(t)
+            
+            # ORDENAR ALFABÉTICAMENTE
+            compatibles.sort(key=lambda x: x.nombre)
             
             mapa_comp = {t.nombre: t for t in compatibles}
             sel_add = st.selectbox("Elegir:", ["--"] + list(mapa_comp.keys()), key=f"sad_{fecha_str}")
@@ -494,8 +521,7 @@ def renderizar_dia(fecha_obj):
                         db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
                         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
-    # --- C. LISTA DE TARJETAS ---
-    registros_dia = db_usuario["historial"].get(fecha_str, {})
+    # C. TARJETAS
     descartados = db_usuario.get("descartados", {}).get(fecha_str, [])
     lista_mostrar = []
     
@@ -507,7 +533,7 @@ def renderizar_dia(fecha_obj):
         if clave_usuario != "usuario_rutina" and t.id in ids_seleccionados_libre: mostrar = True
         if mostrar: lista_mostrar.append((t, origen))
 
-    # --- BOTÓN REGISTRAR TODO (FIX V50: Saltarse Bloqueo si es Ad-Hoc/Clínica) ---
+    # --- BOTÓN REGISTRAR TODO ---
     if lista_mostrar and st.button("⚡ Registrar Todos los Tratamientos del Día", key=f"all_{fecha_str}"):
         now = datetime.datetime.now().strftime('%H:%M')
         if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
@@ -524,7 +550,7 @@ def renderizar_dia(fecha_obj):
                     if pref and pref in valid_opts: momento_a_guardar = pref
                     elif valid_opts: momento_a_guardar = valid_opts[0]
             
-            # BYPASS TAGS si es Ad-Hoc o Clinica (se supone que ya se validó al añadir)
+            # BYPASS TAGS PARA MANUALES
             bloq, _ = analizar_bloqueos(t, momento_a_guardar, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
             if origen in ["adhoc", "clinica"]: bloq = False 
             
@@ -535,7 +561,6 @@ def renderizar_dia(fecha_obj):
         
         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
-    # --- AGRUPACIÓN VISUAL ---
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
@@ -558,7 +583,6 @@ def renderizar_dia(fecha_obj):
         for t in lista_tratamientos:
             if t.id not in ids_mostrados: grupos["HIDDEN"].append(t)
 
-    # --- RENDERIZAR TARJETA ---
     def render_card(item):
         t, origen = item
         hechos = len(registros_dia.get(t.id, []))
@@ -597,7 +621,6 @@ def renderizar_dia(fecha_obj):
             valid = [o for o in opts if o not in t.momentos_prohibidos]
             idx_def = 0
             if origen == "adhoc" and adhoc_hoy.get(t.id) in valid: idx_def = valid.index(adhoc_hoy[t.id])
-            
             sel = st.radio("Momento:", valid, index=idx_def, key=f"rad_{t.id}_{fecha_str}")
             
             c1, c2, c3 = st.columns([2,1,1])
@@ -784,7 +807,7 @@ elif menu_navegacion == "📊 Historial":
             row = {"Tratamiento": mapa.get(tid, tid), "Total": 0}
             for i, d in enumerate(days):
                 c = len(hist.get(d.isoformat(), {}).get(tid, []))
-                row[["Lun","Mar","Mie","Jue","Vie","Sab","Dom"][i]] = "✅" * c
+                row[["L","M","X","J","V","S","D"][i]] = "✅" * c
                 row["Total"] += c
             if row["Total"] > 0: data.append(row)
         st.dataframe(pd.DataFrame(data), use_container_width=True)
