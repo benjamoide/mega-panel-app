@@ -54,12 +54,15 @@ TAGS_ACTIVIDADES = {
 }
 
 # --- DEFINICIÓN MAESTRA DE PATOLOGÍAS (Generador Dinámico) ---
-# Definida aquí arriba para evitar NameError
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
         "Epicondilitis (Tenista)": {
-            "ondas": "660+850", "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Piel limpia"], "tips_des": ["No hacer pinza con dedos", "Hielo si dolor agudo"]
+            "ondas": "660+850", "hz": "50Hz (Dolor Agudo)", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Piel limpia"], "tips_des": ["Evitar pinza dedos", "Hielo si dolor"]
+        },
+        "Epitrocleitis (Golfista)": {
+            "ondas": "660+850", "hz": "50Hz", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Piel limpia"], "tips_des": ["Estirar flexores", "Hielo si dolor"]
         },
         "Calcificación": {
             "ondas": "850nm (Profundo)", "hz": "50Hz (Analgesia)", "dist": "5-10cm", "dur": 12,
@@ -67,40 +70,49 @@ DB_TRATAMIENTOS_BASE = {
         },
         "Bursitis (Apoyo Mesa)": {
             "ondas": "660+850", "hz": "10Hz (Anti-inflamatorio)", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Zona limpia"], "tips_des": ["Evitar apoyar codo en superficies duras", "Usar almohadilla"]
+            "tips_ant": ["Zona limpia"], "tips_des": ["Evitar apoyar codo en mesa", "Usar almohadilla"]
+        }
+    },
+    "Antebrazo": {
+        "Sobrecarga/Contractura": {
+            "ondas": "660+850", "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
+            "tips_ant": ["Quitar sudor"], "tips_des": ["Estiramientos suaves", "Calor"]
+        },
+        "Tendinitis General": {
+            "ondas": "660+850", "hz": "50Hz", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Quitar reloj"], "tips_des": ["Reposo relativo"]
+        }
+    },
+    "Muñeca": {
+        "Túnel Carpiano": {
+            "ondas": "660+850", "hz": "10Hz (Nervio)", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Palma abierta"], "tips_des": ["Movilidad dedos", "No forzar agarre"]
+        },
+        "Dolor Articular/Abierta": {
+            "ondas": "660+850", "hz": "50Hz", "dist": "5-10cm", "dur": 10,
+            "tips_ant": ["Sin muñequera"], "tips_des": ["Hielo si inflamación"]
         }
     },
     "Pie": {
-        "Plantar (Fascitis)": {
+        "Plantar (Fascitis/Talón)": {
             "ondas": "660+850", "hz": "50Hz", "dist": "10cm", "dur": 10,
             "tips_ant": ["Quitar calcetín"], "tips_des": ["Rodar pelota tenis", "Estirar gemelo"]
         },
-        "Dorsal/Lateral (Tendinitis/Esguince)": {
+        "Dorsal/Lateral (Esguince)": {
             "ondas": "660+850", "hz": "10Hz (Regeneración)", "dist": "10cm", "dur": 10,
             "tips_ant": ["Piel limpia"], "tips_des": ["Movilidad tobillo", "No impacto"]
         }
     },
     "Hombro": {
-        "Tendinitis/Lesión": {
+        "Tendinitis/Manguito": {
             "ondas": "660+850", "hz": "10-40Hz", "dist": "15cm", "dur": 10,
-            "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos", "No elevar brazo"]
+            "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos", "No elevar brazo >90º"]
         }
     },
     "Rodilla": {
         "General/Menisco": {
             "ondas": "660+850", "hz": "10Hz (Hueso/Cartílago)", "dist": "15cm", "dur": 10,
             "tips_ant": ["No hielo antes"], "tips_des": ["Movilidad sin carga"]
-        }
-    },
-    "Muñeca/Antebrazo": {
-        "Tendinitis": {
-            "ondas": "660+850", "hz": "50Hz", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Quitar reloj"], "tips_des": ["Estiramientos suaves"]
-        },
-        "Recuperación Muscular": {
-            "ondas": "660+850", "hz": "10Hz (Alfa)", "dist": "15cm", "dur": 10,
-            "tips_ant": ["Quitar sudor"], "tips_des": ["Proteína", "Descanso"],
-            "visual_group": "POST", "momento_txt": "Post-Entreno"
         }
     },
     "Grasa/Estética": {
@@ -189,16 +201,14 @@ def obtener_catalogo():
                     herzios=specs.get("hz", "CW"),
                     distancia=specs.get("dist", "10cm"),
                     duracion=specs.get("dur", 10),
-                    max_diario=2 if "Recuperación" not in patologia else 1,
-                    max_semanal=7,
-                    tipo="LESION" if "Recuperación" not in patologia else "MUSCULAR",
-                    tags_entreno=['All'] if "Recuperación" not in patologia else ['Upper'],
+                    max_diario=2, max_semanal=7,
+                    tipo="LESION", tags_entreno=['All'],
                     default_visual_group=specs.get("visual_group", "FLEX"),
                     momento_ideal_txt=specs.get("momento_txt", "Flexible"),
                     momentos_prohibidos=[],
                     tips_antes=specs.get("tips_ant", []),
                     tips_despues=specs.get("tips_des", []),
-                    fases_config=fases_lesion if "Recuperación" not in patologia else []
+                    fases_config=fases_lesion
                 )
                 catalogo.append(t)
 
@@ -214,6 +224,10 @@ def obtener_catalogo():
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
         id_t = k.lower()
         catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], "100%", v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v["momento_txt"], [], v["tips_ant"], v["tips_des"]))
+
+    # Musculo Recuperación (Legacy manual add for specific naming)
+    for lado, code in [("Dcho", "d"), ("Izq", "i")]:
+        catalogo.append(Tratamiento(f"arm_{code}", f"Antebrazo {lado} (Recup)", "Antebrazo", "660+850", "100%", "10Hz", "15cm", 10, 1, 7, "MUSCULAR", ["Upper"], "POST", "Post-Entreno", ["🏋️ Entrenamiento (Pre)"], ["Quitar sudor"], ["Proteína"]))
 
     return catalogo
 
@@ -245,27 +259,22 @@ def guardar_datos_completos(datos):
 def obtener_rutina_completa(fecha_obj, db_global, db_usuario):
     fecha_iso = fecha_obj.isoformat()
     dia_semana_str = str(fecha_obj.weekday())
-    
     rutina_manual = db_usuario.get("meta_diaria", {}).get(fecha_iso, None)
     config_semana = db_global.get("configuracion_rutina", {}).get("semana", RUTINA_SEMANAL)
     config_tags = db_global.get("configuracion_rutina", {}).get("tags", TAGS_ACTIVIDADES)
-    
     rutina_fuerza = rutina_manual if rutina_manual is not None else config_semana.get(dia_semana_str, [])
     es_manual_fuerza = (rutina_manual is not None)
-    
     cardio_manual = db_usuario.get("meta_cardio", {}).get(fecha_iso, None)
     if cardio_manual:
         rutina_cardio = cardio_manual; es_manual_cardio = True
     else:
         rutina_cardio = CARDIO_DEFAULTS_BY_DAY.get(dia_semana_str, {"actividad": "Descanso Cardio"})
         es_manual_cardio = False
-    
     tags_totales = set(['All'])
     for r in rutina_fuerza:
         if r in config_tags: tags_totales.update(config_tags[r])
     act = rutina_cardio.get("actividad", "Descanso Cardio")
     if act in TAGS_ACTIVIDADES: tags_totales.update(TAGS_ACTIVIDADES[act])
-        
     return rutina_fuerza, rutina_cardio, tags_totales, es_manual_fuerza, es_manual_cardio, list(config_tags.keys())
 
 def procesar_excel_rutina(uploaded_file):
@@ -284,13 +293,12 @@ def procesar_excel_rutina(uploaded_file):
             if pd.isna(t) or not str(t).strip(): nuevos_tags[r] = []
             else: nuevos_tags[r] = [x.strip() for x in str(t).split(',')]
         return {"semana": nueva_semana, "tags": nuevos_tags}
-    except: return None
+    except Exception as e: return None
 
 # --- 5. HELPERS VISUALES Y LÓGICA ---
 def mostrar_definiciones_ondas():
     with st.expander("ℹ️ Guía Técnica (nm/Hz)"):
-        st.markdown("**🔴 630/660nm:** Piel (Regeneración) | **🟣 810/850nm:** Profundidad (Inflamación)")
-        st.markdown("**⚡ CW:** Dosis Alta | **10Hz:** Recup. Muscular | **40Hz:** Cerebro | **50Hz:** Dolor Agudo")
+        st.markdown("**🔴 630/660nm:** Piel (Regeneración) | **🟣 810/850nm:** Profundidad (Inflamación)\n**⚡ CW:** Dosis Alta | **10Hz:** Recup. Muscular | **40Hz:** Cerebro | **50Hz:** Dolor Agudo")
 
 def mostrar_ficha_tecnica(t, lista_completa):
     c1, c2 = st.columns(2)
@@ -322,8 +330,6 @@ def analizar_bloqueos(tratamiento, momento, historial, registros_hoy, fecha_str,
         if f in historial and tratamiento.id in historial[f]: dias_hechos += 1
     hecho_hoy = (fecha_str in historial and tratamiento.id in historial[fecha_str])
     if not hecho_hoy and dias_hechos >= tratamiento.max_semanal: return True, "⛔ MAX SEMANAL"
-    for inc in tratamiento.incompatible_with:
-        if inc in registros_hoy: return True, "⛔ INCOMPATIBLE"
     return False, ""
 
 def obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos):
@@ -350,8 +356,7 @@ def renderizar_dia(fecha_obj):
         with c_f:
             st.markdown(f"**🏋️ Fuerza** ({'Manual' if man_f else 'Auto'})")
             opts_f = [k for k in todas_rutinas if "Remo" not in k and "Cinta" not in k and "Elíptica" not in k and "Andar" not in k]
-            def_f = [x for x in rutina_fuerza if x in opts_f]
-            sel_f = st.multiselect("Rutina:", opts_f, default=def_f, key=f"sf_{fecha_str}", label_visibility="collapsed")
+            sel_f = st.multiselect("Rutina:", opts_f, default=[x for x in rutina_fuerza if x in opts_f], key=f"sf_{fecha_str}", label_visibility="collapsed")
             if set(sel_f) != set(rutina_fuerza):
                 if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
                 db_usuario["meta_diaria"][fecha_str] = sel_f
@@ -395,7 +400,6 @@ def renderizar_dia(fecha_obj):
     adhoc_hoy = db_usuario.get("planificados_adhoc", {}).get(fecha_str, {})
     presentes_hoy = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
     
-    # B. AÑADIR TRATAMIENTO ADICIONAL
     if clave_usuario == "usuario_rutina" and st.session_state.get(f"conf_{fecha_str}", False):
         with st.expander("➕ Añadir Tratamiento Adicional (Compatible)"):
             compatibles = []
@@ -403,7 +407,6 @@ def renderizar_dia(fecha_obj):
                 ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
                 if ciclo and ciclo.get('activo') and ciclo.get('estado')=='activo': continue
                 if 'All' in t.tags_entreno or any(tag in tags_dia for tag in t.tags_entreno):
-                    # Check Cruzado
                     choca = False
                     for pid in presentes_hoy:
                         if pid in t.incompatible_with: choca = True
@@ -419,6 +422,7 @@ def renderizar_dia(fecha_obj):
                 opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
                 valid = [o for o in opts if o not in t_obj.momentos_prohibidos]
                 mom = st.selectbox("Momento:", valid, key=f"mad_{fecha_str}")
+                
                 bloq, mot = analizar_bloqueos(t_obj, mom, db_usuario["historial"], {}, fecha_str, tags_dia, clave_usuario)
                 if bloq: st.error(mot)
                 else:
@@ -438,7 +442,6 @@ def renderizar_dia(fecha_obj):
                         db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
                         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
-    # C. TARJETAS
     registros_dia = db_usuario["historial"].get(fecha_str, {})
     descartados = db_usuario.get("descartados", {}).get(fecha_str, [])
     lista_mostrar = []
@@ -451,13 +454,14 @@ def renderizar_dia(fecha_obj):
         if clave_usuario != "usuario_rutina" and t.id in ids_seleccionados_libre: mostrar = True
         if mostrar: lista_mostrar.append((t, origen))
 
-    # --- BOTÓN REGISTRAR TODO ---
+    # --- BOTÓN REGISTRAR TODO MEJORADO (Fix v42) ---
     if lista_mostrar and st.button("⚡ Registrar Todos los Tratamientos del Día", key=f"all_{fecha_str}"):
         now = datetime.datetime.now().strftime('%H:%M')
         if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
         for t, origen in lista_mostrar:
             rad_key = f"rad_{t.id}_{fecha_str}"
             momento_a_guardar = st.session_state.get(rad_key)
+            
             if not momento_a_guardar:
                 if origen == "adhoc": momento_a_guardar = adhoc_hoy.get(t.id)
                 else:
@@ -466,7 +470,7 @@ def renderizar_dia(fecha_obj):
                     opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
                     valid_opts = [o for o in opts if o not in t.momentos_prohibidos]
                     if pref and pref in valid_opts: momento_a_guardar = pref
-                    elif valid_opts: momento_a_guardar = valid_opts[0]
+                    elif valid_opts: momento_a_guardar = valid_opts[0] # PRIMER VALIDO
             
             if momento_a_guardar:
                 bloq, _ = analizar_bloqueos(t, momento_a_guardar, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
@@ -474,15 +478,13 @@ def renderizar_dia(fecha_obj):
                     if t.id not in db_usuario["historial"][fecha_str] or not db_usuario["historial"][fecha_str][t.id]:
                         if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
                         db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": momento_a_guardar})
+        
         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
-    # Agrupar activos
-    ids_mostrados = []
     for t, origen in lista_mostrar:
-        ids_mostrados.append(t.id)
         hechos = len(registros_dia.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
@@ -495,6 +497,7 @@ def renderizar_dia(fecha_obj):
             else: grupos["FLEX"].append((t, origen))
     
     if clave_usuario == "usuario_rutina":
+        ids_mostrados = [t.id for t, _ in lista_mostrar]
         for t in lista_tratamientos:
             if t.id not in ids_mostrados: grupos["HIDDEN"].append(t)
 
@@ -582,7 +585,7 @@ def renderizar_dia(fecha_obj):
         st.markdown("### ❌ Descartados")
         for item in grupos["DISCARDED"]: render_card(item)
     if grupos["HIDDEN"] and clave_usuario == "usuario_rutina":
-        with st.expander("Inactivos / Ocultos Hoy"):
+        with st.expander("Inactivos / Ocultos Hoy (Ver Detalles)"):
             for t in grupos["HIDDEN"]: 
                 with st.expander(f"{t.nombre}"): mostrar_ficha_tecnica(t, lista_tratamientos)
 
