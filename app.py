@@ -70,145 +70,177 @@ TAGS_ACTIVIDADES = {
 }
 
 # ==============================================================================
-# 2. DEFINICIÓN MAESTRA DE PATOLOGÍAS (CATÁLOGO COMPLETO)
+# 2. DEFINICIÓN MAESTRA DE PATOLOGÍAS (CATÁLOGO COMPLETO Y EXPANDIDO)
 # ==============================================================================
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
         "Epicondilitis (Tenista)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "tips_ant": ["Piel limpia"], "tips_des": ["No pinza con dedos", "Hielo si dolor"]
         },
         "Epitrocleitis (Golfista)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar flexores"]
         },
         "Calcificación": {
-            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 100%", "hz": "50Hz (Analgesia)", "dist": "Contacto", "dur": 12,
+            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 100%", 
+            "hz": "50Hz (Analgesia)", "dist": "Contacto", "dur": 12,
             "tips_ant": ["Calor previo"], "tips_des": ["Movilidad suave"]
         },
         "Bursitis (Apoyo)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz (Anti-inflamatorio)", "dist": "5cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10Hz (Anti-inflamatorio)", "dist": "5cm", "dur": 10,
             "tips_ant": ["Zona limpia"], "tips_des": ["No apoyar codo"]
         }
     },
     "Espalda": {
         "Cervicalgia (Cuello)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 15,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 15,
             "tips_ant": ["Sin collar"], "tips_des": ["Movilidad suave"]
         },
         "Dorsalgia (Alta)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz", "dist": "15cm", "dur": 15,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz", "dist": "15cm", "dur": 15,
             "tips_ant": ["Postura recta"], "tips_des": ["Estirar pecho"]
         },
         "Lumbalgia (Baja)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 20,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 20,
             "tips_ant": ["Calor previo"], "tips_des": ["No cargar peso"]
         }
     },
     "Antebrazo": {
         "Sobrecarga": {
-            "ondas": "660+850", "energia": "660nm: 80% | 850nm: 80%", "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
+            "ondas": "660+850", "energia": "660nm: 80% | 850nm: 80%", 
+            "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar", "Calor"]
         },
         "Tendinitis": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 10,
             "tips_ant": ["Quitar reloj"], "tips_des": ["Reposo"]
         }
     },
     "Muñeca": {
         "Túnel Carpiano": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz (Nervio)", "dist": "5cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10Hz (Nervio)", "dist": "5cm", "dur": 10,
             "tips_ant": ["Palma abierta"], "tips_des": ["Movilidad"]
         },
         "Articular": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz", "dist": "5cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz", "dist": "5cm", "dur": 10,
             "tips_ant": ["Sin muñequera"], "tips_des": ["Hielo"]
         }
     },
     "Pierna": {
         "Cintilla Iliotibial": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 12,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 12,
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar TFL"]
         },
         "Sobrecarga Femoral": {
-            "ondas": "660+850", "energia": "660nm: 80% | 850nm: 100%", "hz": "10Hz (Recuperación)", "dist": "10cm", "dur": 15,
+            "ondas": "660+850", "energia": "660nm: 80% | 850nm: 100%", 
+            "hz": "10Hz (Recuperación)", "dist": "10cm", "dur": 15,
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar"]
         }
     },
     "Pie": {
         "Plantar (Fascitis)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz", "dist": "5cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz", "dist": "5cm", "dur": 10,
             "tips_ant": ["Sin calcetín"], "tips_des": ["Rodar pelota"]
         },
         "Dorsal (Esguince)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz", "dist": "10cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10Hz (Regeneración)", "dist": "10cm", "dur": 10,
             "tips_ant": ["Piel limpia"], "tips_des": ["Movilidad"]
         }
     },
     "Hombro": {
         "Tendinitis": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10-40Hz", "dist": "15cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10-40Hz", "dist": "15cm", "dur": 10,
             "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos"]
         }
     },
     "Rodilla": {
         "General": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz", "dist": "15cm", "dur": 10,
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10Hz", "dist": "15cm", "dur": 10,
             "tips_ant": ["No hielo antes"], "tips_des": ["Movilidad"]
         }
     },
     "Piel": {
         "Cicatrices": {
-            "ondas": "630+660", "energia": "660nm: 100% | 850nm: 20%", "hz": "CW", "dist": "10cm", "dur": 10,
+            "ondas": "630+660", "energia": "660nm: 100% | 850nm: 20%", 
+            "hz": "CW", "dist": "10cm", "dur": 10,
             "tips_ant": ["Limpio"], "tips_des": ["Rosa Mosqueta"]
         },
         "Acné": {
-            "ondas": "630+660", "energia": "660nm: 80% | 850nm: 0%", "hz": "CW", "dist": "15cm", "dur": 8,
+            "ondas": "630+660", "energia": "660nm: 80% | 850nm: 0%", 
+            "hz": "CW", "dist": "15cm", "dur": 8,
             "tips_ant": ["Limpio"], "tips_des": ["Hidratar"]
         },
         "Quemaduras": {
-            "ondas": "630+660", "energia": "660nm: 50% | 850nm: 0%", "hz": "CW", "dist": "20cm", "dur": 5,
+            "ondas": "630+660", "energia": "660nm: 50% | 850nm: 0%", 
+            "hz": "CW", "dist": "20cm", "dur": 5,
             "tips_ant": ["Sin cremas"], "tips_des": ["Aloe Vera"]
         }
     },
     "Sistémico": {
         "Circulación": {
-            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "30cm", "dur": 20,
+            "ondas": "660+850", "energia": "100% | 100%", 
+            "hz": "CW", "dist": "30cm", "dur": 20,
             "tips_ant": ["Beber agua"], "tips_des": ["Caminar"]
         },
         "Energía": {
-            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "20cm", "dur": 10,
+            "ondas": "660+850", "energia": "100% | 100%", 
+            "hz": "CW", "dist": "20cm", "dur": 10,
             "tips_ant": ["Mañana"], "tips_des": ["Actividad"]
         }
     },
     "Cabeza": {
         "Migraña": {
-            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 50%", "hz": "10Hz (Alfa)", "dist": "Contacto Nuca", "dur": 10,
+            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 50%", 
+            "hz": "10Hz (Alfa)", "dist": "Contacto Nuca", "dur": 10,
             "tips_ant": ["Oscuridad"], "tips_des": ["Reposo"]
         },
         "Salud Cerebral": {
-            "ondas": "810nm", "energia": "0% | 100%", "hz": "40Hz (Gamma)", "dist": "30cm", "dur": 10,
+            "ondas": "810nm", "energia": "0% | 100%", 
+            "hz": "40Hz (Gamma)", "dist": "30cm", "dur": 10,
             "tips_ant": ["Gafas"], "tips_des": ["Tarea cognitiva"]
         }
     },
     "Grasa/Estética": {
         "Grasa Localizada": {
-            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "10cm", "dur": 10,
-            "tips_ant": ["Beber agua"], "tips_des": ["Ejercicio"], "visual_group": "PRE", "req_tags": ["Active"]
+            "ondas": "660+850", "energia": "100% | 100%", 
+            "hz": "CW", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Beber agua"], "tips_des": ["Ejercicio"], 
+            "visual_group": "PRE", "req_tags": ["Active"]
         },
         "Facial": {
-            "ondas": "630nm", "energia": "100% | 0%", "hz": "CW", "dist": "30cm", "dur": 10,
-            "tips_ant": ["Gafas"], "tips_des": ["Serum"], "visual_group": "FLEX", "momento_txt": "Cualquier hora"
+            "ondas": "630nm", "energia": "100% | 0%", 
+            "hz": "CW", "dist": "30cm", "dur": 10,
+            "tips_ant": ["Gafas"], "tips_des": ["Serum"], 
+            "visual_group": "FLEX", "momento_txt": "Cualquier hora"
         }
     },
     "Permanente": {
         "Testosterona": {
-            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "15cm", "dur": 5,
-            "tips_ant": ["Piel limpia"], "tips_des": ["Ducha fría"], "visual_group": "MORNING"
+            "ondas": "660+850", "energia": "100% | 100%", 
+            "hz": "CW", "dist": "15cm", "dur": 5,
+            "tips_ant": ["Piel limpia"], "tips_des": ["Ducha fría"], 
+            "visual_group": "MORNING"
         },
         "Sueño": {
-            "ondas": "630nm", "energia": "20% | 0%", "hz": "CW", "dist": "50cm", "dur": 15,
-            "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"], "visual_group": "NIGHT"
+            "ondas": "630nm", "energia": "20% | 0%", 
+            "hz": "CW", "dist": "50cm", "dur": 15,
+            "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"], 
+            "visual_group": "NIGHT"
         }
     }
 }
@@ -256,7 +288,8 @@ def obtener_catalogo(tratamientos_custom=[]):
         if zona in ["Grasa/Estética", "Permanente"]: continue
         for patologia, specs in patologias.items():
             if zona in ["Espalda", "Sistémico", "Cabeza", "Piel"]:
-                id_t = "".join(c for c in f"{zona[:3]}_{patologia[:3]}".lower() if c.isalnum() or c=="_")
+                # Generamos ID genérico. IMPORTANTE: [:4] para consistencia histórica
+                id_t = "".join(c for c in f"{zona[:4]}_{patologia[:4]}".lower() if c.isalnum() or c=="_")
                 catalogo.append(Tratamiento(
                     id_t, f"{zona} - {patologia}", zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
                     1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
@@ -264,6 +297,7 @@ def obtener_catalogo(tratamientos_custom=[]):
                 ))
             else:
                 for lado_code, lado_nom in [("d", "Derecho"), ("i", "Izquierdo")]:
+                    # IMPORTANTE: [:4] para consistencia con versiones antiguas
                     base_id = f"{zona.lower()[:4]}_{patologia.lower()[:4]}_{lado_code}"
                     id_t = "".join(c for c in base_id if c.isalnum() or c == "_")
                     nombre = f"{zona} {lado_nom} ({patologia})"
@@ -360,7 +394,7 @@ def procesar_excel_rutina(uploaded_file):
         return {"semana": nueva_semana, "tags": nuevos_tags}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) - ACTUALIZADO V72 (GEMINI 2.5 NATIVO) ---
+# --- 5. LÓGICA AI (GEMINI) - V74 (2.5 Priority) ---
 def consultar_ia(dolencia):
     api_key = None
     try:
@@ -398,6 +432,7 @@ def consultar_ia(dolencia):
     Responde SOLO JSON.
     """
     
+    # Priority List: 2.5 Flash -> 2.0 Flash -> 1.5 Flash
     modelos_a_probar = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
     
     for modelo_nombre in modelos_a_probar:
@@ -633,10 +668,11 @@ def renderizar_dia(fecha_obj):
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
-    ids_mostrados = [] 
+    # FIX V68: Inicializar ids_mostrados
+    ids_mostrados = []
 
     for t, origen in lista_mostrar:
-        ids_mostrados.append(t.id) 
+        ids_mostrados.append(t.id) # POBLAR LISTA
         hechos = len(registros_dia.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
@@ -748,7 +784,7 @@ with st.sidebar:
     
     menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
     
-    # Campo API Key
+    # Campo API Key (Si no hay secretos) - V72: Sin Debug
     if HAS_GEMINI:
         try:
             _ = st.secrets["GEMINI_API_KEY"]
