@@ -72,7 +72,6 @@ TAGS_ACTIVIDADES = {
 # ==============================================================================
 # 2. DEFINICIÓN MAESTRA DE PATOLOGÍAS (CATÁLOGO EXTENDIDO)
 # ==============================================================================
-# Aquí está todo el detalle médico desplegado línea a línea
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
         "Epicondilitis (Tenista)": {
@@ -392,7 +391,7 @@ class Tratamiento:
 
 # --- GENERADOR DE CATÁLOGO ---
 def obtener_catalogo(tratamientos_custom=[]):
-    fases_lesion = [{"nombre": "🔥 Fase 1", "dias_fin": 7}, {"nombre": "🛠️ Fase 2", "dias_fin": 21}, {"nombre": "🧱 Fase 3", "dias_fin": 60}]
+    fases_lesion = [{"nombre": "🔥 Fase 1: Inflamatoria", "dias_fin": 7}, {"nombre": "🛠️ Fase 2: Proliferación", "dias_fin": 21}, {"nombre": "🧱 Fase 3: Remodelación", "dias_fin": 60}]
     catalogo = []
     
     # 1. Base Local (Dinámicos)
@@ -588,8 +587,7 @@ def renderizar_dia(fecha_obj):
         with c_f:
             st.markdown(f"**🏋️ Fuerza** ({'Manual' if man_f else 'Auto'})")
             opts_f = [k for k in todas_rutinas if "Remo" not in k and "Cinta" not in k and "Elíptica" not in k and "Andar" not in k]
-            def_f = [x for x in rutina_fuerza if x in opts_f]
-            sel_f = st.multiselect("Rutina:", opts_f, default=def_f, key=f"sf_{fecha_str}", label_visibility="collapsed")
+            sel_f = st.multiselect("Rutina:", opts_f, default=[x for x in rutina_fuerza if x in opts_f], key=f"sf_{fecha_str}", label_visibility="collapsed")
             if set(sel_f) != set(rutina_fuerza):
                 if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
                 db_usuario["meta_diaria"][fecha_str] = sel_f
@@ -634,12 +632,11 @@ def renderizar_dia(fecha_obj):
     presentes_hoy = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
     registros_dia = db_usuario["historial"].get(fecha_str, {})
     
-    # B. AÑADIR TRATAMIENTO ADICIONAL (SELECTOR BIDIRECCIONAL)
+    # B. AÑADIR TRATAMIENTO ADICIONAL (SELECTOR INTELIGENTE)
     if clave_usuario == "usuario_rutina" and st.session_state.get(f"conf_{fecha_str}", False):
         with st.expander("➕ Añadir Tratamiento Adicional"):
             compatibles = []
-            
-            # Solo para lista inicial, pero no bloqueamos si quieres ver uno ya existente para borrarlo
+            # Llenamos la lista con todos los compatibles (sin filtrar planificados para permitir borrado)
             for t in lista_tratamientos:
                 compatible_tag = False
                 if 'All' in t.tags_entreno or any(tag in tags_dia for tag in t.tags_entreno): compatible_tag = True
@@ -648,10 +645,10 @@ def renderizar_dia(fecha_obj):
             compatibles.sort(key=lambda x: x.nombre)
             mapa_comp = {t.nombre: t for t in compatibles}
             sel_add = st.selectbox("Elegir:", ["--"] + list(mapa_comp.keys()), key=f"sad_{fecha_str}")
+            
             if sel_add != "--":
                 t_obj = mapa_comp[sel_add]
-                
-                # Check si ya está planificado
+                # Selector Bidireccional
                 esta_planificado = t_obj.id in adhoc_hoy
                 
                 if esta_planificado:
@@ -684,7 +681,7 @@ def renderizar_dia(fecha_obj):
                             if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
                             if t_obj.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t_obj.id] = []
                             db_usuario["historial"][fecha_str][t_obj.id].append({"hora": now, "detalle": mom})
-                            # También marcamos planificado para consistencia visual
+                            # También marcamos como planificado
                             if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
                             if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
                             db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
@@ -714,7 +711,7 @@ def renderizar_dia(fecha_obj):
                 mapa_inv = {"PRE": "🏋️ Entrenamiento (Pre)", "POST": "🚿 Post-Entreno / Mañana", "NIGHT": "🌙 Noche", "MORNING": "🌞 Mañana"}
                 pref = mapa_inv.get(t.default_visual_group)
                 if pref and pref in valid_opts: momento_final = pref
-                elif valid_opts: momento_final = valid_opts[0] # FALLBACK FLEX
+                elif valid_opts: momento_final = valid_opts[0] # FALLBACK CLAVE PARA FLEX
             
             bloq, _ = analizar_bloqueos(t, momento_final, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
             if origen in ["adhoc", "clinica"]: bloq = False 
@@ -780,27 +777,23 @@ def renderizar_dia(fecha_obj):
                 if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
                 db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": sel})
                 guardar_datos_completos(st.session_state.db_global); st.rerun()
-            
             if c2.button("Omitir", key=f"om_{t.id}_{fecha_str}"):
                 if "descartados" not in db_usuario: db_usuario["descartados"] = {}
                 if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
                 db_usuario["descartados"][fecha_str].append(t.id)
                 if origen == "adhoc": del db_usuario["planificados_adhoc"][fecha_str][t.id]
                 guardar_datos_completos(st.session_state.db_global); st.rerun()
-            
-            if origen == "clinica":
-                if c3.button("⏭️ Saltar", key=f"sk_{t.id}_{fecha_str}"):
-                    c = db_usuario["ciclos_activos"][t.id]
-                    if 'dias_saltados' not in c: c['dias_saltados'] = []
-                    c['dias_saltados'].append(fecha_str)
-                    if "descartados" not in db_usuario: db_usuario["descartados"] = {}
-                    if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
-                    db_usuario["descartados"][fecha_str].append(t.id)
-                    guardar_datos_completos(st.session_state.db_global); st.rerun()
-            elif origen == "adhoc":
-                if c3.button("🗑️ Quitar", key=f"del_{t.id}_{fecha_str}"):
-                    del db_usuario["planificados_adhoc"][fecha_str][t.id]
-                    guardar_datos_completos(st.session_state.db_global); st.rerun()
+            if origen == "clinica" and c3.button("⏭️ Saltar", key=f"sk_{t.id}_{fecha_str}"):
+                c = db_usuario["ciclos_activos"][t.id]
+                if 'dias_saltados' not in c: c['dias_saltados'] = []
+                c['dias_saltados'].append(fecha_str)
+                if "descartados" not in db_usuario: db_usuario["descartados"] = {}
+                if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
+                db_usuario["descartados"][fecha_str].append(t.id)
+                guardar_datos_completos(st.session_state.db_global); st.rerun()
+            elif origen == "adhoc" and c3.button("🗑️ Quitar", key=f"del_{t.id}_{fecha_str}"):
+                del db_usuario["planificados_adhoc"][fecha_str][t.id]
+                guardar_datos_completos(st.session_state.db_global); st.rerun()
 
     for g in ["MORNING", "PRE", "POST", "NIGHT", "FLEX"]:
         if grupos[g]:
@@ -850,3 +843,49 @@ elif menu_navegacion == "🔍 Buscador AI":
                     if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
                     db_usuario["ciclos_activos"][id_new] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []}
                     guardar_datos_completos(st.session_state.db_global); st.success("Iniciado"); st.rerun()
+
+elif menu_navegacion == "📊 Historial":
+    st.title("📊 Historial")
+    vista = st.radio("Vista:", ["Semana", "Mes", "Año"], horizontal=True)
+    hist = db_usuario.get("historial", {})
+    t_usados = set([k for r in hist.values() for k in r.keys()])
+    mapa = {t.id: t.nombre for t in lista_tratamientos}
+    
+    if vista == "Semana":
+        d_ref = st.date_input("Semana:", datetime.date.today())
+        start = d_ref - timedelta(days=d_ref.weekday())
+        days = [start + timedelta(days=i) for i in range(7)]
+        data = []
+        for tid in t_usados:
+            row = {"Tratamiento": mapa.get(tid, tid), "Total": 0}
+            for i, d in enumerate(days):
+                c = len(hist.get(d.isoformat(), {}).get(tid, []))
+                row[["Lun","Mar","Mie","Jue","Vie","Sab","Dom"][i]] = "✅" * c
+                row["Total"] += c
+            if row["Total"] > 0: data.append(row)
+        st.dataframe(pd.DataFrame(data), use_container_width=True)
+    elif vista == "Mes":
+        d_ref = st.date_input("Mes:", datetime.date.today())
+        m_str = d_ref.strftime("%Y-%m")
+        counts = {}
+        for f, r in hist.items():
+            if f.startswith(m_str):
+                for tid, l in r.items(): counts[mapa.get(tid, tid)] = counts.get(mapa.get(tid, tid), 0) + len(l)
+        if counts: st.bar_chart(pd.DataFrame(list(counts.items()), columns=["T", "N"]).set_index("T"))
+    elif vista == "Año":
+        y_ref = st.number_input("Año:", value=datetime.date.today().year)
+        y_str = str(y_ref)
+        meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+        data = []
+        for tid in t_usados:
+            row = {"T": mapa.get(tid, tid)}
+            tot = 0
+            for i in range(1, 13):
+                m_key = f"{y_str}-{i:02d}"
+                c = 0
+                for f, r in hist.items():
+                    if f.startswith(m_key): c += len(r.get(tid, []))
+                row[meses[i-1]] = c
+                tot += c
+            if tot > 0: data.append(row)
+        st.dataframe(pd.DataFrame(data), use_container_width=True)
