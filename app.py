@@ -331,7 +331,8 @@ DB_TRATAMIENTOS_BASE = {
             "dur": 10,
             "tips_ant": ["Gafas"],
             "tips_des": ["Serum"],
-            "visual_group": "FLEX"
+            "visual_group": "FLEX",
+            "momento_txt": "Cualquier hora"
         }
     },
     "Permanente": {
@@ -422,7 +423,8 @@ def obtener_catalogo(tratamientos_custom=[]):
     catalogo.append(Tratamiento("fat_glutes", "Grasa Glúteos", "Glúteos", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", ["Active", "Lower"], s["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], s["tips_ant"], s["tips_des"]))
     
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
-    catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f["momento_txt"], ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"]))
+    # FIX: Usamos .get() para momento_txt para evitar el error si falta la clave en alguna actualización futura
+    catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"]))
     
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
         id_t = k.lower()
@@ -604,7 +606,8 @@ def renderizar_dia(fecha_obj):
         with c_f:
             st.markdown(f"**🏋️ Fuerza** ({'Manual' if man_f else 'Auto'})")
             opts_f = [k for k in todas_rutinas if "Remo" not in k and "Cinta" not in k and "Elíptica" not in k and "Andar" not in k]
-            sel_f = st.multiselect("Rutina:", opts_f, default=[x for x in rutina_fuerza if x in opts_f], key=f"sf_{fecha_str}", label_visibility="collapsed")
+            def_f = [x for x in rutina_fuerza if x in opts_f]
+            sel_f = st.multiselect("Rutina:", opts_f, default=def_f, key=f"sf_{fecha_str}", label_visibility="collapsed")
             if set(sel_f) != set(rutina_fuerza):
                 if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
                 db_usuario["meta_diaria"][fecha_str] = sel_f
@@ -664,7 +667,6 @@ def renderizar_dia(fecha_obj):
             
             if sel_add != "--":
                 t_obj = mapa_comp[sel_add]
-                # Selector Bidireccional
                 esta_planificado = t_obj.id in adhoc_hoy
                 
                 if esta_planificado:
@@ -697,7 +699,6 @@ def renderizar_dia(fecha_obj):
                             if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
                             if t_obj.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t_obj.id] = []
                             db_usuario["historial"][fecha_str][t_obj.id].append({"hora": now, "detalle": mom})
-                            # También marcamos como planificado
                             if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
                             if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
                             db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
@@ -713,6 +714,7 @@ def renderizar_dia(fecha_obj):
         if clave_usuario != "usuario_rutina" and t.id in ids_seleccionados_libre: mostrar = True
         if mostrar: lista_mostrar.append((t, origen))
 
+    # --- BOTÓN REGISTRAR TODO ---
     if lista_mostrar and st.button("⚡ Registrar Todos los Tratamientos del Día", key=f"all_{fecha_str}"):
         now = datetime.datetime.now().strftime('%H:%M')
         if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
@@ -848,7 +850,7 @@ lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
     
-    # Menú Principal
+    # Menú Principal (Corregido para mostrar siempre)
     menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
     
     st.divider()
@@ -907,7 +909,7 @@ elif menu_navegacion == "🚑 Clínica":
                     fi = st.date_input("Fecha Inicio", datetime.date.today())
                     
                     code_lado = "d" if l == "Derecho" else "i"
-                    id_temp = "".join(c for c in f"{z[:3]}_{p[:3]}_{code_lado}".lower() if c.isalnum() or c=="_")
+                    id_temp = "".join(c for c in f"{z.lower()[:4]}_{p.lower()[:4]}_{code_lado}".lower() if c.isalnum() or c=="_")
                     
                     presentes = obtener_tratamientos_presentes(fi.isoformat(), db_usuario, lista_tratamientos)
                     t_obj = next((t for t in lista_tratamientos if t.id == id_temp), None)
