@@ -60,7 +60,6 @@ TAGS_ACTIVIDADES = {
     "TORSO + CIRCUITO": ["Upper", "Active", "Cardio"], 
     "PREVENTIVO II": ["Active"],
     "Descanso Total": [],
-    
     "Remo Ergómetro": ["Active", "Cardio", "Upper", "Lower"],
     "Cinta Inclinada": ["Active", "Cardio", "Lower"],
     "Elíptica": ["Active", "Cardio", "Lower"],
@@ -520,7 +519,8 @@ def consultar_ia(dolencia):
     genai.configure(api_key=api_key)
     
     prompt = f"""
-    Actúa como un experto en Fotobiomodulación. Usuario con: "{dolencia}".
+    Actúa como un experto en Fotobiomodulación (Red Light Therapy). 
+    El usuario tiene: "{dolencia}".
     Genera JSON estricto con:
     {{
         "nombre": "Título corto",
@@ -551,7 +551,6 @@ def consultar_ia(dolencia):
             continue # Prueba el siguiente modelo
     
     # Si llega aquí es que fallaron todos
-    # Intento final: listar modelos y coger el primero disponible
     try:
         for m in genai.list_models():
             if 'generateContent' in m.supported_generation_methods:
@@ -718,7 +717,6 @@ def renderizar_dia(fecha_obj):
                             if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
                             if t_obj.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t_obj.id] = []
                             db_usuario["historial"][fecha_str][t_obj.id].append({"hora": now, "detalle": mom})
-                            # También marcamos como planificado
                             if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
                             if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
                             db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
@@ -761,11 +759,11 @@ def renderizar_dia(fecha_obj):
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
-    # INICIALIZACIÓN LISTA (FIX V68)
+    # FIX V68: Inicializar ids_mostrados
     ids_mostrados = []
 
     for t, origen in lista_mostrar:
-        ids_mostrados.append(t.id) # POBLAR LISTA
+        ids_mostrados.append(t.id) # FIX V68
         hechos = len(registros_dia.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
@@ -790,11 +788,13 @@ def renderizar_dia(fecha_obj):
 
         with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_ex}{head_xtra}"):
             if t.id in descartados:
+                mostrar_ficha_tecnica(t, lista_tratamientos)
                 if st.button("Recuperar", key=f"rec_{t.id}_{fecha_str}"):
                     db_usuario["descartados"][fecha_str].remove(t.id)
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
                 return
             if hechos >= t.max_diario:
+                st.success("✅ Completado")
                 if st.button("❌ Deshacer", key=f"undo_{t.id}_{fecha_str}"):
                     del db_usuario["historial"][fecha_str][t.id]
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
@@ -846,6 +846,174 @@ def renderizar_dia(fecha_obj):
         with st.expander("Inactivos / Ocultos Hoy"):
             for t in grupos["HIDDEN"]: 
                 with st.expander(f"{t.nombre}"): mostrar_ficha_tecnica(t, lista_tratamientos)
+
+# --- MENÚ Y NAVEGACIÓN ---
+# --- LOGIN ---
+if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+def login_screen():
+    st.title("🔐 Acceso")
+    c1, c2, c3 = st.columns([1,2,1])
+    with c2:
+        usr = st.selectbox("Usuario", ["Seleccionar...", "Benja", "Eva"])
+        if st.button("Entrar", use_container_width=True) and usr != "Seleccionar...":
+            st.session_state.logged_in = True
+            st.session_state.current_user_name = usr
+            st.session_state.current_user_role = "usuario_rutina" if usr == "Benja" else "usuario_libre"
+            st.rerun()
+
+if not st.session_state.logged_in: login_screen(); st.stop()
+
+# --- CARGA GLOBAL ---
+if 'db_global' not in st.session_state: st.session_state.db_global = cargar_datos_completos()
+clave_usuario = st.session_state.current_user_role
+db_usuario = st.session_state.db_global[clave_usuario]
+lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
+
+# --- SIDEBAR ---
+with st.sidebar:
+    st.write(f"Hola, **{st.session_state.current_user_name}**")
+    
+    # Menú Principal (Corregido para mostrar siempre)
+    menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
+    
+    # Botón Ver Modelos (Nuevo)
+    if HAS_GEMINI:
+        with st.expander("🤖 Debug AI"):
+            if st.button("Listar Modelos Gemini"):
+                try:
+                    if 'api_key_val' in st.session_state and st.session_state.api_key_val:
+                        genai.configure(api_key=st.session_state.api_key_val)
+                    elif "GEMINI_API_KEY" in st.secrets:
+                        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+                    
+                    models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                    st.write(models)
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+    # Campo API Key (Si no hay secretos)
+    if HAS_GEMINI:
+        try:
+            _ = st.secrets["GEMINI_API_KEY"]
+        except:
+            if 'api_key_val' not in st.session_state: st.session_state.api_key_val = ""
+            api_key = st.text_input("🔑 OpenAI API Key (Gemini)", type="password", value=st.session_state.api_key_val)
+            if api_key: st.session_state.api_key_val = api_key
+    
+    st.divider()
+    if st.button("💾 Guardar Todo"):
+        guardar_datos_completos(st.session_state.db_global); st.success("Guardado.")
+    
+    if clave_usuario == "usuario_rutina":
+        with st.expander("⚙️ Importar Excel"):
+            uploaded_file = st.file_uploader("Subir .xlsx", type=['xlsx'])
+            if uploaded_file and st.button("Procesar"):
+                new_conf = procesar_excel_rutina(uploaded_file)
+                if new_conf:
+                    st.session_state.db_global["configuracion_rutina"] = new_conf
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Correcto")
+                    st.rerun()
+    st.divider()
+    mostrar_definiciones_ondas()
+    st.divider()
+    if st.button("Cerrar Sesión"): st.session_state.logged_in = False; st.rerun()
+
+# ==========================================
+# RUTAS DE NAVEGACIÓN
+# ==========================================
+
+if menu_navegacion == "📅 Panel Diario":
+    st.title("📅 Panel Diario")
+    c_f, c_r = st.columns([2,1])
+    fecha_seleccionada = c_f.date_input("Fecha", datetime.date.today())
+    renderizar_dia(fecha_seleccionada)
+
+elif menu_navegacion == "🗓️ Panel Semanal":
+    st.title("🗓️ Panel Semanal")
+    d_ref = st.date_input("Semana de Referencia:", datetime.date.today())
+    start_week = d_ref - timedelta(days=d_ref.weekday())
+    tabs = st.tabs(["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"])
+    for i, tab in enumerate(tabs):
+        with tab:
+            dia_tab = start_week + timedelta(days=i)
+            st.subheader(dia_tab.strftime("%A %d/%m"))
+            renderizar_dia(dia_tab)
+
+elif menu_navegacion == "🚑 Clínica":
+    st.title("🚑 Clínica")
+    
+    with st.expander("🆕 Iniciar Nuevo Tratamiento"):
+        zonas = list(DB_TRATAMIENTOS_BASE.keys())
+        c1, c2, c3 = st.columns(3)
+        z = c1.selectbox("Zona", ["--"] + zonas)
+        if z != "--":
+            pats = list(DB_TRATAMIENTOS_BASE[z].keys())
+            p = c2.selectbox("Patología", ["--"] + pats)
+            if p != "--":
+                l = c3.selectbox("Lado", ["Derecho", "Izquierdo"])
+                if l:
+                    fi = st.date_input("Fecha Inicio", datetime.date.today())
+                    
+                    code_lado = "d" if l == "Derecho" else "i"
+                    id_temp = "".join(c for c in f"{z.lower()[:4]}_{p.lower()[:4]}_{code_lado}".lower() if c.isalnum() or c=="_")
+                    
+                    presentes = obtener_tratamientos_presentes(fi.isoformat(), db_usuario, lista_tratamientos)
+                    t_obj = next((t for t in lista_tratamientos if t.id == id_temp), None)
+                    
+                    conflicto_msg = ""
+                    if t_obj:
+                        if t_obj.id in presentes: conflicto_msg = "Ya registrado/planificado hoy."
+                        for pid in presentes:
+                            t_p = next((t for t in lista_tratamientos if t.id == pid), None)
+                            if pid in t_obj.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
+                            if t_p and t_obj.id in t_p.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
+                    
+                    if conflicto_msg:
+                        st.error(f"🚫 Conflicto: {conflicto_msg}")
+                    else:
+                        fin = fi + timedelta(days=60)
+                        st.info(f"📅 Fin Estimado: {fin.strftime('%d/%m/%Y')}")
+                        if st.button("Comenzar Tratamiento"):
+                            if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                            db_usuario["ciclos_activos"][id_temp] = {
+                                "fecha_inicio": fi.isoformat(),
+                                "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
+                            }
+                            guardar_datos_completos(st.session_state.db_global)
+                            st.success("Iniciado"); st.rerun()
+
+    st.divider()
+    st.subheader("Tratamientos Activos")
+    
+    for t in lista_tratamientos:
+        ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+        if ciclo:
+            estado = ciclo.get('estado', 'activo')
+            with st.container(border=True):
+                c1, c2 = st.columns([3, 1])
+                c1.markdown(f"**{t.nombre}** ({estado.upper()})")
+                ini = datetime.date.fromisoformat(ciclo['fecha_inicio'])
+                hoy = datetime.date.today()
+                saltos = len([s for s in ciclo.get('dias_saltados', []) if s < hoy.isoformat()])
+                dias = (hoy - ini).days - saltos
+                c1.progress(min(dias/60, 1.0))
+                c1.caption(f"Día {dias} | Inicio: {ini.strftime('%d/%m')}")
+                
+                if estado == 'activo':
+                    if c2.button("Pausar", key=f"cp_{t.id}"):
+                        ciclo['estado']='pausado'; ciclo['dias_acumulados']=dias; ciclo['activo']=False
+                        guardar_datos_completos(st.session_state.db_global); st.rerun()
+                else:
+                    fr = c2.date_input("Retomar:", key=f"cfr_{t.id}")
+                    if c2.button("Continuar", key=f"cc_{t.id}"):
+                        ciclo['fecha_inicio'] = (fr - timedelta(days=ciclo['dias_acumulados'])).isoformat()
+                        ciclo['estado']='activo'; ciclo['activo']=True; ciclo['dias_saltados']=[]; del ciclo['dias_acumulados']
+                        guardar_datos_completos(st.session_state.db_global); st.rerun()
+                
+                if st.button("🗑️ Finalizar/Cancelar", key=f"cx_{t.id}"):
+                    del db_usuario["ciclos_activos"][t.id]
+                    guardar_datos_completos(st.session_state.db_global); st.rerun()
 
 elif menu_navegacion == "🔍 Buscador AI":
     st.title("🔍 Buscador & Generador AI")
