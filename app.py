@@ -75,285 +75,140 @@ TAGS_ACTIVIDADES = {
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
         "Epicondilitis (Tenista)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz (Dolor)",
-            "dist": "Contacto",
-            "dur": 10,
-            "tips_ant": ["Piel limpia"],
-            "tips_des": ["No pinza con dedos", "Hielo si dolor"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
+            "tips_ant": ["Piel limpia"], "tips_des": ["No pinza con dedos", "Hielo si dolor"]
         },
         "Epitrocleitis (Golfista)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz (Dolor)",
-            "dist": "Contacto",
-            "dur": 10,
-            "tips_ant": ["Piel limpia"],
-            "tips_des": ["Estirar flexores"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
+            "tips_ant": ["Piel limpia"], "tips_des": ["Estirar flexores"]
         },
         "Calcificación": {
-            "ondas": "850nm",
-            "energia": "660nm: 0% | 850nm: 100%",
-            "hz": "50Hz (Analgesia)",
-            "dist": "Contacto",
-            "dur": 12,
-            "tips_ant": ["Calor previo"],
-            "tips_des": ["Movilidad suave"]
+            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 100%", "hz": "50Hz (Analgesia)", "dist": "Contacto", "dur": 12,
+            "tips_ant": ["Calor previo"], "tips_des": ["Movilidad suave"]
         },
         "Bursitis (Apoyo)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "10Hz (Anti-inflamatorio)",
-            "dist": "5cm",
-            "dur": 10,
-            "tips_ant": ["Zona limpia"],
-            "tips_des": ["No apoyar codo"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz (Anti-inflamatorio)", "dist": "5cm", "dur": 10,
+            "tips_ant": ["Zona limpia"], "tips_des": ["No apoyar codo"]
         }
     },
     "Espalda": {
         "Cervicalgia (Cuello)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz (Dolor)",
-            "dist": "10cm",
-            "dur": 15,
-            "tips_ant": ["Sin collar"],
-            "tips_des": ["Movilidad suave"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 15,
+            "tips_ant": ["Sin collar"], "tips_des": ["Movilidad suave"]
         },
         "Dorsalgia (Alta)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz",
-            "dist": "15cm",
-            "dur": 15,
-            "tips_ant": ["Postura recta"],
-            "tips_des": ["Estirar pecho"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz", "dist": "15cm", "dur": 15,
+            "tips_ant": ["Postura recta"], "tips_des": ["Estirar pecho"]
         },
         "Lumbalgia (Baja)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz (Dolor)",
-            "dist": "10cm",
-            "dur": 20,
-            "tips_ant": ["Calor previo"],
-            "tips_des": ["No cargar peso"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 20,
+            "tips_ant": ["Calor previo"], "tips_des": ["No cargar peso"]
         }
     },
     "Antebrazo": {
         "Sobrecarga": {
-            "ondas": "660+850",
-            "energia": "660nm: 80% | 850nm: 80%",
-            "hz": "10Hz (Relajación)",
-            "dist": "15cm",
-            "dur": 12,
-            "tips_ant": ["Quitar sudor"],
-            "tips_des": ["Estirar", "Calor"]
+            "ondas": "660+850", "energia": "660nm: 80% | 850nm: 80%", "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
+            "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar", "Calor"]
         },
         "Tendinitis": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz (Dolor)",
-            "dist": "10cm",
-            "dur": 10,
-            "tips_ant": ["Quitar reloj"],
-            "tips_des": ["Reposo"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Quitar reloj"], "tips_des": ["Reposo"]
         }
     },
     "Muñeca": {
         "Túnel Carpiano": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "10Hz (Nervio)",
-            "dist": "5cm",
-            "dur": 10,
-            "tips_ant": ["Palma abierta"],
-            "tips_des": ["Movilidad"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz (Nervio)", "dist": "5cm", "dur": 10,
+            "tips_ant": ["Palma abierta"], "tips_des": ["Movilidad"]
         },
         "Articular": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz",
-            "dist": "5cm",
-            "dur": 10,
-            "tips_ant": ["Sin muñequera"],
-            "tips_des": ["Hielo"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz", "dist": "5cm", "dur": 10,
+            "tips_ant": ["Sin muñequera"], "tips_des": ["Hielo"]
         }
     },
     "Pierna": {
         "Cintilla Iliotibial": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz (Dolor)",
-            "dist": "Contacto",
-            "dur": 12,
-            "tips_ant": ["Piel limpia"],
-            "tips_des": ["Estirar TFL"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 12,
+            "tips_ant": ["Piel limpia"], "tips_des": ["Estirar TFL"]
         },
         "Sobrecarga Femoral": {
-            "ondas": "660+850",
-            "energia": "660nm: 80% | 850nm: 100%",
-            "hz": "10Hz (Recuperación)",
-            "dist": "10cm",
-            "dur": 15,
-            "tips_ant": ["Quitar sudor"],
-            "tips_des": ["Estirar"]
+            "ondas": "660+850", "energia": "660nm: 80% | 850nm: 100%", "hz": "10Hz (Recuperación)", "dist": "10cm", "dur": 15,
+            "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar"]
         }
     },
     "Pie": {
         "Plantar (Fascitis)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "50Hz",
-            "dist": "5cm",
-            "dur": 10,
-            "tips_ant": ["Sin calcetín"],
-            "tips_des": ["Rodar pelota"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "50Hz", "dist": "5cm", "dur": 10,
+            "tips_ant": ["Sin calcetín"], "tips_des": ["Rodar pelota"]
         },
         "Dorsal (Esguince)": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "10Hz",
-            "dist": "10cm",
-            "dur": 10,
-            "tips_ant": ["Piel limpia"],
-            "tips_des": ["Movilidad"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Piel limpia"], "tips_des": ["Movilidad"]
         }
     },
     "Hombro": {
         "Tendinitis": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "10-40Hz",
-            "dist": "15cm",
-            "dur": 10,
-            "tips_ant": ["Sin ropa"],
-            "tips_des": ["Péndulos"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10-40Hz", "dist": "15cm", "dur": 10,
+            "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos"]
         }
     },
     "Rodilla": {
         "General": {
-            "ondas": "660+850",
-            "energia": "660nm: 50% | 850nm: 100%",
-            "hz": "10Hz",
-            "dist": "15cm",
-            "dur": 10,
-            "tips_ant": ["No hielo antes"],
-            "tips_des": ["Movilidad"]
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", "hz": "10Hz", "dist": "15cm", "dur": 10,
+            "tips_ant": ["No hielo antes"], "tips_des": ["Movilidad"]
         }
     },
     "Piel": {
         "Cicatrices": {
-            "ondas": "630+660",
-            "energia": "660nm: 100% | 850nm: 20%",
-            "hz": "CW",
-            "dist": "10cm",
-            "dur": 10,
-            "tips_ant": ["Limpio"],
-            "tips_des": ["Rosa Mosqueta"]
+            "ondas": "630+660", "energia": "660nm: 100% | 850nm: 20%", "hz": "CW", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Limpio"], "tips_des": ["Rosa Mosqueta"]
         },
         "Acné": {
-            "ondas": "630+660",
-            "energia": "660nm: 80% | 850nm: 0%",
-            "hz": "CW",
-            "dist": "15cm",
-            "dur": 8,
-            "tips_ant": ["Limpio"],
-            "tips_des": ["Hidratar"]
+            "ondas": "630+660", "energia": "660nm: 80% | 850nm: 0%", "hz": "CW", "dist": "15cm", "dur": 8,
+            "tips_ant": ["Limpio"], "tips_des": ["Hidratar"]
         },
         "Quemaduras": {
-            "ondas": "630+660",
-            "energia": "660nm: 50% | 850nm: 0%",
-            "hz": "CW",
-            "dist": "20cm",
-            "dur": 5,
-            "tips_ant": ["Sin cremas"],
-            "tips_des": ["Aloe Vera"]
+            "ondas": "630+660", "energia": "660nm: 50% | 850nm: 0%", "hz": "CW", "dist": "20cm", "dur": 5,
+            "tips_ant": ["Sin cremas"], "tips_des": ["Aloe Vera"]
         }
     },
     "Sistémico": {
         "Circulación": {
-            "ondas": "660+850",
-            "energia": "100% | 100%",
-            "hz": "CW",
-            "dist": "30cm",
-            "dur": 20,
-            "tips_ant": ["Beber agua"],
-            "tips_des": ["Caminar"]
+            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "30cm", "dur": 20,
+            "tips_ant": ["Beber agua"], "tips_des": ["Caminar"]
         },
         "Energía": {
-            "ondas": "660+850",
-            "energia": "100% | 100%",
-            "hz": "CW",
-            "dist": "20cm",
-            "dur": 10,
-            "tips_ant": ["Mañana"],
-            "tips_des": ["Actividad"]
+            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "20cm", "dur": 10,
+            "tips_ant": ["Mañana"], "tips_des": ["Actividad"]
         }
     },
     "Cabeza": {
         "Migraña": {
-            "ondas": "850nm",
-            "energia": "660nm: 0% | 850nm: 50%",
-            "hz": "10Hz (Alfa)",
-            "dist": "Contacto Nuca",
-            "dur": 10,
-            "tips_ant": ["Oscuridad"],
-            "tips_des": ["Reposo"]
+            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 50%", "hz": "10Hz (Alfa)", "dist": "Contacto Nuca", "dur": 10,
+            "tips_ant": ["Oscuridad"], "tips_des": ["Reposo"]
         },
         "Salud Cerebral": {
-            "ondas": "810nm",
-            "energia": "0% | 100%",
-            "hz": "40Hz (Gamma)",
-            "dist": "30cm",
-            "dur": 10,
-            "tips_ant": ["Gafas"],
-            "tips_des": ["Tarea cognitiva"]
+            "ondas": "810nm", "energia": "0% | 100%", "hz": "40Hz (Gamma)", "dist": "30cm", "dur": 10,
+            "tips_ant": ["Gafas"], "tips_des": ["Tarea cognitiva"]
         }
     },
     "Grasa/Estética": {
         "Grasa Localizada": {
-            "ondas": "660+850",
-            "energia": "100% | 100%",
-            "hz": "CW",
-            "dist": "10cm",
-            "dur": 10,
-            "tips_ant": ["Beber agua"],
-            "tips_des": ["Ejercicio"],
-            "visual_group": "PRE",
-            "req_tags": ["Active"]
+            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "10cm", "dur": 10,
+            "tips_ant": ["Beber agua"], "tips_des": ["Ejercicio"], "visual_group": "PRE", "req_tags": ["Active"]
         },
         "Facial": {
-            "ondas": "630nm",
-            "energia": "100% | 0%",
-            "hz": "CW",
-            "dist": "30cm",
-            "dur": 10,
-            "tips_ant": ["Gafas"],
-            "tips_des": ["Serum"],
-            "visual_group": "FLEX"
+            "ondas": "630nm", "energia": "100% | 0%", "hz": "CW", "dist": "30cm", "dur": 10,
+            "tips_ant": ["Gafas"], "tips_des": ["Serum"], "visual_group": "FLEX"
         }
     },
     "Permanente": {
         "Testosterona": {
-            "ondas": "660+850",
-            "energia": "100% | 100%",
-            "hz": "CW",
-            "dist": "15cm",
-            "dur": 5,
-            "tips_ant": ["Piel limpia"],
-            "tips_des": ["Ducha fría"],
-            "visual_group": "MORNING"
+            "ondas": "660+850", "energia": "100% | 100%", "hz": "CW", "dist": "15cm", "dur": 5,
+            "tips_ant": ["Piel limpia"], "tips_des": ["Ducha fría"], "visual_group": "MORNING"
         },
         "Sueño": {
-            "ondas": "630nm",
-            "energia": "20% | 0%",
-            "hz": "CW",
-            "dist": "50cm",
-            "dur": 15,
-            "tips_ant": ["Oscuridad"],
-            "tips_des": ["Dormir"],
-            "visual_group": "NIGHT"
+            "ondas": "630nm", "energia": "20% | 0%", "hz": "CW", "dist": "50cm", "dur": 15,
+            "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"], "visual_group": "NIGHT"
         }
     }
 }
@@ -533,7 +388,7 @@ def mostrar_definiciones_ondas():
 def mostrar_ficha_tecnica(t, lista_completa):
     c1, c2 = st.columns(2)
     with c1: st.markdown(f"**Zona:** {t.zona}\n**Intensidad:** {t.config_energia}")
-    with c2: st.markdown(f"**Hz:** {t.herzios}\n**Tiempo:** {t.duracion} min ({t.distancia})")
+    with c2: st.markdown(f"**Hz:** {t.herzios}\n**Tiempo:** {t.duracion} min")
     st.markdown("---")
     if t.momentos_prohibidos: st.write(f"⏰ **No usar:** {', '.join(t.momentos_prohibidos)}")
     if t.tags_entreno != ['All']: st.write(f"🏋️ **Req:** {', '.join(t.tags_entreno)}")
@@ -587,7 +442,8 @@ def renderizar_dia(fecha_obj):
         with c_f:
             st.markdown(f"**🏋️ Fuerza** ({'Manual' if man_f else 'Auto'})")
             opts_f = [k for k in todas_rutinas if "Remo" not in k and "Cinta" not in k and "Elíptica" not in k and "Andar" not in k]
-            sel_f = st.multiselect("Rutina:", opts_f, default=[x for x in rutina_fuerza if x in opts_f], key=f"sf_{fecha_str}", label_visibility="collapsed")
+            def_f = [x for x in rutina_fuerza if x in opts_f]
+            sel_f = st.multiselect("Rutina:", opts_f, default=def_f, key=f"sf_{fecha_str}", label_visibility="collapsed")
             if set(sel_f) != set(rutina_fuerza):
                 if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
                 db_usuario["meta_diaria"][fecha_str] = sel_f
@@ -636,7 +492,6 @@ def renderizar_dia(fecha_obj):
     if clave_usuario == "usuario_rutina" and st.session_state.get(f"conf_{fecha_str}", False):
         with st.expander("➕ Añadir Tratamiento Adicional"):
             compatibles = []
-            # Llenamos la lista con todos los compatibles (sin filtrar planificados para permitir borrado)
             for t in lista_tratamientos:
                 compatible_tag = False
                 if 'All' in t.tags_entreno or any(tag in tags_dia for tag in t.tags_entreno): compatible_tag = True
@@ -648,7 +503,6 @@ def renderizar_dia(fecha_obj):
             
             if sel_add != "--":
                 t_obj = mapa_comp[sel_add]
-                # Selector Bidireccional
                 esta_planificado = t_obj.id in adhoc_hoy
                 
                 if esta_planificado:
@@ -681,7 +535,6 @@ def renderizar_dia(fecha_obj):
                             if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
                             if t_obj.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t_obj.id] = []
                             db_usuario["historial"][fecha_str][t_obj.id].append({"hora": now, "detalle": mom})
-                            # También marcamos como planificado
                             if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
                             if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
                             db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
@@ -697,7 +550,6 @@ def renderizar_dia(fecha_obj):
         if clave_usuario != "usuario_rutina" and t.id in ids_seleccionados_libre: mostrar = True
         if mostrar: lista_mostrar.append((t, origen))
 
-    # --- BOTÓN REGISTRAR TODO ---
     if lista_mostrar and st.button("⚡ Registrar Todos los Tratamientos del Día", key=f"all_{fecha_str}"):
         now = datetime.datetime.now().strftime('%H:%M')
         if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
@@ -711,7 +563,7 @@ def renderizar_dia(fecha_obj):
                 mapa_inv = {"PRE": "🏋️ Entrenamiento (Pre)", "POST": "🚿 Post-Entreno / Mañana", "NIGHT": "🌙 Noche", "MORNING": "🌞 Mañana"}
                 pref = mapa_inv.get(t.default_visual_group)
                 if pref and pref in valid_opts: momento_final = pref
-                elif valid_opts: momento_final = valid_opts[0] # FALLBACK CLAVE PARA FLEX
+                elif valid_opts: momento_final = valid_opts[0]
             
             bloq, _ = analizar_bloqueos(t, momento_final, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
             if origen in ["adhoc", "clinica"]: bloq = False 
@@ -762,7 +614,6 @@ def renderizar_dia(fecha_obj):
 
             st.success(f"💡 {t.momento_ideal_txt}")
             mostrar_ficha_tecnica(t, lista_tratamientos)
-            
             opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
             valid = [o for o in opts if o not in t.momentos_prohibidos]
             idx_def = valid.index(adhoc_hoy[t.id]) if origen == "adhoc" and adhoc_hoy.get(t.id) in valid else 0
@@ -808,41 +659,188 @@ def renderizar_dia(fecha_obj):
             for t in grupos["HIDDEN"]: 
                 with st.expander(f"{t.nombre}"): mostrar_ficha_tecnica(t, lista_tratamientos)
 
+# --- LOGIN ---
+if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+def login_screen():
+    st.title("🔐 Acceso")
+    c1, c2, c3 = st.columns([1,2,1])
+    with c2:
+        usr = st.selectbox("Usuario", ["Seleccionar...", "Benja", "Eva"])
+        if st.button("Entrar", use_container_width=True) and usr != "Seleccionar...":
+            st.session_state.logged_in = True
+            st.session_state.current_user_name = usr
+            st.session_state.current_user_role = "usuario_rutina" if usr == "Benja" else "usuario_libre"
+            st.rerun()
+
+if not st.session_state.logged_in: login_screen(); st.stop()
+
+# --- CARGA GLOBAL ---
+if 'db_global' not in st.session_state: st.session_state.db_global = cargar_datos_completos()
+clave_usuario = st.session_state.current_user_role
+db_usuario = st.session_state.db_global[clave_usuario]
+lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
+
+# --- SIDEBAR ---
+with st.sidebar:
+    st.write(f"Hola, **{st.session_state.current_user_name}**")
+    if HAS_OPENAI:
+        if 'api_key_val' not in st.session_state: st.session_state.api_key_val = ""
+        api_key = st.text_input("🔑 OpenAI API Key", type="password", value=st.session_state.api_key_val)
+        if api_key: st.session_state.api_key_val = api_key
+    
+    # MENÚ CORREGIDO
+    menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
+    
+    if st.button("💾 Guardar Todo"):
+        guardar_datos_completos(st.session_state.db_global); st.success("Guardado.")
+    if clave_usuario == "usuario_rutina":
+        with st.expander("⚙️ Importar Excel"):
+            uploaded_file = st.file_uploader("Subir .xlsx", type=['xlsx'])
+            if uploaded_file and st.button("Procesar"):
+                new_conf = procesar_excel_rutina(uploaded_file)
+                if new_conf:
+                    st.session_state.db_global["configuracion_rutina"] = new_conf
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Correcto")
+                    st.rerun()
+    st.divider()
+    mostrar_definiciones_ondas()
+    st.divider()
+    if st.button("Cerrar Sesión"): st.session_state.logged_in = False; st.rerun()
+
+# ==========================================
+# RUTAS DE NAVEGACIÓN
+# ==========================================
+
+if menu_navegacion == "📅 Panel Diario":
+    st.title("📅 Panel Diario")
+    c_f, c_r = st.columns([2,1])
+    fecha_seleccionada = c_f.date_input("Fecha", datetime.date.today())
+    renderizar_dia(fecha_seleccionada)
+
+elif menu_navegacion == "🗓️ Panel Semanal":
+    st.title("🗓️ Panel Semanal")
+    d_ref = st.date_input("Semana de Referencia:", datetime.date.today())
+    start_week = d_ref - timedelta(days=d_ref.weekday())
+    tabs = st.tabs(["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"])
+    for i, tab in enumerate(tabs):
+        with tab:
+            dia_tab = start_week + timedelta(days=i)
+            st.subheader(dia_tab.strftime("%A %d/%m"))
+            renderizar_dia(dia_tab)
+
+elif menu_navegacion == "🚑 Clínica":
+    st.title("🚑 Clínica")
+    
+    with st.expander("🆕 Iniciar Nuevo Tratamiento"):
+        zonas = list(DB_TRATAMIENTOS_BASE.keys())
+        c1, c2, c3 = st.columns(3)
+        z = c1.selectbox("Zona", ["--"] + zonas)
+        if z != "--":
+            pats = list(DB_TRATAMIENTOS_BASE[z].keys())
+            p = c2.selectbox("Patología", ["--"] + pats)
+            if p != "--":
+                l = c3.selectbox("Lado", ["Derecho", "Izquierdo"])
+                if l:
+                    fi = st.date_input("Fecha Inicio", datetime.date.today())
+                    
+                    code_lado = "d" if l == "Derecho" else "i"
+                    id_temp = "".join(c for c in f"{z.lower()[:4]}_{p.lower()[:4]}_{code_lado}".lower() if c.isalnum() or c=="_")
+                    
+                    presentes = obtener_tratamientos_presentes(fi.isoformat(), db_usuario, lista_tratamientos)
+                    t_obj = next((t for t in lista_tratamientos if t.id == id_temp), None)
+                    
+                    conflicto_msg = ""
+                    if t_obj:
+                        if t_obj.id in presentes: conflicto_msg = "Ya registrado/planificado hoy."
+                        for pid in presentes:
+                            t_p = next((t for t in lista_tratamientos if t.id == pid), None)
+                            if pid in t_obj.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
+                            if t_p and t_obj.id in t_p.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
+                    
+                    if conflicto_msg:
+                        st.error(f"🚫 Conflicto: {conflicto_msg}")
+                    else:
+                        fin = fi + timedelta(days=60)
+                        st.info(f"📅 Fin Estimado: {fin.strftime('%d/%m/%Y')}")
+                        if st.button("Comenzar Tratamiento"):
+                            if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                            db_usuario["ciclos_activos"][id_temp] = {
+                                "fecha_inicio": fi.isoformat(),
+                                "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
+                            }
+                            guardar_datos_completos(st.session_state.db_global)
+                            st.success("Iniciado"); st.rerun()
+
+    st.divider()
+    st.subheader("Tratamientos Activos")
+    
+    for t in lista_tratamientos:
+        ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+        if ciclo:
+            estado = ciclo.get('estado', 'activo')
+            with st.container(border=True):
+                c1, c2 = st.columns([3, 1])
+                c1.markdown(f"**{t.nombre}** ({estado.upper()})")
+                ini = datetime.date.fromisoformat(ciclo['fecha_inicio'])
+                hoy = datetime.date.today()
+                saltos = len([s for s in ciclo.get('dias_saltados', []) if s < hoy.isoformat()])
+                dias = (hoy - ini).days - saltos
+                c1.progress(min(dias/60, 1.0))
+                c1.caption(f"Día {dias} | Inicio: {ini.strftime('%d/%m')}")
+                
+                if estado == 'activo':
+                    if c2.button("Pausar", key=f"cp_{t.id}"):
+                        ciclo['estado']='pausado'; ciclo['dias_acumulados']=dias; ciclo['activo']=False
+                        guardar_datos_completos(st.session_state.db_global); st.rerun()
+                else:
+                    fr = c2.date_input("Retomar:", key=f"cfr_{t.id}")
+                    if c2.button("Continuar", key=f"cc_{t.id}"):
+                        ciclo['fecha_inicio'] = (fr - timedelta(days=ciclo['dias_acumulados'])).isoformat()
+                        ciclo['estado']='activo'; ciclo['activo']=True; ciclo['dias_saltados']=[]; del ciclo['dias_acumulados']
+                        guardar_datos_completos(st.session_state.db_global); st.rerun()
+                
+                if st.button("🗑️ Finalizar/Cancelar", key=f"cx_{t.id}"):
+                    del db_usuario["ciclos_activos"][t.id]
+                    guardar_datos_completos(st.session_state.db_global); st.rerun()
+
 elif menu_navegacion == "🔍 Buscador AI":
     st.title("🔍 Buscador & Generador AI")
     if not HAS_OPENAI: st.warning("Instala 'openai' para usar esto."); st.stop()
     if 'api_key_val' not in st.session_state: st.session_state.api_key_val = ""
-    api_key = st.text_input("🔑 OpenAI API Key", type="password", value=st.session_state.api_key_val)
-    if api_key: st.session_state.api_key_val = api_key
     
-    query = st.text_input("Describe tu dolencia...")
-    if st.button("Consultar AI") and query and api_key:
-        with st.spinner("Analizando con IA..."):
-            res = consultar_ia(query, api_key)
-            if res:
-                st.success(f"Protocolo: {res['nombre']}")
-                st.json(res)
-                c1, c2 = st.columns(2)
-                if c1.button("📅 Añadir a Hoy"):
-                    id_new = str(uuid.uuid4())[:8]
-                    res['id'] = id_new
-                    res['tipo'] = 'LESION'
-                    res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
-                    db_usuario["tratamientos_custom"].append(res)
-                    hoy = datetime.date.today().isoformat()
-                    if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
-                    if hoy not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][hoy] = {}
-                    db_usuario["planificados_adhoc"][hoy][id_new] = "FLEX"
-                    guardar_datos_completos(st.session_state.db_global); st.success("Añadido"); st.rerun()
-                if c2.button("🚑 Empezar Clínica"):
-                    id_new = str(uuid.uuid4())[:8]
-                    res['id'] = id_new
-                    res['tipo'] = 'LESION'
-                    res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
-                    db_usuario["tratamientos_custom"].append(res)
-                    if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                    db_usuario["ciclos_activos"][id_new] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []}
-                    guardar_datos_completos(st.session_state.db_global); st.success("Iniciado"); st.rerun()
+    # API KEY si no está en sidebar
+    if not st.session_state.api_key_val:
+        st.info("Introduce tu API Key en la barra lateral.")
+    else:
+        query = st.text_input("Describe tu dolencia...")
+        if st.button("Consultar AI") and query:
+            with st.spinner("Analizando con IA..."):
+                res = consultar_ia(query, st.session_state.api_key_val)
+                if res:
+                    st.success(f"Protocolo: {res['nombre']}")
+                    st.json(res)
+                    c1, c2 = st.columns(2)
+                    if c1.button("📅 Añadir a Hoy"):
+                        id_new = str(uuid.uuid4())[:8]
+                        res['id'] = id_new
+                        res['tipo'] = 'LESION'
+                        res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
+                        db_usuario["tratamientos_custom"].append(res)
+                        hoy = datetime.date.today().isoformat()
+                        if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
+                        if hoy not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][hoy] = {}
+                        db_usuario["planificados_adhoc"][hoy][id_new] = "FLEX"
+                        guardar_datos_completos(st.session_state.db_global); st.success("Añadido"); st.rerun()
+                    if c2.button("🚑 Empezar Clínica"):
+                        id_new = str(uuid.uuid4())[:8]
+                        res['id'] = id_new
+                        res['tipo'] = 'LESION'
+                        res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
+                        db_usuario["tratamientos_custom"].append(res)
+                        if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                        db_usuario["ciclos_activos"][id_new] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []}
+                        guardar_datos_completos(st.session_state.db_global); st.success("Iniciado"); st.rerun()
 
 elif menu_navegacion == "📊 Historial":
     st.title("📊 Historial")
