@@ -503,17 +503,24 @@ def procesar_excel_rutina(uploaded_file):
 
 # --- 5. LÓGICA AI (GEMINI) ---
 def consultar_ia(dolencia):
-    # Intentar obtener la clave de st.secrets (BACKEND)
     api_key = None
+    # 1. Intentar desde Secrets
     try:
         api_key = st.secrets["GEMINI_API_KEY"]
     except:
-        st.error("⚠️ No se encontró 'GEMINI_API_KEY' en secrets.toml. Configúralo en .streamlit/secrets.toml")
+        pass
+    
+    # 2. Si no hay secret, mirar session state (sidebar)
+    if not api_key:
+        if 'api_key_val' in st.session_state and st.session_state.api_key_val:
+            api_key = st.session_state.api_key_val
+    
+    if not api_key:
+        st.error("⚠️ Falta API KEY. Configúrala en secrets.toml o en la barra lateral.")
         return None
 
     genai.configure(api_key=api_key)
     
-    # Prompt para Gemini (JSON puro)
     prompt = f"""
     Actúa como un experto en Fotobiomodulación (Red Light Therapy). 
     El usuario tiene: "{dolencia}".
@@ -534,9 +541,14 @@ def consultar_ia(dolencia):
     Responde SOLO con el JSON, sin markdown ni explicaciones adicionales.
     """
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt)
-        # Limpiar respuesta por si incluye ```json ... ```
+        # AUTO-RETRY MODEL LOGIC (Flash -> Pro)
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(prompt)
+        except:
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(prompt)
+            
         clean_text = response.text.replace("```json", "").replace("```", "").strip()
         return json.loads(clean_text)
     except Exception as e:
@@ -726,7 +738,7 @@ def renderizar_dia(fecha_obj):
                 mapa_inv = {"PRE": "🏋️ Entrenamiento (Pre)", "POST": "🚿 Post-Entreno / Mañana", "NIGHT": "🌙 Noche", "MORNING": "🌞 Mañana"}
                 pref = mapa_inv.get(t.default_visual_group)
                 if pref and pref in valid_opts: momento_final = pref
-                elif valid_opts: momento_final = valid_opts[0]
+                elif valid_opts: momento_final = valid_opts[0] # FALLBACK FLEX
             
             bloq, _ = analizar_bloqueos(t, momento_final, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
             if origen in ["adhoc", "clinica"]: bloq = False 
@@ -740,11 +752,11 @@ def renderizar_dia(fecha_obj):
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
-    # FIX V68: Inicializar ids_mostrados antes del bucle
+    # FIX V68: Inicializar ids_mostrados
     ids_mostrados = []
 
     for t, origen in lista_mostrar:
-        ids_mostrados.append(t.id) # FIX V68: Poblar lista
+        ids_mostrados.append(t.id) # FIX V68
         hechos = len(registros_dia.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
@@ -769,11 +781,13 @@ def renderizar_dia(fecha_obj):
 
         with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_ex}{head_xtra}"):
             if t.id in descartados:
+                mostrar_ficha_tecnica(t, lista_tratamientos)
                 if st.button("Recuperar", key=f"rec_{t.id}_{fecha_str}"):
                     db_usuario["descartados"][fecha_str].remove(t.id)
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
                 return
             if hechos >= t.max_diario:
+                st.success("✅ Completado")
                 if st.button("❌ Deshacer", key=f"undo_{t.id}_{fecha_str}"):
                     del db_usuario["historial"][fecha_str][t.id]
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
@@ -852,8 +866,32 @@ lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
     
-    # Menú Principal
+    # Menú Principal (Corregido para mostrar siempre)
     menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
+    
+    # Botón Ver Modelos (Nuevo)
+    if HAS_GEMINI:
+        with st.expander("🤖 Debug AI"):
+            if st.button("Listar Modelos Gemini"):
+                try:
+                    if 'api_key_val' in st.session_state and st.session_state.api_key_val:
+                        genai.configure(api_key=st.session_state.api_key_val)
+                    elif "GEMINI_API_KEY" in st.secrets:
+                        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+                    
+                    models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+                    st.write(models)
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+    # Campo API Key (Si no hay secretos)
+    if HAS_GEMINI:
+        try:
+            _ = st.secrets["GEMINI_API_KEY"]
+        except:
+            if 'api_key_val' not in st.session_state: st.session_state.api_key_val = ""
+            api_key = st.text_input("🔑 OpenAI API Key", type="password", value=st.session_state.api_key_val)
+            if api_key: st.session_state.api_key_val = api_key
     
     st.divider()
     if st.button("💾 Guardar Todo"):
@@ -911,7 +949,7 @@ elif menu_navegacion == "🚑 Clínica":
                     fi = st.date_input("Fecha Inicio", datetime.date.today())
                     
                     code_lado = "d" if l == "Derecho" else "i"
-                    id_temp = "".join(c for c in f"{z.lower()[:4]}_{p.lower()[:4]}_{code_lado}".lower() if c.isalnum() or c=="_")
+                    id_temp = "".join(c for c in f"{z[:3]}_{p[:3]}_{code_lado}".lower() if c.isalnum() or c=="_")
                     
                     presentes = obtener_tratamientos_presentes(fi.isoformat(), db_usuario, lista_tratamientos)
                     t_obj = next((t for t in lista_tratamientos if t.id == id_temp), None)
