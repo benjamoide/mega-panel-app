@@ -423,7 +423,6 @@ def obtener_catalogo(tratamientos_custom=[]):
     catalogo.append(Tratamiento("fat_glutes", "Grasa Glúteos", "Glúteos", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", ["Active", "Lower"], s["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], s["tips_ant"], s["tips_des"]))
     
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
-    # FIX: Usamos .get() para momento_txt para evitar el error si falta la clave en alguna actualización futura
     catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"]))
     
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
@@ -714,7 +713,6 @@ def renderizar_dia(fecha_obj):
         if clave_usuario != "usuario_rutina" and t.id in ids_seleccionados_libre: mostrar = True
         if mostrar: lista_mostrar.append((t, origen))
 
-    # --- BOTÓN REGISTRAR TODO ---
     if lista_mostrar and st.button("⚡ Registrar Todos los Tratamientos del Día", key=f"all_{fecha_str}"):
         now = datetime.datetime.now().strftime('%H:%M')
         if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
@@ -742,7 +740,11 @@ def renderizar_dia(fecha_obj):
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
 
+    # FIX V68: Inicializar ids_mostrados antes del bucle
+    ids_mostrados = []
+
     for t, origen in lista_mostrar:
+        ids_mostrados.append(t.id) # FIX V68: Poblar lista
         hechos = len(registros_dia.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
@@ -850,7 +852,7 @@ lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
     
-    # Menú Principal (Corregido para mostrar siempre)
+    # Menú Principal
     menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
     
     st.divider()
