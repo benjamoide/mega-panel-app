@@ -70,7 +70,7 @@ TAGS_ACTIVIDADES = {
 }
 
 # ==============================================================================
-# 2. DEFINICIÓN MAESTRA DE PATOLOGÍAS
+# 2. DEFINICIÓN MAESTRA (FRECUENCIAS MEGA PANEL)
 # ==============================================================================
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
@@ -243,8 +243,9 @@ DB_TRATAMIENTOS_BASE = {
         "Grasa Localizada": {
             "ondas": "Todas (Mega)", "energia": "TODO AL 100%", 
             "hz": "CW (Continuo)", "dist": "20-30cm", "dur": 15,
+            # CONFIGURACIÓN MEGA PANEL
             "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
-            "tips_ant": ["Beber agua"], "tips_des": ["Ejercicio"], 
+            "tips_ant": ["Beber vaso agua grande"], "tips_des": ["Cardio inmediato (30min)"], 
             "visual_group": "PRE", "req_tags": ["Active"]
         },
         "Facial": {
@@ -296,16 +297,11 @@ class Tratamiento:
         self.tips_antes = tips_antes
         self.tips_despues = tips_despues
         self.incompatible_with = incompatible_with if incompatible_with else []
-        self.incompatibilidades = "" 
         self.fases_config = fases_config if fases_config else []
         self.es_custom = es_custom
         self.patologia = patologia
         self.lado_txt = lado_txt
         self.frecuencias = frecuencias if frecuencias else []
-
-    def set_incompatibilidades(self, texto):
-        self.incompatibilidades = texto
-        return self
 
 # --- GENERADOR DE CATÁLOGO ---
 def obtener_catalogo(tratamientos_custom=[]):
@@ -424,7 +420,7 @@ def procesar_excel_rutina(uploaded_file):
         return {"semana": nueva_semana, "tags": nuevos_tags}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) ---
+# --- 5. LÓGICA AI (GEMINI) - FIX SESSION STATE ---
 def consultar_ia(dolencia):
     api_key = None
     try:
@@ -451,7 +447,7 @@ def consultar_ia(dolencia):
         "zona": "Parte cuerpo",
         "ondas": "660+850",
         "energia": "Dimmer (ej. 660nm: 50% | 850nm: 100%)",
-        "frecuencias": [[660, 50], [850, 100]],  <-- IMPORTANTE: Array de arrays con [nm, %]
+        "frecuencias": [[660, 50], [850, 100]],  
         "hz": "Frecuencia (CW, 10Hz, 40Hz, 50Hz) y motivo",
         "dist": "Distancia cm",
         "dur": 10,
@@ -472,9 +468,9 @@ def consultar_ia(dolencia):
             response = model.generate_content(prompt)
             clean_text = response.text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean_text)
-        except Exception as e:
-            continue 
-    
+        except Exception:
+            continue
+            
     try:
         for m in genai.list_models():
             if 'generateContent' in m.supported_generation_methods:
@@ -488,18 +484,14 @@ def consultar_ia(dolencia):
 
 # --- 6. HELPERS VISUALES ---
 def mostrar_visualizador_mega(t):
-    if not t.frecuencias:
-        return
+    if not t.frecuencias: return
     st.caption("Configuración Panel:")
     cols = st.columns(len(t.frecuencias))
     for idx, (nm, pct) in enumerate(t.frecuencias):
         bg_color = "#ffebee" if pct >= 80 else "#f5f5f5"
         border_color = "#ef5350" if pct >= 80 else "#bdbdbd"
         txt_color = "#b71c1c" if pct >= 80 else "#616161"
-        cols[idx].markdown(
-            f"""<div style="background-color: {bg_color}; border: 1px solid {border_color}; border-radius: 5px; padding: 5px; text-align: center; font-size: 12px; color: {txt_color}; font-weight: bold;">{nm}nm<br><span style="font-size: 14px">{pct}%</span></div>""", 
-            unsafe_allow_html=True
-        )
+        cols[idx].markdown(f"""<div style="background-color: {bg_color}; border: 1px solid {border_color}; border-radius: 5px; padding: 5px; text-align: center; font-size: 12px; color: {txt_color}; font-weight: bold;">{nm}nm<br><span style="font-size: 14px">{pct}%</span></div>""", unsafe_allow_html=True)
 
 def mostrar_definiciones_ondas():
     with st.expander("ℹ️ Guía Técnica (nm/Hz)"):
@@ -560,7 +552,6 @@ def renderizar_dia(fecha_obj):
 
     confirmado_db = db_usuario.get("confirmaciones_diarias", {}).get(fecha_str, False)
 
-    # A. RUTINAS
     if clave_usuario == "usuario_rutina":
         if not confirmado_db:
             c_f, c_c = st.columns(2)
@@ -583,10 +574,10 @@ def renderizar_dia(fecha_obj):
                     if "tiempo" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
                         params["tiempo"] = c_p1.number_input("Min:", value=params.get("tiempo", 15), key=f"t_{fecha_str}")
                     if "velocidad" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
-                        # CORRECCION 1: Step 0.5 y Formato %.1f
+                        # FIX: 0.5 step, 1 decimal
                         params["velocidad"] = c_p2.number_input("Km/h:", value=float(params.get("velocidad", 6.5)), step=0.5, format="%.1f", key=f"v_{fecha_str}")
                     if "inclinacion" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
-                        # CORRECCION 1: Step 0.5 y Formato %.1f
+                        # FIX: 0.5 step, 1 decimal
                         params["inclinacion"] = c_p1.number_input("Inc %:", value=float(params.get("inclinacion", 0.0)), step=0.5, format="%.1f", key=f"i_{fecha_str}")
                     if "pasos" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
                         params["pasos"] = c_p1.number_input("Pasos:", value=params.get("pasos", 10000), key=f"p_{fecha_str}")
@@ -621,7 +612,6 @@ def renderizar_dia(fecha_obj):
     presentes_hoy = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
     registros_dia = db_usuario["historial"].get(fecha_str, {})
     
-    # B. AÑADIR TRATAMIENTO ADICIONAL (SELECTOR JERÁRQUICO)
     if clave_usuario == "usuario_rutina":
         if confirmado_db:
             with st.expander("➕ Añadir Tratamiento Adicional"):
@@ -920,73 +910,89 @@ elif menu_navegacion == "🚑 Clínica":
 elif menu_navegacion == "🔍 Buscador AI":
     st.title("🔍 Buscador & Generador AI")
     if not HAS_GEMINI: st.warning("Instala 'google-generativeai' para usar esto."); st.stop()
+    
+    # ----------------------------------------------------
+    # FIX: PERSISTENCIA DE BÚSQUEDA CON SESSION_STATE
+    # ----------------------------------------------------
+    if 'ai_search_result' not in st.session_state:
+        st.session_state.ai_search_result = None
+
     query = st.text_input("Describe tu dolencia...")
     if st.button("Consultar AI") and query:
-        with st.spinner("Analizando con Gemini (v2.5/2.0)..."):
+        with st.spinner("Analizando con Gemini..."):
             res = consultar_ia(query)
             if res:
-                st.success(f"Protocolo: {res['nombre']}")
-                st.json(res)
-                temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'))
-                mostrar_visualizador_mega(temp_t)
-                st.divider()
+                st.session_state.ai_search_result = res
+            else:
+                st.error("No se pudo obtener respuesta de la IA.")
 
-                # CORRECCIÓN 2: Lógica de Planificación Diaria con Fecha
-                st.subheader("📅 Planificar Puntuamente")
-                d_plan = st.date_input("Fecha para planificar:", datetime.date.today())
-                if st.button("Añadir a Planificación"):
-                    id_new = str(uuid.uuid4())[:8]
-                    res['id'] = id_new
-                    res['tipo'] = 'PUNTUAL'
-                    # Guardamos el tratamiento custom en la lista global
-                    db_usuario["tratamientos_custom"].append(res)
-                    
-                    # Lo añadimos al adhoc del día seleccionado
-                    fecha_plan_str = d_plan.isoformat()
-                    if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
-                    if fecha_plan_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_plan_str] = {}
-                    
-                    db_usuario["planificados_adhoc"][fecha_plan_str][id_new] = "FLEX"
-                    guardar_datos_completos(st.session_state.db_global)
-                    st.success(f"Añadido al {fecha_plan_str}")
-                    st.rerun()
+    # Si hay un resultado guardado, mostramos la UI de gestión
+    if st.session_state.ai_search_result:
+        res = st.session_state.ai_search_result
+        st.success(f"Protocolo Encontrado: {res['nombre']}")
+        st.json(res)
+        
+        # Preview visual
+        temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'))
+        mostrar_visualizador_mega(temp_t)
+        
+        st.markdown("---")
+        c_plan, c_clinic = st.columns(2)
 
-                st.divider()
+        # COLUMNA 1: PLANIFICACIÓN DIARIA
+        with c_plan:
+            st.subheader("📅 Planificar")
+            d_plan = st.date_input("Fecha:", datetime.date.today(), key="date_ai_plan")
+            if st.button("Añadir a la Agenda", use_container_width=True):
+                id_new = str(uuid.uuid4())[:8]
+                res['id'] = id_new
+                res['tipo'] = 'PUNTUAL'
+                # 1. Guardar en DB Global
+                db_usuario["tratamientos_custom"].append(res)
+                # 2. Planificar
+                f_str = d_plan.isoformat()
+                if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
+                if f_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][f_str] = {}
+                db_usuario["planificados_adhoc"][f_str][id_new] = "FLEX"
+                guardar_datos_completos(st.session_state.db_global)
+                st.success(f"Añadido al {f_str}")
+                # Limpiar estado para nueva busqueda opcional
+                st.session_state.ai_search_result = None
+                st.rerun()
 
-                # CORRECCIÓN 3: Lógica de Clínica con opciones separadas
-                st.subheader("🚑 Gestión Clínica")
-                c1, c2 = st.columns(2)
-                
-                # Opción A: Solo Guardar
-                if c1.button("💾 Solo Guardar en Catálogo"):
-                    id_new = str(uuid.uuid4())[:8]
-                    res['id'] = id_new
-                    res['tipo'] = 'LESION'
-                    res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
-                    db_usuario["tratamientos_custom"].append(res)
-                    guardar_datos_completos(st.session_state.db_global)
-                    st.success("Guardado en Tratamientos Custom (sin iniciar)")
-                    st.rerun()
-
-                # Opción B: Iniciar Tratamiento
-                d_inicio_clinica = c2.date_input("Inicio Tratamiento:", datetime.date.today())
-                if c2.button("🚑 Guardar e Iniciar Clínica"):
-                    id_new = str(uuid.uuid4())[:8]
-                    res['id'] = id_new
-                    res['tipo'] = 'LESION'
-                    res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
-                    
-                    # 1. Guardar en custom
-                    db_usuario["tratamientos_custom"].append(res)
-                    # 2. Iniciar en ciclos activos con la fecha seleccionada
+        # COLUMNA 2: CLÍNICA
+        with c_clinic:
+            st.subheader("🚑 Clínica")
+            action = st.radio("Acción:", ["Solo Guardar", "Empezar Tratamiento"], key="radio_ai_clinic")
+            if action == "Empezar Tratamiento":
+                d_start = st.date_input("Inicio:", datetime.date.today(), key="date_ai_start")
+            
+            if st.button("Confirmar Clínica", use_container_width=True):
+                id_new = str(uuid.uuid4())[:8]
+                res['id'] = id_new
+                res['tipo'] = 'LESION'
+                res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
+                # 1. Guardar
+                db_usuario["tratamientos_custom"].append(res)
+                # 2. Activar si procede
+                if action == "Empezar Tratamiento":
                     if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
                     db_usuario["ciclos_activos"][id_new] = {
-                        "fecha_inicio": d_inicio_clinica.isoformat(),
+                        "fecha_inicio": d_start.isoformat(),
                         "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
                     }
-                    guardar_datos_completos(st.session_state.db_global)
-                    st.success(f"Tratamiento iniciado desde el {d_inicio_clinica}")
-                    st.rerun()
+                    msg = f"Tratamiento iniciado el {d_start}"
+                else:
+                    msg = "Guardado en base de datos."
+                
+                guardar_datos_completos(st.session_state.db_global)
+                st.success(msg)
+                st.session_state.ai_search_result = None
+                st.rerun()
+                
+        if st.button("❌ Cancelar / Nueva Búsqueda"):
+            st.session_state.ai_search_result = None
+            st.rerun()
 
 elif menu_navegacion == "📊 Historial":
     st.title("📊 Historial")
