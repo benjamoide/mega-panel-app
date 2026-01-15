@@ -70,9 +70,8 @@ TAGS_ACTIVIDADES = {
 }
 
 # ==============================================================================
-# 2. DEFINICIÓN MAESTRA DE PATOLOGÍAS (ACTUALIZADA MEGA PANEL)
+# 2. DEFINICIÓN MAESTRA DE PATOLOGÍAS
 # ==============================================================================
-# Se ha añadido el campo 'frecuencias': [(nm, %)] a todos los tratamientos para la visualización.
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
         "Epicondilitis (Tenista)": {
@@ -244,7 +243,6 @@ DB_TRATAMIENTOS_BASE = {
         "Grasa Localizada": {
             "ondas": "Todas (Mega)", "energia": "TODO AL 100%", 
             "hz": "CW (Continuo)", "dist": "20-30cm", "dur": 15,
-            # NUEVO: Configuración "Mega Panel" explícita para visualizador
             "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
             "tips_ant": ["Beber agua"], "tips_des": ["Ejercicio"], 
             "visual_group": "PRE", "req_tags": ["Active"]
@@ -253,7 +251,7 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "630nm", "energia": "100% | 0%", 
             "hz": "CW", "dist": "30cm", "dur": 10,
             "frecuencias": [(630, 100), (660, 50)],
-            "tips_ant": ["Gafas"], "tips_des": ["Serum"], 
+            "tips_ant": ["Gafas Obligatorias"], "tips_des": ["Serum"], 
             "visual_group": "FLEX", "momento_txt": "Cualquier hora"
         }
     },
@@ -303,7 +301,6 @@ class Tratamiento:
         self.es_custom = es_custom
         self.patologia = patologia
         self.lado_txt = lado_txt
-        # NUEVO: Campo para el visualizador del panel
         self.frecuencias = frecuencias if frecuencias else []
 
     def set_incompatibilidades(self, texto):
@@ -319,7 +316,7 @@ def obtener_catalogo(tratamientos_custom=[]):
     for zona, patologias in DB_TRATAMIENTOS_BASE.items():
         if zona in ["Grasa/Estética", "Permanente"]: continue
         for patologia, specs in patologias.items():
-            freqs = specs.get("frecuencias", [(660, 50), (850, 100)]) # Default si no existe
+            freqs = specs.get("frecuencias", [(660, 50), (850, 100)])
             if zona in ["Espalda", "Sistémico", "Cabeza", "Piel"]:
                 id_t = "".join(c for c in f"{zona[:4]}_{patologia[:4]}".lower() if c.isalnum() or c=="_")
                 catalogo.append(Tratamiento(
@@ -382,7 +379,7 @@ def cargar_datos_completos():
                 if "meta_cardio" not in datos[user]: datos[user]["meta_cardio"] = {}
                 if "planificados_adhoc" not in datos[user]: datos[user]["planificados_adhoc"] = {}
                 if "tratamientos_custom" not in datos[user]: datos[user]["tratamientos_custom"] = []
-                if "confirmaciones_diarias" not in datos[user]: datos[user]["confirmaciones_diarias"] = {} # NUEVO
+                if "confirmaciones_diarias" not in datos[user]: datos[user]["confirmaciones_diarias"] = {}
             return datos
     except: return default_db
 
@@ -427,7 +424,7 @@ def procesar_excel_rutina(uploaded_file):
         return {"semana": nueva_semana, "tags": nuevos_tags}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) - V75 (CON SOPORTE MEGA PANEL) ---
+# --- 5. LÓGICA AI (GEMINI) ---
 def consultar_ia(dolencia):
     api_key = None
     try:
@@ -445,7 +442,6 @@ def consultar_ia(dolencia):
 
     genai.configure(api_key=api_key)
     
-    # Prompt actualizado para devolver 'frecuencias' para el visualizador
     prompt = f"""
     Actúa como un experto en Fotobiomodulación (Red Light Therapy). 
     El usuario tiene: "{dolencia}".
@@ -492,34 +488,16 @@ def consultar_ia(dolencia):
 
 # --- 6. HELPERS VISUALES ---
 def mostrar_visualizador_mega(t):
-    """Muestra la fila de cajitas de frecuencias"""
     if not t.frecuencias:
         return
-    
     st.caption("Configuración Panel:")
     cols = st.columns(len(t.frecuencias))
     for idx, (nm, pct) in enumerate(t.frecuencias):
-        # Color rojo claro si es 100%, gris si es menos
         bg_color = "#ffebee" if pct >= 80 else "#f5f5f5"
         border_color = "#ef5350" if pct >= 80 else "#bdbdbd"
         txt_color = "#b71c1c" if pct >= 80 else "#616161"
-        
         cols[idx].markdown(
-            f"""
-            <div style="
-                background-color: {bg_color};
-                border: 1px solid {border_color};
-                border-radius: 5px;
-                padding: 5px;
-                text-align: center;
-                font-size: 12px;
-                color: {txt_color};
-                font-weight: bold;
-            ">
-                {nm}nm<br>
-                <span style="font-size: 14px">{pct}%</span>
-            </div>
-            """, 
+            f"""<div style="background-color: {bg_color}; border: 1px solid {border_color}; border-radius: 5px; padding: 5px; text-align: center; font-size: 12px; color: {txt_color}; font-weight: bold;">{nm}nm<br><span style="font-size: 14px">{pct}%</span></div>""", 
             unsafe_allow_html=True
         )
 
@@ -528,10 +506,8 @@ def mostrar_definiciones_ondas():
         st.markdown("""**🔴 630nm / 660nm:** Piel (Regeneración) | **🟣 810nm / 850nm:** Profundidad (Inflamación)\n**⚡ CW:** Dosis Alta | **10Hz:** Recup. Muscular | **40Hz:** Cerebro | **50Hz:** Dolor Agudo""")
 
 def mostrar_ficha_tecnica(t, lista_completa):
-    # NUEVO: Mostrar el gráfico de frecuencias
     mostrar_visualizador_mega(t)
     st.divider()
-    
     c1, c2 = st.columns(2)
     with c1: st.markdown(f"**Zona:** {t.zona}\n**Intensidad:** {t.config_energia}")
     with c2: st.markdown(f"**Hz:** {t.herzios}\n**Tiempo:** {t.duracion} min ({t.distancia})")
@@ -582,12 +558,10 @@ def renderizar_dia(fecha_obj):
     rutina_fuerza, rutina_cardio, tags_dia, man_f, man_c, todas_rutinas = obtener_rutina_completa(fecha_obj, st.session_state.db_global, db_usuario)
     ids_seleccionados_libre = []
 
-    # --- LÓGICA DE CONFIRMACIÓN PERSISTENTE (NUEVO) ---
     confirmado_db = db_usuario.get("confirmaciones_diarias", {}).get(fecha_str, False)
 
     # A. RUTINAS
     if clave_usuario == "usuario_rutina":
-        # Si NO está confirmado en DB, mostramos los selectores
         if not confirmado_db:
             c_f, c_c = st.columns(2)
             with c_f:
@@ -606,31 +580,32 @@ def renderizar_dia(fecha_obj):
                 params = rutina_cardio.copy(); params["actividad"] = sel_c
                 if sel_c != "Descanso Cardio":
                     c_p1, c_p2 = st.columns(2)
-                    if "tiempo" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): params["tiempo"] = c_p1.number_input("Min:", value=params.get("tiempo", 15), key=f"t_{fecha_str}")
-                    if "velocidad" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): params["velocidad"] = c_p2.number_input("Km/h:", value=params.get("velocidad", 6.5), key=f"v_{fecha_str}")
-                    if "inclinacion" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): params["inclinacion"] = c_p1.number_input("Inc %:", value=params.get("inclinacion", 0), key=f"i_{fecha_str}")
-                    if "pasos" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): params["pasos"] = c_p1.number_input("Pasos:", value=params.get("pasos", 10000), key=f"p_{fecha_str}")
+                    if "tiempo" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
+                        params["tiempo"] = c_p1.number_input("Min:", value=params.get("tiempo", 15), key=f"t_{fecha_str}")
+                    if "velocidad" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
+                        # CORRECCION 1: Step 0.5 y Formato %.1f
+                        params["velocidad"] = c_p2.number_input("Km/h:", value=float(params.get("velocidad", 6.5)), step=0.5, format="%.1f", key=f"v_{fecha_str}")
+                    if "inclinacion" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
+                        # CORRECCION 1: Step 0.5 y Formato %.1f
+                        params["inclinacion"] = c_p1.number_input("Inc %:", value=float(params.get("inclinacion", 0.0)), step=0.5, format="%.1f", key=f"i_{fecha_str}")
+                    if "pasos" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
+                        params["pasos"] = c_p1.number_input("Pasos:", value=params.get("pasos", 10000), key=f"p_{fecha_str}")
+                
                 if params != rutina_cardio:
                     if "meta_cardio" not in db_usuario: db_usuario["meta_cardio"] = {}
                     db_usuario["meta_cardio"][fecha_str] = params
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
             
-            # Botón de Confirmación que guarda en JSON
             if st.button("✅ Confirmar Rutina del Día", key=f"btn_c_{fecha_str}", type="primary", use_container_width=True):
                 if "confirmaciones_diarias" not in db_usuario: db_usuario["confirmaciones_diarias"] = {}
                 db_usuario["confirmaciones_diarias"][fecha_str] = True
-                guardar_datos_completos(st.session_state.db_global)
-                st.rerun()
+                guardar_datos_completos(st.session_state.db_global); st.rerun()
         else:
-            # Vista Bloqueada (si ya está confirmado)
             st.success(f"Rutina Confirmada: 🏋️ {', '.join(rutina_fuerza)} | 🏃 {rutina_cardio.get('actividad')}")
             if st.button("✏️ Editar Rutina", key=f"unlock_{fecha_str}"):
                 db_usuario["confirmaciones_diarias"][fecha_str] = False
-                guardar_datos_completos(st.session_state.db_global)
-                st.rerun()
-
+                guardar_datos_completos(st.session_state.db_global); st.rerun()
     else:
-        # USUARIO LIBRE
         ids = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
         mapa_n = {t.nombre: t.id for t in lista_tratamientos}
         mapa_i = {t.id: t.nombre for t in lista_tratamientos}
@@ -646,13 +621,10 @@ def renderizar_dia(fecha_obj):
     presentes_hoy = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
     registros_dia = db_usuario["historial"].get(fecha_str, {})
     
-    # B. AÑADIR TRATAMIENTO ADICIONAL (SELECTOR JERÁRQUICO COMPLETO RESTAURADO)
+    # B. AÑADIR TRATAMIENTO ADICIONAL (SELECTOR JERÁRQUICO)
     if clave_usuario == "usuario_rutina":
-        # Solo mostrar si está confirmado (o usar lógica local session_state si prefieres)
-        # Usaremos la confirmación persistente para habilitar el panel
         if confirmado_db:
             with st.expander("➕ Añadir Tratamiento Adicional"):
-                
                 compatibles = []
                 for t in lista_tratamientos:
                     compatible_tag = False
@@ -660,28 +632,19 @@ def renderizar_dia(fecha_obj):
                     if compatible_tag: compatibles.append(t)
                 
                 if compatibles:
-                    # 1. ZONA
                     zonas_disp = sorted(list(set(t.zona for t in compatibles)))
                     zona_sel = st.selectbox("1. Zona:", ["--"] + zonas_disp, key=f"zs_{fecha_str}")
-                    
                     if zona_sel != "--":
-                        # 2. PATOLOGÍA
                         treats_zona = [t for t in compatibles if t.zona == zona_sel]
                         pats_disp = sorted(list(set(t.patologia for t in treats_zona)))
                         pat_sel = st.selectbox("2. Tratamiento:", ["--"] + pats_disp, key=f"ps_{fecha_str}")
-                        
                         if pat_sel != "--":
-                            # 3. LADO
                             treats_final = [t for t in treats_zona if t.patologia == pat_sel]
                             mapa_lados = {t.lado_txt: t for t in treats_final}
                             lado_sel = st.selectbox("3. Lado/Variante:", list(mapa_lados.keys()), key=f"ls_{fecha_str}")
-                            
                             t_obj = mapa_lados[lado_sel]
-                            
-                            # LÓGICA DE AÑADIR/DESCARTAR
                             esta_planificado = t_obj.id in adhoc_hoy
                             st.markdown("---")
-                            
                             if esta_planificado:
                                 st.warning(f"⚠️ {t_obj.nombre} ya está planificado.")
                                 if st.button("🗑️ Descartar del Plan", key=f"del_plan_{fecha_str}"):
@@ -692,13 +655,11 @@ def renderizar_dia(fecha_obj):
                                 opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
                                 valid = [o for o in opts if o not in t_obj.momentos_prohibidos]
                                 mom = st.selectbox("Momento:", valid, key=f"mad_{fecha_str}")
-                                
                                 bloq, mot = analizar_bloqueos(t_obj, mom, db_usuario["historial"], {}, fecha_str, tags_dia, clave_usuario)
                                 for pid in presentes_hoy:
                                     if pid in t_obj.incompatible_with: bloq=True; mot=f"Incompatible con {pid}"
                                     t_pres = next((tp for tp in lista_tratamientos if tp.id == pid), None)
                                     if t_pres and t_obj.id in t_pres.incompatible_with: bloq=True; mot=f"Incompatible con {pid}"
-                                
                                 if bloq: st.error(mot)
                                 else:
                                     c_pl, c_reg = st.columns(2)
@@ -741,10 +702,8 @@ def renderizar_dia(fecha_obj):
                 pref = mapa_inv.get(t.default_visual_group)
                 if pref and pref in valid_opts: momento_final = pref
                 elif valid_opts: momento_final = valid_opts[0] # FALLBACK FLEX
-            
             bloq, _ = analizar_bloqueos(t, momento_final, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
             if origen in ["adhoc", "clinica"]: bloq = False 
-            
             if not bloq and momento_final:
                 if t.id not in db_usuario["historial"][fecha_str] or not db_usuario["historial"][fecha_str][t.id]:
                     if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
@@ -753,11 +712,9 @@ def renderizar_dia(fecha_obj):
 
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
     mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
-
     ids_mostrados = []
-
     for t, origen in lista_mostrar:
-        ids_mostrados.append(t.id) # POBLAR LISTA
+        ids_mostrados.append(t.id) 
         hechos = len(registros_dia.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
@@ -768,7 +725,6 @@ def renderizar_dia(fecha_obj):
             elif origen == "adhoc" and adhoc_hoy.get(t.id) in mapa_vis: g = mapa_vis[adhoc_hoy[t.id]]
             if g in grupos: grupos[g].append((t, origen))
             else: grupos["FLEX"].append((t, origen))
-    
     if clave_usuario == "usuario_rutina":
         for t in lista_tratamientos:
             if t.id not in ids_mostrados: grupos["HIDDEN"].append(t)
@@ -779,7 +735,6 @@ def renderizar_dia(fecha_obj):
         icon = "❌" if t.id in descartados else ("✅" if hechos>=t.max_diario else "⬜")
         info_ex = f" [CLÍNICA] (Día {(fecha_obj - datetime.date.fromisoformat(db_usuario['ciclos_activos'][t.id]['fecha_inicio'])).days})" if origen == "clinica" else (" [PUNTUAL]" if origen == "adhoc" else "")
         head_xtra = f" | {registros_dia[t.id][-1]['detalle']}" if hechos >= t.max_diario else ""
-
         with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_ex}{head_xtra}"):
             if t.id in descartados:
                 mostrar_ficha_tecnica(t, lista_tratamientos)
@@ -793,17 +748,12 @@ def renderizar_dia(fecha_obj):
                     del db_usuario["historial"][fecha_str][t.id]
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
                 return
-
             st.success(f"💡 {t.momento_ideal_txt}")
-            
-            # --- VISUALIZADOR MEGA PANEL AQUI ---
             mostrar_ficha_tecnica(t, lista_tratamientos)
-            
             opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
             valid = [o for o in opts if o not in t.momentos_prohibidos]
             idx_def = valid.index(adhoc_hoy[t.id]) if origen == "adhoc" and adhoc_hoy.get(t.id) in valid else 0
             sel = st.radio("Momento:", valid, index=idx_def, key=f"rad_{t.id}_{fecha_str}")
-            
             c1, c2, c3 = st.columns([2,1,1])
             bloq, mot = analizar_bloqueos(t, sel, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
             if bloq: c1.warning(mot)
@@ -845,7 +795,6 @@ def renderizar_dia(fecha_obj):
                 with st.expander(f"{t.nombre}"): mostrar_ficha_tecnica(t, lista_tratamientos)
 
 # --- MENÚ Y NAVEGACIÓN ---
-# --- LOGIN ---
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 def login_screen():
     st.title("🔐 Acceso")
@@ -860,31 +809,23 @@ def login_screen():
 
 if not st.session_state.logged_in: login_screen(); st.stop()
 
-# --- CARGA GLOBAL ---
 if 'db_global' not in st.session_state: st.session_state.db_global = cargar_datos_completos()
 clave_usuario = st.session_state.current_user_role
 db_usuario = st.session_state.db_global[clave_usuario]
 lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
 
-# --- SIDEBAR ---
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
-    
     menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
-    
-    # Campo API Key (Si no hay secretos) - V72: Sin Debug
     if HAS_GEMINI:
-        try:
-            _ = st.secrets["GEMINI_API_KEY"]
-        except:
+        try: _ = st.secrets["GEMINI_API_KEY"]
+        except: 
             if 'api_key_val' not in st.session_state: st.session_state.api_key_val = ""
             api_key = st.text_input("🔑 OpenAI API Key (Gemini)", type="password", value=st.session_state.api_key_val)
             if api_key: st.session_state.api_key_val = api_key
-    
     st.divider()
     if st.button("💾 Guardar Todo"):
         guardar_datos_completos(st.session_state.db_global); st.success("Guardado.")
-    
     if clave_usuario == "usuario_rutina":
         with st.expander("⚙️ Importar Excel"):
             uploaded_file = st.file_uploader("Subir .xlsx", type=['xlsx'])
@@ -892,17 +833,11 @@ with st.sidebar:
                 new_conf = procesar_excel_rutina(uploaded_file)
                 if new_conf:
                     st.session_state.db_global["configuracion_rutina"] = new_conf
-                    guardar_datos_completos(st.session_state.db_global)
-                    st.success("Correcto")
-                    st.rerun()
+                    guardar_datos_completos(st.session_state.db_global); st.success("Correcto"); st.rerun()
     st.divider()
     mostrar_definiciones_ondas()
     st.divider()
     if st.button("Cerrar Sesión"): st.session_state.logged_in = False; st.rerun()
-
-# ==========================================
-# RUTAS DE NAVEGACIÓN
-# ==========================================
 
 if menu_navegacion == "📅 Panel Diario":
     st.title("📅 Panel Diario")
@@ -923,8 +858,7 @@ elif menu_navegacion == "🗓️ Panel Semanal":
 
 elif menu_navegacion == "🚑 Clínica":
     st.title("🚑 Clínica")
-    
-    with st.expander("🆕 Iniciar Nuevo Tratamiento"):
+    with st.expander("🆕 Iniciar Nuevo Tratamiento (Catálogo Local)"):
         zonas = list(DB_TRATAMIENTOS_BASE.keys())
         c1, c2, c3 = st.columns(3)
         z = c1.selectbox("Zona", ["--"] + zonas)
@@ -935,13 +869,10 @@ elif menu_navegacion == "🚑 Clínica":
                 l = c3.selectbox("Lado", ["Derecho", "Izquierdo"])
                 if l:
                     fi = st.date_input("Fecha Inicio", datetime.date.today())
-                    
                     code_lado = "d" if l == "Derecho" else "i"
                     id_temp = "".join(c for c in f"{z.lower()[:4]}_{p.lower()[:4]}_{code_lado}".lower() if c.isalnum() or c=="_")
-                    
                     presentes = obtener_tratamientos_presentes(fi.isoformat(), db_usuario, lista_tratamientos)
                     t_obj = next((t for t in lista_tratamientos if t.id == id_temp), None)
-                    
                     conflicto_msg = ""
                     if t_obj:
                         if t_obj.id in presentes: conflicto_msg = "Ya registrado/planificado hoy."
@@ -949,24 +880,16 @@ elif menu_navegacion == "🚑 Clínica":
                             t_p = next((t for t in lista_tratamientos if t.id == pid), None)
                             if pid in t_obj.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
                             if t_p and t_obj.id in t_p.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
-                    
-                    if conflicto_msg:
-                        st.error(f"🚫 Conflicto: {conflicto_msg}")
+                    if conflicto_msg: st.error(f"🚫 Conflicto: {conflicto_msg}")
                     else:
                         fin = fi + timedelta(days=60)
                         st.info(f"📅 Fin Estimado: {fin.strftime('%d/%m/%Y')}")
                         if st.button("Comenzar Tratamiento"):
                             if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                            db_usuario["ciclos_activos"][id_temp] = {
-                                "fecha_inicio": fi.isoformat(),
-                                "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
-                            }
-                            guardar_datos_completos(st.session_state.db_global)
-                            st.success("Iniciado"); st.rerun()
-
+                            db_usuario["ciclos_activos"][id_temp] = {"fecha_inicio": fi.isoformat(), "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []}
+                            guardar_datos_completos(st.session_state.db_global); st.success("Iniciado"); st.rerun()
     st.divider()
     st.subheader("Tratamientos Activos")
-    
     for t in lista_tratamientos:
         ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
         if ciclo:
@@ -980,7 +903,6 @@ elif menu_navegacion == "🚑 Clínica":
                 dias = (hoy - ini).days - saltos
                 c1.progress(min(dias/60, 1.0))
                 c1.caption(f"Día {dias} | Inicio: {ini.strftime('%d/%m')}")
-                
                 if estado == 'activo':
                     if c2.button("Pausar", key=f"cp_{t.id}"):
                         ciclo['estado']='pausado'; ciclo['dias_acumulados']=dias; ciclo['activo']=False
@@ -991,7 +913,6 @@ elif menu_navegacion == "🚑 Clínica":
                         ciclo['fecha_inicio'] = (fr - timedelta(days=ciclo['dias_acumulados'])).isoformat()
                         ciclo['estado']='activo'; ciclo['activo']=True; ciclo['dias_saltados']=[]; del ciclo['dias_acumulados']
                         guardar_datos_completos(st.session_state.db_global); st.rerun()
-                
                 if st.button("🗑️ Finalizar/Cancelar", key=f"cx_{t.id}"):
                     del db_usuario["ciclos_activos"][t.id]
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
@@ -999,7 +920,6 @@ elif menu_navegacion == "🚑 Clínica":
 elif menu_navegacion == "🔍 Buscador AI":
     st.title("🔍 Buscador & Generador AI")
     if not HAS_GEMINI: st.warning("Instala 'google-generativeai' para usar esto."); st.stop()
-    
     query = st.text_input("Describe tu dolencia...")
     if st.button("Consultar AI") and query:
         with st.spinner("Analizando con Gemini (v2.5/2.0)..."):
@@ -1007,35 +927,66 @@ elif menu_navegacion == "🔍 Buscador AI":
             if res:
                 st.success(f"Protocolo: {res['nombre']}")
                 st.json(res)
-                
-                # CREAR OBJETO TEMPORAL PARA VISUALIZAR EN PREVIEW
                 temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'))
                 mostrar_visualizador_mega(temp_t)
+                st.divider()
 
-                c1, c2 = st.columns(2)
-                # BOTÓN 1: SOLO HOY (PUNTUAL)
-                if c1.button("📅 Añadir a Hoy"):
+                # CORRECCIÓN 2: Lógica de Planificación Diaria con Fecha
+                st.subheader("📅 Planificar Puntuamente")
+                d_plan = st.date_input("Fecha para planificar:", datetime.date.today())
+                if st.button("Añadir a Planificación"):
                     id_new = str(uuid.uuid4())[:8]
                     res['id'] = id_new
-                    res['tipo'] = 'LESION'
-                    res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
+                    res['tipo'] = 'PUNTUAL'
+                    # Guardamos el tratamiento custom en la lista global
                     db_usuario["tratamientos_custom"].append(res)
-                    hoy = datetime.date.today().isoformat()
+                    
+                    # Lo añadimos al adhoc del día seleccionado
+                    fecha_plan_str = d_plan.isoformat()
                     if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
-                    if hoy not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][hoy] = {}
-                    db_usuario["planificados_adhoc"][hoy][id_new] = "FLEX"
-                    guardar_datos_completos(st.session_state.db_global); st.success("Añadido"); st.rerun()
+                    if fecha_plan_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_plan_str] = {}
+                    
+                    db_usuario["planificados_adhoc"][fecha_plan_str][id_new] = "FLEX"
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success(f"Añadido al {fecha_plan_str}")
+                    st.rerun()
+
+                st.divider()
+
+                # CORRECCIÓN 3: Lógica de Clínica con opciones separadas
+                st.subheader("🚑 Gestión Clínica")
+                c1, c2 = st.columns(2)
                 
-                # BOTÓN 2: CLÍNICA (RECURRENTE CON FASES)
-                if c2.button("🚑 Empezar Clínica"):
+                # Opción A: Solo Guardar
+                if c1.button("💾 Solo Guardar en Catálogo"):
                     id_new = str(uuid.uuid4())[:8]
                     res['id'] = id_new
                     res['tipo'] = 'LESION'
                     res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
                     db_usuario["tratamientos_custom"].append(res)
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Guardado en Tratamientos Custom (sin iniciar)")
+                    st.rerun()
+
+                # Opción B: Iniciar Tratamiento
+                d_inicio_clinica = c2.date_input("Inicio Tratamiento:", datetime.date.today())
+                if c2.button("🚑 Guardar e Iniciar Clínica"):
+                    id_new = str(uuid.uuid4())[:8]
+                    res['id'] = id_new
+                    res['tipo'] = 'LESION'
+                    res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
+                    
+                    # 1. Guardar en custom
+                    db_usuario["tratamientos_custom"].append(res)
+                    # 2. Iniciar en ciclos activos con la fecha seleccionada
                     if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                    db_usuario["ciclos_activos"][id_new] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []}
-                    guardar_datos_completos(st.session_state.db_global); st.success("Iniciado"); st.rerun()
+                    db_usuario["ciclos_activos"][id_new] = {
+                        "fecha_inicio": d_inicio_clinica.isoformat(),
+                        "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
+                    }
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success(f"Tratamiento iniciado desde el {d_inicio_clinica}")
+                    st.rerun()
 
 elif menu_navegacion == "📊 Historial":
     st.title("📊 Historial")
@@ -1043,7 +994,6 @@ elif menu_navegacion == "📊 Historial":
     hist = db_usuario.get("historial", {})
     t_usados = set([k for r in hist.values() for k in r.keys()])
     mapa = {t.id: t.nombre for t in lista_tratamientos}
-    
     if vista == "Semana":
         d_ref = st.date_input("Semana:", datetime.date.today())
         start = d_ref - timedelta(days=d_ref.weekday())
