@@ -303,6 +303,10 @@ class Tratamiento:
         self.lado_txt = lado_txt
         self.frecuencias = frecuencias if frecuencias else []
 
+    def set_incompatibilidades(self, texto):
+        self.incompatibilidades = texto
+        return self
+
 # --- GENERADOR DE CATÁLOGO ---
 def obtener_catalogo(tratamientos_custom=[]):
     fases_lesion = [{"nombre": "🔥 Fase 1: Inflamatoria", "dias_fin": 7}, {"nombre": "🛠️ Fase 2: Proliferación", "dias_fin": 21}, {"nombre": "🧱 Fase 3: Remodelación", "dias_fin": 60}]
@@ -350,7 +354,7 @@ def obtener_catalogo(tratamientos_custom=[]):
     for c in tratamientos_custom:
         catalogo.append(Tratamiento(
             c['id'], c['nombre'], c['zona'], c['ondas'], c['energia'], c['hz'], c['dist'], c['dur'], 
-            1, 7, c['tipo'], ['All'], "FLEX", "Según AI", [], c['tips_ant'], c['tips_des'], fases_config=c['fases'], es_custom=True,
+            1, 7, c['tipo'], ['All'], "FLEX", "Según AI", [], c['tips_ant'], c['tips_des'], fases_config=c.get('fases', []), es_custom=True,
             patologia=c['nombre'], lado_txt="Personalizado", frecuencias=c.get('frecuencias', [])
         ))
 
