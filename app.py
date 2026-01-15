@@ -70,7 +70,7 @@ TAGS_ACTIVIDADES = {
 }
 
 # ==============================================================================
-# 2. DEFINICIÓN MAESTRA (FRECUENCIAS MEGA PANEL)
+# 2. DEFINICIÓN MAESTRA BASE (CON DESCRIPCIONES)
 # ==============================================================================
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
@@ -78,24 +78,28 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Reduce inflamación en tendón extensor y alivia dolor agudo mediante pulsos analgésicos.",
             "tips_ant": ["Piel limpia"], "tips_des": ["No pinza con dedos", "Hielo si dolor"]
         },
         "Epitrocleitis (Golfista)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Tratamiento regenerativo para la cara interna del codo y flexores.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar flexores"]
         },
         "Calcificación": {
             "ondas": "850nm", "energia": "660nm: 0% | 850nm: 100%", 
             "hz": "50Hz (Analgesia)", "dist": "Contacto", "dur": 12,
             "frecuencias": [(660, 0), (850, 100)],
+            "descripcion": "Infrarrojo profundo para estimular reabsorción de calcio y vascularización.",
             "tips_ant": ["Calor previo"], "tips_des": ["Movilidad suave"]
         },
         "Bursitis (Apoyo)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "10Hz (Anti-inflamatorio)", "dist": "5cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Baja la inflamación de la bursa sin contacto directo para evitar presión.",
             "tips_ant": ["Zona limpia"], "tips_des": ["No apoyar codo"]
         }
     },
@@ -104,18 +108,21 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Relaja tensión cervical y mejora riego sanguíneo para aliviar contracturas.",
             "tips_ant": ["Sin collar"], "tips_des": ["Movilidad suave"]
         },
         "Dorsalgia (Alta)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz", "dist": "15cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Para zona media-alta de la espalda, útil en corrección postural.",
             "tips_ant": ["Postura recta"], "tips_des": ["Estirar pecho"]
         },
         "Lumbalgia (Baja)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 20,
             "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Penetración profunda lumbar para desinflamar discos y musculatura.",
             "tips_ant": ["Calor previo"], "tips_des": ["No cargar peso"]
         }
     },
@@ -124,27 +131,8 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 80% | 850nm: 80%", 
             "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
             "frecuencias": [(660, 80), (850, 80)],
+            "descripcion": "Relajación muscular general del antebrazo por uso excesivo.",
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar", "Calor"]
-        },
-        "Tendinitis": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 10,
-            "frecuencias": [(660, 50), (850, 100)],
-            "tips_ant": ["Quitar reloj"], "tips_des": ["Reposo"]
-        }
-    },
-    "Muñeca": {
-        "Túnel Carpiano": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "10Hz (Nervio)", "dist": "5cm", "dur": 10,
-            "frecuencias": [(660, 50), (850, 100)],
-            "tips_ant": ["Palma abierta"], "tips_des": ["Movilidad"]
-        },
-        "Articular": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "50Hz", "dist": "5cm", "dur": 10,
-            "frecuencias": [(660, 50), (850, 100)],
-            "tips_ant": ["Sin muñequera"], "tips_des": ["Hielo"]
         }
     },
     "Pierna": {
@@ -152,99 +140,23 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 12,
             "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Reduce fricción e inflamación en la fascia lata lateral.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar TFL"]
         },
         "Sobrecarga Femoral": {
             "ondas": "660+850", "energia": "660nm: 80% | 850nm: 100%", 
             "hz": "10Hz (Recuperación)", "dist": "10cm", "dur": 15,
             "frecuencias": [(660, 80), (850, 100)],
+            "descripcion": "Acelera barrido de lactato y reduce fatiga post-entreno.",
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar"]
-        }
-    },
-    "Pie": {
-        "Plantar (Fascitis)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "50Hz", "dist": "5cm", "dur": 10,
-            "frecuencias": [(660, 50), (850, 100)],
-            "tips_ant": ["Sin calcetín"], "tips_des": ["Rodar pelota"]
-        },
-        "Dorsal (Esguince)": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "10Hz (Regeneración)", "dist": "10cm", "dur": 10,
-            "frecuencias": [(660, 50), (850, 100)],
-            "tips_ant": ["Piel limpia"], "tips_des": ["Movilidad"]
-        }
-    },
-    "Hombro": {
-        "Tendinitis": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "10-40Hz", "dist": "15cm", "dur": 10,
-            "frecuencias": [(660, 50), (850, 100)],
-            "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos"]
-        }
-    },
-    "Rodilla": {
-        "General": {
-            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "10Hz", "dist": "15cm", "dur": 10,
-            "frecuencias": [(660, 50), (850, 100)],
-            "tips_ant": ["No hielo antes"], "tips_des": ["Movilidad"]
-        }
-    },
-    "Piel": {
-        "Cicatrices": {
-            "ondas": "630+660", "energia": "660nm: 100% | 850nm: 20%", 
-            "hz": "CW", "dist": "10cm", "dur": 10,
-            "frecuencias": [(660, 100), (850, 20)],
-            "tips_ant": ["Limpio"], "tips_des": ["Rosa Mosqueta"]
-        },
-        "Acné": {
-            "ondas": "630+660", "energia": "660nm: 80% | 850nm: 0%", 
-            "hz": "CW", "dist": "15cm", "dur": 8,
-            "frecuencias": [(660, 80), (850, 0)],
-            "tips_ant": ["Limpio"], "tips_des": ["Hidratar"]
-        },
-        "Quemaduras": {
-            "ondas": "630+660", "energia": "660nm: 50% | 850nm: 0%", 
-            "hz": "CW", "dist": "20cm", "dur": 5,
-            "frecuencias": [(660, 50), (850, 0)],
-            "tips_ant": ["Sin cremas"], "tips_des": ["Aloe Vera"]
-        }
-    },
-    "Sistémico": {
-        "Circulación": {
-            "ondas": "660+850", "energia": "100% | 100%", 
-            "hz": "CW", "dist": "30cm", "dur": 20,
-            "frecuencias": [(660, 100), (850, 100)],
-            "tips_ant": ["Beber agua"], "tips_des": ["Caminar"]
-        },
-        "Energía": {
-            "ondas": "660+850", "energia": "100% | 100%", 
-            "hz": "CW", "dist": "20cm", "dur": 10,
-            "frecuencias": [(660, 100), (850, 100)],
-            "tips_ant": ["Mañana"], "tips_des": ["Actividad"]
-        }
-    },
-    "Cabeza": {
-        "Migraña": {
-            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 50%", 
-            "hz": "10Hz (Alfa)", "dist": "Contacto Nuca", "dur": 10,
-            "frecuencias": [(660, 0), (850, 50)],
-            "tips_ant": ["Oscuridad"], "tips_des": ["Reposo"]
-        },
-        "Salud Cerebral": {
-            "ondas": "810nm", "energia": "0% | 100%", 
-            "hz": "40Hz (Gamma)", "dist": "30cm", "dur": 10,
-            "frecuencias": [(810, 100)],
-            "tips_ant": ["Gafas"], "tips_des": ["Tarea cognitiva"]
         }
     },
     "Grasa/Estética": {
         "Grasa Localizada": {
             "ondas": "Todas (Mega)", "energia": "TODO AL 100%", 
             "hz": "CW (Continuo)", "dist": "20-30cm", "dur": 15,
-            # CONFIGURACIÓN MEGA PANEL
             "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
+            "descripcion": "Lipólisis térmica máxima. Libera ácidos grasos que deben quemarse con ejercicio inmediato.",
             "tips_ant": ["Beber vaso agua grande"], "tips_des": ["Cardio inmediato (30min)"], 
             "visual_group": "PRE", "req_tags": ["Active"]
         },
@@ -252,6 +164,7 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "630nm", "energia": "100% | 0%", 
             "hz": "CW", "dist": "30cm", "dur": 10,
             "frecuencias": [(630, 100), (660, 50)],
+            "descripcion": "Estimulación de colágeno superficial para piel y arrugas finas.",
             "tips_ant": ["Gafas Obligatorias"], "tips_des": ["Serum"], 
             "visual_group": "FLEX", "momento_txt": "Cualquier hora"
         }
@@ -261,6 +174,7 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "100% | 100%", 
             "hz": "CW", "dist": "15cm", "dur": 5,
             "frecuencias": [(660, 100), (850, 100)],
+            "descripcion": "Estimulación mitocondrial en células de Leydig para optimización hormonal.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Ducha fría"], 
             "visual_group": "MORNING"
         },
@@ -268,6 +182,7 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "630nm", "energia": "20% | 0%", 
             "hz": "CW", "dist": "50cm", "dur": 15,
             "frecuencias": [(630, 20)],
+            "descripcion": "Luz roja tenue ambiental para favorecer la producción de melatonina.",
             "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"], 
             "visual_group": "NIGHT"
         }
@@ -278,7 +193,7 @@ DB_TRATAMIENTOS_BASE = {
 # 3. CLASES Y MODELO DE DATOS
 # ==============================================================================
 class Tratamiento:
-    def __init__(self, id_t, nombre, zona, ondas_txt, config_energia, herzios, distancia, duracion, max_diario, max_semanal, tipo, tags_entreno, default_visual_group, momento_ideal_txt, momentos_prohibidos, tips_antes, tips_despues, incompatible_with=None, fases_config=None, es_custom=False, patologia="", lado_txt="", frecuencias=None):
+    def __init__(self, id_t, nombre, zona, ondas_txt, config_energia, herzios, distancia, duracion, max_diario, max_semanal, tipo, tags_entreno, default_visual_group, momento_ideal_txt, momentos_prohibidos, tips_antes, tips_despues, incompatible_with=None, fases_config=None, es_custom=False, patologia="", lado_txt="", frecuencias=None, descripcion=""):
         self.id = id_t
         self.nombre = nombre
         self.zona = zona
@@ -302,61 +217,70 @@ class Tratamiento:
         self.patologia = patologia
         self.lado_txt = lado_txt
         self.frecuencias = frecuencias if frecuencias else []
+        self.descripcion = descripcion
 
     def set_incompatibilidades(self, texto):
         self.incompatibilidades = texto
         return self
 
-# --- GENERADOR DE CATÁLOGO ---
+# --- GENERADOR DE CATÁLOGO (Fusión Base + Custom) ---
 def obtener_catalogo(tratamientos_custom=[]):
     fases_lesion = [{"nombre": "🔥 Fase 1: Inflamatoria", "dias_fin": 7}, {"nombre": "🛠️ Fase 2: Proliferación", "dias_fin": 21}, {"nombre": "🧱 Fase 3: Remodelación", "dias_fin": 60}]
     catalogo = []
-    
-    # 1. Base Local (Dinámicos)
+    ids_procesados = set()
+
+    # 1. Añadir Custom Primero (Prioridad)
+    for c in tratamientos_custom:
+        catalogo.append(Tratamiento(
+            c['id'], c['nombre'], c['zona'], c['ondas'], c['energia'], c['hz'], c['dist'], c['dur'], 
+            1, 7, c['tipo'], ['All'], "FLEX", "Personalizado", [], c['tips_ant'], c['tips_des'], 
+            fases_config=c.get('fases', []), es_custom=True,
+            patologia=c['nombre'], lado_txt="Custom", frecuencias=c.get('frecuencias', []), 
+            descripcion=c.get('descripcion', 'Tratamiento personalizado.')
+        ))
+        ids_procesados.add(c['id'])
+
+    # 2. Añadir Base (Solo si no están en Custom)
     for zona, patologias in DB_TRATAMIENTOS_BASE.items():
-        if zona in ["Grasa/Estética", "Permanente"]: continue
         for patologia, specs in patologias.items():
             freqs = specs.get("frecuencias", [(660, 50), (850, 100)])
+            desc = specs.get("descripcion", "Tratamiento estándar.")
+            
             if zona in ["Espalda", "Sistémico", "Cabeza", "Piel"]:
                 id_t = "".join(c for c in f"{zona[:4]}_{patologia[:4]}".lower() if c.isalnum() or c=="_")
-                catalogo.append(Tratamiento(
-                    id_t, f"{zona} - {patologia}", zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
-                    1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
-                    patologia=patologia, lado_txt="General", frecuencias=freqs
-                ))
-            else:
+                if id_t not in ids_procesados:
+                    catalogo.append(Tratamiento(
+                        id_t, f"{zona} - {patologia}", zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
+                        1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
+                        patologia=patologia, lado_txt="General", frecuencias=freqs, descripcion=desc
+                    ))
+            elif zona not in ["Grasa/Estética", "Permanente", "Cuerpo"]: # Filtro para los que tienen lado
                 for lado_code, lado_nom in [("d", "Derecho"), ("i", "Izquierdo")]:
                     base_id = f"{zona.lower()[:4]}_{patologia.lower()[:4]}_{lado_code}"
                     id_t = "".join(c for c in base_id if c.isalnum() or c == "_")
                     nombre = f"{zona} {lado_nom} ({patologia})"
-                    catalogo.append(Tratamiento(
-                        id_t, nombre, zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
-                        1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
-                        patologia=patologia, lado_txt=lado_nom, frecuencias=freqs
-                    ))
+                    if id_t not in ids_procesados:
+                        catalogo.append(Tratamiento(
+                            id_t, nombre, zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
+                            1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
+                            patologia=patologia, lado_txt=lado_nom, frecuencias=freqs, descripcion=desc
+                        ))
 
-    # 2. Estáticos
+    # 3. Estáticos (Grasa) - Si no fueron sobreescritos
     s = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
-    freqs_grasa = s.get("frecuencias")
-    catalogo.append(Tratamiento("fat_front", "Grasa Abdomen (Frontal)", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", s["req_tags"], s["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt="Frontal", frecuencias=freqs_grasa))
-    catalogo.append(Tratamiento("fat_d", "Grasa Abdomen (Flanco D)", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", s["req_tags"], s["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt="Flanco Dcho", frecuencias=freqs_grasa))
-    catalogo.append(Tratamiento("fat_i", "Grasa Abdomen (Flanco I)", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", s["req_tags"], s["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt="Flanco Izq", frecuencias=freqs_grasa))
-    catalogo.append(Tratamiento("fat_glutes", "Grasa Glúteos", "Glúteos", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", ["Active", "Lower"], s["visual_group"], "Pre-Entreno", ["🌙 Noche", "🚿 Post-Entreno / Mañana"], s["tips_ant"], s["tips_des"], patologia="Grasa Glúteos", lado_txt="General", frecuencias=freqs_grasa))
+    for sufijo, nombre, lado in [("front", "Frontal", "Frontal"), ("d", "Flanco D", "Flanco Dcho"), ("i", "Flanco I", "Flanco Izq"), ("glutes", "Glúteos", "General")]:
+        id_t = f"fat_{sufijo}"
+        if id_t not in ids_procesados:
+            catalogo.append(Tratamiento(id_t, f"Grasa {nombre if 'Glúteos' in nombre else 'Abdomen ('+nombre+')'}", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", s["req_tags"], s["visual_group"], "Pre-Entreno", ["🌙 Noche"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt=lado, frecuencias=s.get("frecuencias"), descripcion=s.get("descripcion")))
     
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
-    catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"], patologia="Facial", lado_txt="General", frecuencias=f.get("frecuencias")))
+    if "face" not in ids_procesados:
+        catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"], patologia="Facial", lado_txt="General", frecuencias=f.get("frecuencias"), descripcion=f.get("descripcion")))
     
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
         id_t = k.lower()
-        catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], v["energia"], v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v.get("momento_txt","FLEX"), [], v["tips_ant"], v["tips_des"], patologia=k, lado_txt="Único", frecuencias=v.get("frecuencias")))
-
-    # 3. Custom AI
-    for c in tratamientos_custom:
-        catalogo.append(Tratamiento(
-            c['id'], c['nombre'], c['zona'], c['ondas'], c['energia'], c['hz'], c['dist'], c['dur'], 
-            1, 7, c['tipo'], ['All'], "FLEX", "Según AI", [], c['tips_ant'], c['tips_des'], fases_config=c.get('fases', []), es_custom=True,
-            patologia=c['nombre'], lado_txt="Personalizado", frecuencias=c.get('frecuencias', [])
-        ))
+        if id_t not in ids_procesados:
+            catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], v["energia"], v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v.get("momento_txt","FLEX"), [], v["tips_ant"], v["tips_des"], patologia=k, lado_txt="Único", frecuencias=v.get("frecuencias"), descripcion=v.get("descripcion")))
 
     return catalogo
 
@@ -424,21 +348,14 @@ def procesar_excel_rutina(uploaded_file):
         return {"semana": nueva_semana, "tags": nuevos_tags}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) - FIX SESSION STATE ---
+# --- 5. LÓGICA AI (GEMINI) ---
 def consultar_ia(dolencia):
     api_key = None
-    try:
-        api_key = st.secrets["GEMINI_API_KEY"]
-    except:
-        pass
+    try: api_key = st.secrets["GEMINI_API_KEY"]
+    except: pass
+    if not api_key and 'api_key_val' in st.session_state: api_key = st.session_state.api_key_val
     
-    if not api_key:
-        if 'api_key_val' in st.session_state and st.session_state.api_key_val:
-            api_key = st.session_state.api_key_val
-    
-    if not api_key:
-        st.error("⚠️ Falta API KEY. Configúrala en secrets.toml o en la barra lateral.")
-        return None
+    if not api_key: st.error("⚠️ Falta API KEY."); return None
 
     genai.configure(api_key=api_key)
     
@@ -449,6 +366,7 @@ def consultar_ia(dolencia):
     {{
         "nombre": "Título corto",
         "zona": "Parte cuerpo",
+        "descripcion": "Explica brevemente qué hace este tratamiento biológicamente y sus beneficios (max 20 palabras)",
         "ondas": "660+850",
         "energia": "Dimmer (ej. 660nm: 50% | 850nm: 100%)",
         "frecuencias": [[660, 50], [850, 100]],  
@@ -464,27 +382,15 @@ def consultar_ia(dolencia):
     Responde SOLO JSON.
     """
     
-    modelos_a_probar = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
-    
-    for modelo_nombre in modelos_a_probar:
+    modelos = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+    for m_nom in modelos:
         try:
-            model = genai.GenerativeModel(modelo_nombre)
+            model = genai.GenerativeModel(m_nom)
             response = model.generate_content(prompt)
             clean_text = response.text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean_text)
-        except Exception:
-            continue
-            
-    try:
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                model = genai.GenerativeModel(m.name)
-                response = model.generate_content(prompt)
-                clean_text = response.text.replace("```json", "").replace("```", "").strip()
-                return json.loads(clean_text)
-    except:
-        st.error("❌ Error fatal: No se encontró ningún modelo Gemini operativo con tu clave.")
-        return None
+        except: continue
+    return None
 
 # --- 6. HELPERS VISUALES ---
 def mostrar_visualizador_mega(t):
@@ -502,6 +408,8 @@ def mostrar_definiciones_ondas():
         st.markdown("""**🔴 630nm / 660nm:** Piel (Regeneración) | **🟣 810nm / 850nm:** Profundidad (Inflamación)\n**⚡ CW:** Dosis Alta | **10Hz:** Recup. Muscular | **40Hz:** Cerebro | **50Hz:** Dolor Agudo""")
 
 def mostrar_ficha_tecnica(t, lista_completa):
+    if t.descripcion:
+        st.info(f"ℹ️ {t.descripcion}")
     mostrar_visualizador_mega(t)
     st.divider()
     c1, c2 = st.columns(2)
@@ -810,7 +718,7 @@ lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
 
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
-    menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI"])
+    menu_navegacion = st.radio("Menú", ["📅 Panel Diario", "🗓️ Panel Semanal", "📊 Historial", "🚑 Clínica", "🔍 Buscador AI", "🗂️ Gestionar Tratamientos"])
     if HAS_GEMINI:
         try: _ = st.secrets["GEMINI_API_KEY"]
         except: 
@@ -915,9 +823,6 @@ elif menu_navegacion == "🔍 Buscador AI":
     st.title("🔍 Buscador & Generador AI")
     if not HAS_GEMINI: st.warning("Instala 'google-generativeai' para usar esto."); st.stop()
     
-    # ----------------------------------------------------
-    # FIX: PERSISTENCIA DE BÚSQUEDA CON SESSION_STATE
-    # ----------------------------------------------------
     if 'ai_search_result' not in st.session_state:
         st.session_state.ai_search_result = None
 
@@ -930,73 +835,149 @@ elif menu_navegacion == "🔍 Buscador AI":
             else:
                 st.error("No se pudo obtener respuesta de la IA.")
 
-    # Si hay un resultado guardado, mostramos la UI de gestión
     if st.session_state.ai_search_result:
         res = st.session_state.ai_search_result
         st.success(f"Protocolo Encontrado: {res['nombre']}")
+        
+        # Muestra la descripcion en resultado AI
+        if 'descripcion' in res: st.info(res['descripcion'])
         st.json(res)
         
-        # Preview visual
-        temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'))
+        temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'), descripcion=res.get('descripcion', ''))
         mostrar_visualizador_mega(temp_t)
         
         st.markdown("---")
-        c_plan, c_clinic = st.columns(2)
+        
+        # BOTON 1: SOLO GUARDAR
+        if st.button("💾 Guardar en Mis Tratamientos (Sin Planificar)", use_container_width=True):
+            id_new = str(uuid.uuid4())[:8]
+            res['id'] = id_new
+            res['tipo'] = 'LESION'
+            res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
+            db_usuario["tratamientos_custom"].append(res)
+            guardar_datos_completos(st.session_state.db_global)
+            st.success("Guardado en tu catálogo. Puedes buscarlo en 'Gestionar Tratamientos'.")
+            st.session_state.ai_search_result = None
+            st.rerun()
 
-        # COLUMNA 1: PLANIFICACIÓN DIARIA
+        c_plan, c_clinic = st.columns(2)
+        # BOTON 2: PLANIFICACIÓN DIARIA
         with c_plan:
             st.subheader("📅 Planificar")
             d_plan = st.date_input("Fecha:", datetime.date.today(), key="date_ai_plan")
-            if st.button("Añadir a la Agenda", use_container_width=True):
+            if st.button("Añadir a Agenda", use_container_width=True):
                 id_new = str(uuid.uuid4())[:8]
                 res['id'] = id_new
                 res['tipo'] = 'PUNTUAL'
-                # 1. Guardar en DB Global
                 db_usuario["tratamientos_custom"].append(res)
-                # 2. Planificar
                 f_str = d_plan.isoformat()
                 if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
                 if f_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][f_str] = {}
                 db_usuario["planificados_adhoc"][f_str][id_new] = "FLEX"
                 guardar_datos_completos(st.session_state.db_global)
                 st.success(f"Añadido al {f_str}")
-                # Limpiar estado para nueva busqueda opcional
                 st.session_state.ai_search_result = None
                 st.rerun()
 
-        # COLUMNA 2: CLÍNICA
+        # BOTON 3: CLÍNICA
         with c_clinic:
             st.subheader("🚑 Clínica")
-            action = st.radio("Acción:", ["Solo Guardar", "Empezar Tratamiento"], key="radio_ai_clinic")
-            if action == "Empezar Tratamiento":
-                d_start = st.date_input("Inicio:", datetime.date.today(), key="date_ai_start")
-            
-            if st.button("Confirmar Clínica", use_container_width=True):
+            d_start = st.date_input("Inicio:", datetime.date.today(), key="date_ai_start")
+            if st.button("Empezar Clínica", use_container_width=True):
                 id_new = str(uuid.uuid4())[:8]
                 res['id'] = id_new
                 res['tipo'] = 'LESION'
                 res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
-                # 1. Guardar
                 db_usuario["tratamientos_custom"].append(res)
-                # 2. Activar si procede
-                if action == "Empezar Tratamiento":
-                    if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                    db_usuario["ciclos_activos"][id_new] = {
-                        "fecha_inicio": d_start.isoformat(),
-                        "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
-                    }
-                    msg = f"Tratamiento iniciado el {d_start}"
-                else:
-                    msg = "Guardado en base de datos."
-                
+                if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                db_usuario["ciclos_activos"][id_new] = {
+                    "fecha_inicio": d_start.isoformat(),
+                    "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
+                }
                 guardar_datos_completos(st.session_state.db_global)
-                st.success(msg)
+                st.success(f"Tratamiento iniciado el {d_start}")
                 st.session_state.ai_search_result = None
                 st.rerun()
                 
         if st.button("❌ Cancelar / Nueva Búsqueda"):
             st.session_state.ai_search_result = None
             st.rerun()
+
+elif menu_navegacion == "🗂️ Gestionar Tratamientos":
+    st.title("🗂️ Gestionar Tratamientos")
+    st.write("Busca, edita o elimina tratamientos de tu base de datos.")
+    
+    # 1. Selector de Tratamiento
+    tratamientos_nombres = [t.nombre for t in lista_tratamientos]
+    seleccion = st.selectbox("Selecciona un tratamiento:", ["--"] + tratamientos_nombres)
+    
+    if seleccion != "--":
+        # Encontrar el objeto seleccionado
+        t_sel = next((t for t in lista_tratamientos if t.nombre == seleccion), None)
+        
+        if t_sel:
+            st.markdown(f"### Editando: {t_sel.nombre}")
+            if not t_sel.es_custom:
+                st.info("ℹ️ Estás editando un tratamiento BASE. Se creará una copia personalizada con tus cambios.")
+            
+            with st.form("edit_form"):
+                new_nombre = st.text_input("Nombre", value=t_sel.nombre)
+                new_desc = st.text_area("Descripción", value=t_sel.descripcion)
+                new_dur = st.number_input("Duración (min)", value=t_sel.duracion)
+                new_dist = st.text_input("Distancia", value=t_sel.distancia)
+                new_hz = st.text_input("Hercios (Hz)", value=t_sel.herzios)
+                
+                # Edición simple de frecuencias (para usuarios avanzados)
+                st.markdown("**Frecuencias (JSON format: [[nm, %], ...])**")
+                freq_str = st.text_area("Configuración Panel", value=json.dumps(t_sel.frecuencias))
+                
+                c1, c2 = st.columns(2)
+                submitted = c1.form_submit_button("💾 Guardar Cambios")
+                
+                if submitted:
+                    try:
+                        parsed_freqs = json.loads(freq_str)
+                        
+                        # Crear objeto diccionario para guardar
+                        new_data = {
+                            "id": t_sel.id if t_sel.es_custom else str(uuid.uuid4())[:8], # Mismo ID si es custom, nuevo si es base
+                            "nombre": new_nombre,
+                            "zona": t_sel.zona, # Mantenemos zona original por simpleza
+                            "ondas": t_sel.ondas_txt,
+                            "energia": "Custom Config",
+                            "hz": new_hz,
+                            "dist": new_dist,
+                            "dur": new_dur,
+                            "tipo": t_sel.tipo,
+                            "tips_ant": t_sel.tips_antes,
+                            "tips_des": t_sel.tips_despues,
+                            "fases": t_sel.fases_config,
+                            "frecuencias": parsed_freqs,
+                            "descripcion": new_desc
+                        }
+                        
+                        # Si era custom, lo actualizamos (borrar viejo, poner nuevo)
+                        if t_sel.es_custom:
+                            db_usuario["tratamientos_custom"] = [t for t in db_usuario["tratamientos_custom"] if t['id'] != t_sel.id]
+                        
+                        # Añadir el nuevo/editado
+                        db_usuario["tratamientos_custom"].append(new_data)
+                        guardar_datos_completos(st.session_state.db_global)
+                        st.success("Tratamiento guardado correctamente.")
+                        st.rerun()
+                        
+                    except Exception as e:
+                        st.error(f"Error al guardar: {e}")
+
+            # Botón de Borrar (Fuera del form)
+            if t_sel.es_custom:
+                st.markdown("---")
+                if st.button("🗑️ Borrar Tratamiento Definitivamente", type="primary"):
+                    db_usuario["tratamientos_custom"] = [t for t in db_usuario["tratamientos_custom"] if t['id'] != t_sel.id]
+                    # Limpiar referencias en historiales/adhoc sería ideal pero complejo, lo dejamos simple
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Tratamiento eliminado.")
+                    st.rerun()
 
 elif menu_navegacion == "📊 Historial":
     st.title("📊 Historial")
