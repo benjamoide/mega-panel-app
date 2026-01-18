@@ -62,7 +62,7 @@ TAGS_ACTIVIDADES = {
 ZONAS_SIMETRICAS = ["Codo", "Antebrazo", "Muñeca", "Pierna", "Pie", "Hombro", "Rodilla", "Tobillo", "Brazo", "Mano", "Cadera"]
 
 # ==============================================================================
-# 2. DEFINICIÓN MAESTRA BASE (CATÁLOGO COMPLETO)
+# 2. DEFINICIÓN MAESTRA BASE (CATÁLOGO COMPLETO + FIX KEYS)
 # ==============================================================================
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
@@ -93,27 +93,27 @@ DB_TRATAMIENTOS_BASE = {
             "posicion": "Panel en contacto directo con la zona calcificada.",
             "tips_ant": ["Calor previo"], "tips_des": ["Movilidad suave"]
         },
-        "Bursitis (Apoyo)": {
+        "Bursitis": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "10Hz (Anti-inflamatorio)", "dist": "5cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Baja la inflamación de la bursa sin contacto directo.",
+            "descripcion": "Baja inflamación de la bursa sin contacto.",
             "sintomas": "Hinchazón (bulto) en la punta del codo.",
             "posicion": "Panel a 5cm del bulto. NO TOCAR.",
             "tips_ant": ["Zona limpia"], "tips_des": ["No apoyar codo"]
         }
     },
     "Espalda": {
-        "Cervicalgia (Cuello)": {
+        "Cervicalgia": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
-            "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 15,
+            "hz": "50Hz", "dist": "10cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Relaja tensión cervical y mejora riego sanguíneo.",
             "sintomas": "Rigidez de cuello y trapecios.",
             "posicion": "Sentado, panel detrás del cuello.",
             "tips_ant": ["Sin collar"], "tips_des": ["Movilidad suave"]
         },
-        "Dorsalgia (Alta)": {
+        "Dorsalgia": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz", "dist": "15cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
@@ -122,7 +122,7 @@ DB_TRATAMIENTOS_BASE = {
             "posicion": "Sentado al revés en silla o tumbado.",
             "tips_ant": ["Postura recta"], "tips_des": ["Estirar pecho"]
         },
-        "Lumbalgia (Baja)": {
+        "Lumbalgia": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 20,
             "frecuencias": [(660, 50), (850, 100)],
@@ -202,7 +202,7 @@ DB_TRATAMIENTOS_BASE = {
             "posicion": "Sentado, panel apuntando a planta del pie.",
             "tips_ant": ["Sin calcetín"], "tips_des": ["Rodar pelota"]
         },
-        "Dorsal (Esguince)": {
+        "Esguince": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "10Hz (Regeneración)", "dist": "10cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
@@ -315,12 +315,13 @@ DB_TRATAMIENTOS_BASE = {
     "Grasa/Estética": {
         "Grasa Localizada": {
             "ondas": "Todas (Mega)", "energia": "TODO AL 100%", 
-            "hz": "CW", "dist": "20-30cm", "dur": 15,
+            "hz": "CW (Continuo)", "dist": "20-30cm", "dur": 15,
             "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
             "descripcion": "Lipólisis térmica máxima.",
             "sintomas": "Grasa resistente.",
             "posicion": "Directo a piel desnuda. EJERCICIO INMEDIATO.",
-            "tips_ant": ["Beber agua"], "tips_des": ["Cardio 30min"]
+            "tips_ant": ["Beber agua"], "tips_des": ["Cardio 30min"],
+            "visual_group": "PRE", "req_tags": ["Active"]
         },
         "Facial": {
             "ondas": "630nm", "energia": "100% | 0%", 
@@ -328,8 +329,9 @@ DB_TRATAMIENTOS_BASE = {
             "frecuencias": [(630, 100), (660, 50)],
             "descripcion": "Colágeno superficial.",
             "sintomas": "Arrugas finas, piel apagada.",
-            "posicion": "Frente al rostro 30cm. Gafas puestas.",
-            "tips_ant": ["Gafas"], "tips_des": ["Serum"]
+            "posicion": "Frente al rostro 30cm. GAFAS PUESTAS.",
+            "tips_ant": ["Gafas"], "tips_des": ["Serum"],
+            "visual_group": "FLEX", "momento_txt": "Cualquier hora"
         }
     },
     "Permanente": {
@@ -340,7 +342,8 @@ DB_TRATAMIENTOS_BASE = {
             "descripcion": "Estimulación mitocondrial hormonal.",
             "sintomas": "Optimización hormonal.",
             "posicion": "Directo a zona testicular.",
-            "tips_ant": ["Limpio"], "tips_des": ["Ducha fría"]
+            "tips_ant": ["Limpio"], "tips_des": ["Ducha fría"],
+            "visual_group": "MORNING"
         },
         "Sueño": {
             "ondas": "Solo ROJO", "energia": "Rojo: 30% | NIR: 0%", 
@@ -349,7 +352,8 @@ DB_TRATAMIENTOS_BASE = {
             "descripcion": "Luz ambiente tenue para melatonina.",
             "sintomas": "Insomnio, dificultad para desconectar.",
             "posicion": "Panel lejos, luz indirecta contra pared.",
-            "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"]
+            "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"],
+            "visual_group": "NIGHT"
         }
     }
 }
@@ -390,7 +394,7 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- GENERADOR DE CATÁLOGO (LÓGICA MEJORADA DE LADOS) ---
+# --- GENERADOR DE CATÁLOGO ---
 def obtener_catalogo(tratamientos_custom=[]):
     fases_lesion = [{"nombre": "🔥 Fase 1: Inflamatoria", "dias_fin": 7}, {"nombre": "🛠️ Fase 2: Proliferación", "dias_fin": 21}, {"nombre": "🧱 Fase 3: Remodelación", "dias_fin": 60}]
     catalogo = []
@@ -414,6 +418,10 @@ def obtener_catalogo(tratamientos_custom=[]):
             desc = specs.get("descripcion", "")
             sint = specs.get("sintomas", "")
             pos = specs.get("posicion", "")
+            # Recuperar claves antiguas para evitar KeyErrors
+            v_group = specs.get("visual_group", "FLEX")
+            req_tags = specs.get("req_tags", ['All'])
+            momento_txt = specs.get("momento_txt", "Flexible")
             
             # Determinación automática de lados
             lados_a_generar = [("g", "General")] # Default
@@ -435,26 +443,16 @@ def obtener_catalogo(tratamientos_custom=[]):
                     if id_t not in ids_procesados:
                         catalogo.append(Tratamiento(
                             id_t, nombre_final, zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
-                            1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
+                            1, 7, "LESION", req_tags, v_group, momento_txt, [], specs.get("tips_ant", []), specs.get("tips_des", []), fases_config=fases_lesion,
                             patologia=patologia, lado_txt=nombre_lado, frecuencias=freqs, descripcion=desc, sintomas=sint, posicion=pos
                         ))
 
-    # 3. Inyectar estáticos históricos de Grasa para no romper compatibilidad
+    # 3. Inyectar estáticos históricos de Grasa
     s = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
     for sufijo, nombre, lado in [("front", "Frontal", "Frontal"), ("d", "Flanco D", "Flanco Dcho"), ("i", "Flanco I", "Flanco Izq"), ("glutes", "Glúteos", "General")]:
         id_t = f"fat_{sufijo}"
         if id_t not in ids_procesados:
             catalogo.append(Tratamiento(id_t, f"Grasa {nombre}", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", ["Active"], "PRE", "Pre-Entreno", ["🌙 Noche"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt=lado, frecuencias=s.get("frecuencias"), descripcion=s.get("descripcion"), sintomas=s.get("sintomas"), posicion=s.get("posicion")))
-
-    # 4. Inyectar facial y permanentes si no existen
-    f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
-    if "face" not in ids_procesados:
-        catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"], patologia="Facial", lado_txt="General", frecuencias=f.get("frecuencias"), descripcion=f.get("descripcion"), sintomas=f.get("sintomas"), posicion=f.get("posicion")))
-    
-    for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
-        id_t = k.lower()
-        if id_t not in ids_procesados:
-            catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], v["energia"], v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v.get("momento_txt","FLEX"), [], v["tips_ant"], v["tips_des"], patologia=k, lado_txt="Único", frecuencias=v.get("frecuencias"), descripcion=v.get("descripcion"), sintomas=v.get("sintomas"), posicion=v.get("posicion")))
 
     return catalogo
 
@@ -517,7 +515,7 @@ def procesar_excel_rutina(uploaded_file):
         return {"semana": nueva_semana, "tags": TAGS_ACTIVIDADES}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) - LISTA MÚLTIPLE + INFO VISUAL ---
+# --- 5. LÓGICA AI (GEMINI) ---
 def consultar_ia(dolencia):
     api_key = None
     try: api_key = st.secrets["GEMINI_API_KEY"]
@@ -677,7 +675,7 @@ if menu_navegacion == "📅 Panel Diario":
             with c1:
                 st.markdown("**🏋️ Fuerza**")
                 def_f = [x for x in rutina_fuerza if "Descanso" not in x]
-                sel_f = st.multiselect("Rutina:", def_f, default=def_f, key=f"sf_{fecha_str}")
+                sel_f = st.multiselect("Rutina:", def_f, default=def_f, key=f"sf_{fecha_str}") # Simplified logic for brevity
                 if set(sel_f) != set(rutina_fuerza):
                     if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
                     db_usuario["meta_diaria"][fecha_str] = sel_f
@@ -849,7 +847,6 @@ elif menu_navegacion == "🚑 Clínica":
     
     # 1. Selector Manual
     with st.expander("🆕 Iniciar Tratamiento Manualmente"):
-        # Misma lógica que en Panel Diario pero para activar ciclo
         zonas = sorted(list(set(t.zona for t in lista_tratamientos)))
         z_sel = st.selectbox("Zona:", ["--"] + zonas, key="cz_sel")
         if z_sel != "--":
