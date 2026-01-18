@@ -404,14 +404,18 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- GENERADOR DE CATÁLOGO (LÓGICA MEJORADA DE LADOS) ---
-def obtener_catalogo(tratamientos_custom=[]):
+# --- GENERADOR DE CATÁLOGO ---
+def obtener_catalogo(tratamientos_custom=[], db_usuario=None):
     fases_lesion = [{"nombre": "🔥 Fase 1: Inflamatoria", "dias_fin": 7}, {"nombre": "🛠️ Fase 2: Proliferación", "dias_fin": 21}, {"nombre": "🧱 Fase 3: Remodelación", "dias_fin": 60}]
     catalogo = []
     ids_procesados = set()
+    ocultos = set()
+    if db_usuario:
+        ocultos = set(db_usuario.get("tratamientos_ocultos", []))
 
     # 1. Custom
     for c in tratamientos_custom:
+        if c['id'] in ocultos: continue
         catalogo.append(Tratamiento(
             c['id'], c['nombre'], c['zona'], c['ondas'], c['energia'], c['hz'], c['dist'], c['dur'], 
             1, 7, c['tipo'], ['All'], "FLEX", "Personalizado", [], c['tips_ant'], c['tips_des'], 
@@ -432,14 +436,12 @@ def obtener_catalogo(tratamientos_custom=[]):
             req_tags = specs.get("req_tags", ['All'])
             momento_txt = specs.get("momento_txt", "Flexible")
             
-            # Determinación automática de lados
-            lados_a_generar = [("g", "General")] # Default
+            lados_a_generar = [("g", "General")] 
             if zona in ZONAS_SIMETRICAS:
                 lados_a_generar = [("d", "Derecho"), ("i", "Izquierdo")]
             elif zona == "Abdomen": 
                 if "Frontal" in patologia: lados_a_generar = [("f", "Frontal")]
             
-            # Excepción para estáticos históricos de grasa (se añaden luego)
             if zona == "Grasa/Estética" and "Grasa Localizada" in patologia:
                 pass 
             else:
@@ -447,8 +449,9 @@ def obtener_catalogo(tratamientos_custom=[]):
                     base_id = f"{zona[:3]}_{patologia[:4]}_{codigo}".lower().replace(" ", "")
                     id_t = "".join(ch for ch in base_id if ch.isalnum() or ch=="_")
                     
+                    if id_t in ocultos: continue
+
                     nombre_final = f"{zona} {nombre_lado} ({patologia})" if nombre_lado != "General" else f"{zona} ({patologia})"
-                    
                     if id_t not in ids_procesados:
                         catalogo.append(Tratamiento(
                             id_t, nombre_final, zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
@@ -460,17 +463,18 @@ def obtener_catalogo(tratamientos_custom=[]):
     s = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
     for sufijo, nombre, lado in [("front", "Frontal", "Frontal"), ("d", "Flanco D", "Flanco Dcho"), ("i", "Flanco I", "Flanco Izq"), ("glutes", "Glúteos", "General")]:
         id_t = f"fat_{sufijo}"
+        if id_t in ocultos: continue
         if id_t not in ids_procesados:
             catalogo.append(Tratamiento(id_t, f"Grasa {nombre}", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", ["Active"], "PRE", "Pre-Entreno", ["🌙 Noche"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt=lado, frecuencias=s.get("frecuencias"), descripcion=s.get("descripcion"), sintomas=s.get("sintomas"), posicion=s.get("posicion")))
 
-    # 4. Inyectar facial y permanentes si no existen
+    # 4. Inyectar facial y permanentes
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
-    if "face" not in ids_procesados:
+    if "face" not in ids_procesados and "face" not in ocultos:
         catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"], patologia="Facial", lado_txt="General", frecuencias=f.get("frecuencias"), descripcion=f.get("descripcion"), sintomas=f.get("sintomas"), posicion=f.get("posicion")))
     
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
         id_t = k.lower()
-        if id_t not in ids_procesados:
+        if id_t not in ids_procesados and id_t not in ocultos:
             catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], v["energia"], v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v.get("momento_txt","FLEX"), [], v["tips_ant"], v["tips_des"], patologia=k, lado_txt="Único", frecuencias=v.get("frecuencias"), descripcion=v.get("descripcion"), sintomas=v.get("sintomas"), posicion=v.get("posicion")))
 
     return catalogo
@@ -481,8 +485,8 @@ def obtener_catalogo(tratamientos_custom=[]):
 def cargar_datos_completos():
     default_db = {
         "configuracion_rutina": {"semana": RUTINA_SEMANAL, "tags": TAGS_ACTIVIDADES},
-        "usuario_rutina": {"historial": {}, "meta_diaria": {}, "meta_cardio": {}, "ciclos_activos": {}, "descartados": {}, "planificados_adhoc": {}, "tratamientos_custom": [], "confirmaciones_diarias": {}}, 
-        "usuario_libre": {"historial": {}, "meta_diaria": {}, "meta_cardio": {}, "ciclos_activos": {}, "descartados": {}, "planificados_adhoc": {}, "tratamientos_custom": [], "confirmaciones_diarias": {}}
+        "usuario_rutina": {"historial": {}, "meta_diaria": {}, "meta_cardio": {}, "ciclos_activos": {}, "descartados": {}, "planificados_adhoc": {}, "tratamientos_custom": [], "confirmaciones_diarias": {}, "tratamientos_ocultos": []}, 
+        "usuario_libre": {"historial": {}, "meta_diaria": {}, "meta_cardio": {}, "ciclos_activos": {}, "descartados": {}, "planificados_adhoc": {}, "tratamientos_custom": [], "confirmaciones_diarias": {}, "tratamientos_ocultos": []}
     }
     if not os.path.exists(ARCHIVO_DATOS): return default_db
     try:
@@ -495,6 +499,7 @@ def cargar_datos_completos():
                 if "planificados_adhoc" not in datos[user]: datos[user]["planificados_adhoc"] = {}
                 if "tratamientos_custom" not in datos[user]: datos[user]["tratamientos_custom"] = []
                 if "confirmaciones_diarias" not in datos[user]: datos[user]["confirmaciones_diarias"] = {}
+                if "tratamientos_ocultos" not in datos[user]: datos[user]["tratamientos_ocultos"] = []
             return datos
     except: return default_db
 
@@ -534,7 +539,7 @@ def procesar_excel_rutina(uploaded_file):
         return {"semana": nueva_semana, "tags": TAGS_ACTIVIDADES}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) - LISTA MÚLTIPLE + INFO VISUAL ---
+# --- 5. LÓGICA AI (GEMINI) ---
 def consultar_ia(dolencia):
     api_key = None
     try: api_key = st.secrets["GEMINI_API_KEY"]
@@ -639,7 +644,7 @@ def obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos):
     return presentes
 
 # ==============================================================================
-# 7. UI PRINCIPAL
+# 7. UI PRINCIPAL Y LÓGICA DE AÑADIR MANUAL
 # ==============================================================================
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 
@@ -659,7 +664,7 @@ if not st.session_state.logged_in: login_screen(); st.stop()
 if 'db_global' not in st.session_state: st.session_state.db_global = cargar_datos_completos()
 clave_usuario = st.session_state.current_user_role
 db_usuario = st.session_state.db_global[clave_usuario]
-lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []))
+lista_tratamientos = obtener_catalogo(db_usuario.get("tratamientos_custom", []), db_usuario)
 
 with st.sidebar:
     st.write(f"Hola, **{st.session_state.current_user_name}**")
@@ -675,8 +680,55 @@ with st.sidebar:
         guardar_datos_completos(st.session_state.db_global); st.success("Guardado.")
     if st.button("Cerrar Sesión"): st.session_state.logged_in = False; st.rerun()
 
+# --- FUNCIÓN MAESTRA DE AÑADIR ---
+def renderizar_seccion_anadir_manual(fecha_obj, db, lista_treats, key_suffix):
+    fecha_str = fecha_obj.isoformat()
+    with st.expander("➕ Añadir Tratamiento (Planificar)"):
+        c1, c2 = st.columns(2)
+        zonas = sorted(list(set(t.zona for t in lista_treats)))
+        z_sel = c1.selectbox("1. Zona:", ["--"] + zonas, key=f"z_{key_suffix}")
+        
+        t_obj = None
+        if z_sel != "--":
+            pats = sorted(list(set(t.patologia for t in lista_treats if t.zona == z_sel)))
+            p_sel = c2.selectbox("2. Tratamiento:", ["--"] + pats, key=f"p_{key_suffix}")
+            
+            if p_sel != "--":
+                vars_objs = [t for t in lista_treats if t.zona == z_sel and t.patologia == p_sel]
+                v_sel = st.selectbox("3. Lado/Variante:", [t.nombre for t in vars_objs], key=f"v_{key_suffix}")
+                t_obj = next((t for t in vars_objs if t.nombre == v_sel), None)
+
+        if t_obj:
+            st.markdown("---")
+            adhoc = db.get("planificados_adhoc", {}).get(fecha_str, {})
+            if adhoc:
+                nombres = []
+                for tid in adhoc:
+                    tr = next((x for x in lista_treats if x.id == tid), None)
+                    if tr: nombres.append(tr.nombre)
+                st.caption(f"📅 Ya planificado para hoy: {', '.join(nombres)}")
+            
+            ci, cp = st.columns(2)
+            if t_obj.sintomas: ci.info(f"**Síntomas:** {t_obj.sintomas}")
+            if t_obj.posicion: cp.warning(f"**Posición:** {t_obj.posicion}")
+            
+            opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
+            valid = [o for o in opts if o not in t_obj.momentos_prohibidos]
+            momento = st.selectbox("4. Momento Ideal:", valid, key=f"mom_{key_suffix}")
+            
+            if st.button("Añadir a la Agenda", key=f"add_{key_suffix}", type="primary"):
+                if "planificados_adhoc" not in db: db["planificados_adhoc"] = {}
+                if fecha_str not in db["planificados_adhoc"]: db["planificados_adhoc"][fecha_str] = {}
+                
+                mapa_momento = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "⛅ Tarde": "FLEX", "🌙 Noche": "NIGHT"}
+                codigo_momento = mapa_momento.get(momento, "FLEX")
+                
+                db["planificados_adhoc"][fecha_str][t_obj.id] = codigo_momento
+                guardar_datos_completos(st.session_state.db_global)
+                st.success(f"Añadido: {t_obj.nombre} ({momento})")
+                st.rerun()
+
 # --- VISTAS ---
-# --- FUNCION RENDERIZADO COMUN ---
 def renderizar_dia_completo(fecha_obj):
     fecha_str = fecha_obj.isoformat()
     rutina_fuerza, rutina_cardio, tags_dia, man_f, man_c, todas_rutinas = obtener_rutina_completa(fecha_obj, st.session_state.db_global, db_usuario)
@@ -720,30 +772,9 @@ def renderizar_dia_completo(fecha_obj):
 
     st.divider()
     
-    # ADD MANUAL
     if confirmado or clave_usuario == "usuario_libre":
-        with st.expander("➕ Añadir Tratamiento Manual"):
-            zonas = sorted(list(set(t.zona for t in lista_tratamientos)))
-            z_sel = st.selectbox("Zona:", ["--"] + zonas, key=f"mz_{fecha_str}")
-            if z_sel != "--":
-                pats = sorted(list(set(t.patologia for t in lista_tratamientos if t.zona == z_sel)))
-                p_sel = st.selectbox("Tratamiento:", ["--"] + pats, key=f"mp_{fecha_str}")
-                if p_sel != "--":
-                    vars_objs = [t for t in lista_tratamientos if t.zona == z_sel and t.patologia == p_sel]
-                    v_sel = st.selectbox("Lado/Variante:", [t.nombre for t in vars_objs], key=f"mv_{fecha_str}")
-                    
-                    t_obj = next((t for t in vars_objs if t.nombre == v_sel), None)
-                    if t_obj:
-                        if t_obj.sintomas: st.info(f"**Síntomas:** {t_obj.sintomas}")
-                        if t_obj.posicion: st.warning(f"**Posición:** {t_obj.posicion}")
-                        
-                        if st.button("Añadir al Día", key=f"bad_{fecha_str}"):
-                            if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
-                            if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
-                            db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = "FLEX"
-                            guardar_datos_completos(st.session_state.db_global); st.rerun()
+        renderizar_seccion_anadir_manual(fecha_obj, db_usuario, lista_tratamientos, f"day_{fecha_str}")
 
-    # RENDER TARJETAS
     adhoc = db_usuario.get("planificados_adhoc", {}).get(fecha_str, {})
     presentes = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
     registros = db_usuario["historial"].get(fecha_str, {})
@@ -756,7 +787,7 @@ def renderizar_dia_completo(fecha_obj):
             ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
             if ciclo and ciclo['activo']: to_show.append((t, "clinica"))
     
-    if to_show and st.button("⚡ Registrar Todo", key=f"all_{fecha_str}"):
+    if to_show and st.button("⚡ Registrar Todo lo Planificado", key=f"all_{fecha_str}"):
         now = datetime.datetime.now().strftime('%H:%M')
         if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
         for t, origen in to_show:
@@ -766,19 +797,23 @@ def renderizar_dia_completo(fecha_obj):
         guardar_datos_completos(st.session_state.db_global); st.rerun()
 
     grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
-    mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
+    mapa_vis = {"PRE": "🏋️ Entrenamiento (Pre)", "POST": "🚿 Post-Entreno / Mañana", "MORNING": "🌞 Mañana", "NIGHT": "🌙 Noche", "FLEX": "Flexible"}
     
     for t, origen in to_show:
         hechos = len(registros.get(t.id, []))
         if t.id in descartados: grupos["DISCARDED"].append((t, origen))
         elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
         else:
-            g = t.default_visual_group
+            planned_code = adhoc.get(t.id, "FLEX")
             rad_key = f"rad_{t.id}_{fecha_str}"
-            # Logic for radio default
-            planned_moment = adhoc.get(t.id, "FLEX")
-            if rad_key in st.session_state and st.session_state[rad_key] in mapa_vis: g = mapa_vis[st.session_state[rad_key]]
-            elif planned_moment in mapa_vis: g = mapa_vis[planned_moment]
+            if rad_key in st.session_state:
+                val = st.session_state[rad_key]
+                if "Pre" in val: g = "PRE"
+                elif "Post" in val: g = "POST"
+                elif "Noche" in val: g = "NIGHT"
+                else: g = "FLEX"
+            else:
+                g = planned_code if planned_code in grupos else t.default_visual_group
             
             if g in grupos: grupos[g].append((t, origen))
             else: grupos["FLEX"].append((t, origen))
@@ -787,7 +822,7 @@ def renderizar_dia_completo(fecha_obj):
         t, origen = item
         hechos = len(registros.get(t.id, []))
         icon = "❌" if t.id in descartados else ("✅" if hechos>=t.max_diario else "⬜")
-        info_ex = f" [CLÍNICA] (Día {(fecha_obj - datetime.date.fromisoformat(db_usuario['ciclos_activos'][t.id]['fecha_inicio'])).days})" if origen == "clinica" else (" [PUNTUAL]" if origen == "adhoc" else "")
+        info_ex = f" [CLÍNICA]" if origen == "clinica" else (" [PUNTUAL]" if origen == "adhoc" else "")
         head_xtra = f" | {registros[t.id][-1]['detalle']}" if hechos >= t.max_diario else ""
         
         with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_ex}{head_xtra}"):
@@ -810,14 +845,13 @@ def renderizar_dia_completo(fecha_obj):
             opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
             valid = [o for o in opts if o not in t.momentos_prohibidos]
             
-            # Selector de momento
             planned = adhoc.get(t.id, "FLEX")
             idx = 0
-            if planned == "PRE": idx = 0
-            elif planned == "POST": idx = 1
-            elif planned == "NIGHT": idx = 3
+            if planned == "PRE" and len(valid)>0: idx = 0
+            elif planned == "POST" and len(valid)>1: idx = 1
+            elif planned == "NIGHT" and len(valid)>3: idx = 3
             
-            sel = st.radio("Momento:", valid, index=0, key=f"rad_{t.id}_{fecha_str}")
+            sel = st.radio("Momento:", valid, index=min(idx, len(valid)-1), key=f"rad_{t.id}_{fecha_str}")
             
             c1, c2, c3 = st.columns([2,1,1])
             bloq, mot = analizar_bloqueos(t, sel, db_usuario["historial"], registros, fecha_str, tags_dia, clave_usuario)
@@ -834,18 +868,9 @@ def renderizar_dia_completo(fecha_obj):
                 if "descartados" not in db_usuario: db_usuario["descartados"] = {}
                 if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
                 db_usuario["descartados"][fecha_str].append(t.id)
-                if origen == "adhoc": del db_usuario["planificados_adhoc"][fecha_str][t.id]
                 guardar_datos_completos(st.session_state.db_global); st.rerun()
             
-            if origen == "clinica" and c3.button("⏭️ Saltar", key=f"sk_{t.id}_{fecha_str}"):
-                c = db_usuario["ciclos_activos"][t.id]
-                if 'dias_saltados' not in c: c['dias_saltados'] = []
-                c['dias_saltados'].append(fecha_str)
-                if "descartados" not in db_usuario: db_usuario["descartados"] = {}
-                if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
-                db_usuario["descartados"][fecha_str].append(t.id)
-                guardar_datos_completos(st.session_state.db_global); st.rerun()
-            elif origen == "adhoc" and c3.button("🗑️ Quitar", key=f"del_{t.id}_{fecha_str}"):
+            if origen == "adhoc" and c3.button("🗑️ Quitar", key=f"del_{t.id}_{fecha_str}"):
                 del db_usuario["planificados_adhoc"][fecha_str][t.id]
                 guardar_datos_completos(st.session_state.db_global); st.rerun()
 
@@ -894,7 +919,6 @@ elif menu_navegacion == "🔍 Buscador AI":
         for i, r in enumerate(st.session_state.ai_results):
             with st.container(border=True):
                 st.subheader(r['nombre'])
-                # Objeto temporal para visualización
                 temp = Tratamiento("prev", r['nombre'], r['zona'], r['ondas'], r['energia'], r['hz'], r['dist'], r['dur'], 1, 7, "AI", [], "FLEX", "AI", [], r['tips_ant'], r['tips_des'], frecuencias=r.get('frecuencias'), descripcion=r.get('descripcion'), sintomas=r.get('sintomas'), posicion=r.get('posicion'))
                 mostrar_ficha_tecnica(temp, [])
                 
@@ -934,12 +958,32 @@ elif menu_navegacion == "🗂️ Gestionar Tratamientos":
     sel = st.selectbox("Editar:", ["--"] + nombres)
     if sel != "--":
         t = next(x for x in lista_tratamientos if x.nombre == sel)
+        
+        # STATUS CLINICO
+        ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+        is_active = ciclo and ciclo.get('activo', False)
+        
+        with st.container(border=True):
+            st.markdown("#### Estado Clínico")
+            c1, c2 = st.columns([3,1])
+            c1.write(f"Estado actual: **{'ACTIVO' if is_active else 'INACTIVO'}**")
+            if is_active:
+                if c2.button("Detener Clínica"):
+                    db_usuario["ciclos_activos"][t.id]['activo'] = False
+                    guardar_datos_completos(st.session_state.db_global); st.rerun()
+            else:
+                if c2.button("Iniciar Clínica"):
+                    if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                    db_usuario["ciclos_activos"][t.id] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True}
+                    guardar_datos_completos(st.session_state.db_global); st.rerun()
+
+        st.markdown("#### Editar Parámetros")
         with st.form("edit"):
             nn = st.text_input("Nombre", t.nombre)
             nd = st.text_area("Descripción", t.descripcion)
             ns = st.text_area("Síntomas", t.sintomas)
             np = st.text_area("Posición", t.posicion)
-            if st.form_submit_button("Guardar"):
+            if st.form_submit_button("Guardar Cambios"):
                 new_data = t.__dict__.copy()
                 new_data['nombre'] = nn; new_data['descripcion'] = nd
                 new_data['sintomas'] = ns; new_data['posicion'] = np
@@ -951,36 +995,30 @@ elif menu_navegacion == "🗂️ Gestionar Tratamientos":
                 guardar_datos_completos(st.session_state.db_global)
                 st.success("Guardado!"); st.rerun()
         
-        if t.es_custom and st.button("Borrar"):
-            db_usuario["tratamientos_custom"] = [x for x in db_usuario["tratamientos_custom"] if x['id'] != t.id]
-            guardar_datos_completos(st.session_state.db_global)
-            st.success("Borrado!"); st.rerun()
+        st.markdown("#### Acciones Peligrosas")
+        if t.es_custom:
+            if st.button("🗑️ Borrar Tratamiento Definitivamente"):
+                db_usuario["tratamientos_custom"] = [x for x in db_usuario["tratamientos_custom"] if x['id'] != t.id]
+                guardar_datos_completos(st.session_state.db_global)
+                st.success("Borrado!"); st.rerun()
+        else:
+            if st.button("👁️ Ocultar del Catálogo (No borrar)"):
+                if "tratamientos_ocultos" not in db_usuario: db_usuario["tratamientos_ocultos"] = []
+                db_usuario["tratamientos_ocultos"].append(t.id)
+                guardar_datos_completos(st.session_state.db_global)
+                st.success("Ocultado!"); st.rerun()
 
 elif menu_navegacion == "🚑 Clínica":
     st.title("🚑 Clínica")
     
     with st.expander("🆕 Iniciar Tratamiento Manualmente"):
-        zonas = sorted(list(set(t.zona for t in lista_tratamientos)))
-        z_sel = st.selectbox("Zona:", ["--"] + zonas, key="cz_sel")
-        if z_sel != "--":
-            pats = sorted(list(set(t.patologia for t in lista_tratamientos if t.zona == z_sel)))
-            p_sel = st.selectbox("Tratamiento:", ["--"] + pats, key="cp_sel")
-            if p_sel != "--":
-                vars_objs = [t for t in lista_tratamientos if t.zona == z_sel and t.patologia == p_sel]
-                v_sel = st.selectbox("Lado/Variante:", [t.nombre for t in vars_objs], key="cv_sel")
-                
-                if st.button("Iniciar Ciclo"):
-                    t_obj = next((t for t in vars_objs if t.nombre == v_sel), None)
-                    if t_obj:
-                        if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                        db_usuario["ciclos_activos"][t_obj.id] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True}
-                        guardar_datos_completos(st.session_state.db_global); st.rerun()
+        renderizar_seccion_anadir_manual(datetime.date.today(), db_usuario, lista_tratamientos, "clinic_start")
 
     for t in lista_tratamientos:
         ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
         if ciclo and ciclo['activo']:
             st.info(f"En curso: {t.nombre} (Desde {ciclo['fecha_inicio']})")
-            if st.button(f"Finalizar {t.nombre}"):
+            if st.button(f"Finalizar {t.nombre}", key=f"fin_{t.id}"):
                 ciclo['activo'] = False
                 guardar_datos_completos(st.session_state.db_global); st.rerun()
 
