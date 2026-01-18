@@ -24,17 +24,13 @@ st.set_page_config(
 ARCHIVO_DATOS = 'historial_mega_panel_pro.json'
 
 # ==============================================================================
-# 1. CONSTANTES, RUTINAS Y CONFIGURACIÓN
+# 1. CONSTANTES Y CONFIGURACIÓN
 # ==============================================================================
 
 RUTINA_SEMANAL = {
-    "0": ["FULLBODY I"],            # Lunes
-    "1": ["TORSO I"],               # Martes
-    "2": ["FULLBODY II"],           # Miércoles
-    "3": ["TORSO II / CIRCUITO"],   # Jueves
-    "4": ["PREVENTIVO I"],          # Viernes
-    "5": ["PREVENTIVO II"],         # Sábado
-    "6": ["Descanso Total"]         # Domingo
+    "0": ["FULLBODY I"], "1": ["TORSO I"], "2": ["FULLBODY II"],
+    "3": ["TORSO II / CIRCUITO"], "4": ["PREVENTIVO I"],
+    "5": ["PREVENTIVO II"], "6": ["Descanso Total"]
 }
 
 CARDIO_DEFAULTS_BY_DAY = {
@@ -53,24 +49,20 @@ GENERIC_CARDIO_PARAMS = {
 }
 
 TAGS_ACTIVIDADES = {
-    "FULLBODY I": ["Upper", "Lower", "Active"], 
-    "TORSO I": ["Upper", "Active"],
-    "PREVENTIVO I": ["Active"], 
-    "FULLBODY II": ["Upper", "Lower", "Active"],
-    "TORSO + CIRCUITO": ["Upper", "Active", "Cardio"], 
-    "PREVENTIVO II": ["Active"],
-    "Descanso Total": [],
-    
-    "Remo Ergómetro": ["Active", "Cardio", "Upper", "Lower"],
-    "Cinta Inclinada": ["Active", "Cardio", "Lower"],
-    "Elíptica": ["Active", "Cardio", "Lower"],
-    "Andar": ["Active", "Lower"],
-    "Andar (Pasos)": ["Active", "Lower"],
+    "FULLBODY I": ["Upper", "Lower", "Active"], "TORSO I": ["Upper", "Active"],
+    "PREVENTIVO I": ["Active"], "FULLBODY II": ["Upper", "Lower", "Active"],
+    "TORSO + CIRCUITO": ["Upper", "Active", "Cardio"], "PREVENTIVO II": ["Active"],
+    "Descanso Total": [], "Remo Ergómetro": ["Active", "Cardio", "Upper", "Lower"],
+    "Cinta Inclinada": ["Active", "Cardio", "Lower"], "Elíptica": ["Active", "Cardio", "Lower"],
+    "Andar": ["Active", "Lower"], "Andar (Pasos)": ["Active", "Lower"],
     "Descanso Cardio": []
 }
 
+# Zonas que generan variantes Derecha/Izquierda automáticamente
+ZONAS_SIMETRICAS = ["Codo", "Antebrazo", "Muñeca", "Pierna", "Pie", "Hombro", "Rodilla", "Tobillo", "Brazo", "Mano", "Cadera"]
+
 # ==============================================================================
-# 2. DEFINICIÓN MAESTRA BASE (CON SÍNTOMAS Y POSICIÓN)
+# 2. DEFINICIÓN MAESTRA BASE (CATÁLOGO COMPLETO)
 # ==============================================================================
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
@@ -79,17 +71,17 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Reduce inflamación en tendón extensor y alivia dolor agudo.",
-            "sintomas": "Dolor en la cara externa del codo, debilidad al agarrar objetos o girar la muñeca.",
-            "posicion": "Sentado frente a una mesa. Brazo apoyado sobre la mesa. Panel colocado lateralmente tocando la zona externa del codo.",
-            "tips_ant": ["Piel limpia"], "tips_des": ["No pinza con dedos", "Hielo si dolor"]
+            "sintomas": "Dolor en la cara externa del codo al agarrar o girar.",
+            "posicion": "Sentado, brazo en mesa. Panel lateral tocando zona externa.",
+            "tips_ant": ["Piel limpia"], "tips_des": ["Hielo si dolor"]
         },
         "Epitrocleitis (Golfista)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Tratamiento regenerativo para la cara interna del codo.",
-            "sintomas": "Dolor en la cara interna del codo que puede irradiarse al antebrazo. Molestia al flexionar la muñeca.",
-            "posicion": "Sentado con el brazo apoyado en mesa, palma hacia arriba. Panel tocando la cara interna del codo.",
+            "descripcion": "Regeneración para la cara interna del codo.",
+            "sintomas": "Dolor interno al flexionar muñeca.",
+            "posicion": "Brazo en mesa, palma arriba. Panel en cara interna.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar flexores"]
         },
         "Calcificación": {
@@ -97,8 +89,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz (Analgesia)", "dist": "Contacto", "dur": 12,
             "frecuencias": [(660, 0), (850, 100)],
             "descripcion": "Infrarrojo profundo para estimular reabsorción de calcio.",
-            "sintomas": "Dolor punzante y limitación de movimiento debido a depósitos de calcio endurecidos.",
-            "posicion": "Panel en contacto directo con la zona donde se palpa la calcificación. Presión ligera.",
+            "sintomas": "Dolor punzante y limitación de movimiento.",
+            "posicion": "Panel en contacto directo con la zona calcificada.",
             "tips_ant": ["Calor previo"], "tips_des": ["Movilidad suave"]
         },
         "Bursitis (Apoyo)": {
@@ -106,8 +98,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "10Hz (Anti-inflamatorio)", "dist": "5cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Baja la inflamación de la bursa sin contacto directo.",
-            "sintomas": "Hinchazón visible (bulto) en la punta del codo, caliente al tacto y doloroso al apoyar.",
-            "posicion": "Brazo relajado. Panel a 5cm de distancia apuntando al 'bulto'. NO TOCAR la piel para no presionar la bursa.",
+            "sintomas": "Hinchazón (bulto) en la punta del codo.",
+            "posicion": "Panel a 5cm del bulto. NO TOCAR.",
             "tips_ant": ["Zona limpia"], "tips_des": ["No apoyar codo"]
         }
     },
@@ -117,8 +109,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Relaja tensión cervical y mejora riego sanguíneo.",
-            "sintomas": "Rigidez en el cuello, dolor al girar la cabeza, tensión en trapecios superiores.",
-            "posicion": "Sentado en silla. Panel detrás a la altura del cuello. Mantener postura erguida.",
+            "sintomas": "Rigidez de cuello y trapecios.",
+            "posicion": "Sentado, panel detrás del cuello.",
             "tips_ant": ["Sin collar"], "tips_des": ["Movilidad suave"]
         },
         "Dorsalgia (Alta)": {
@@ -126,8 +118,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz", "dist": "15cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Para zona media-alta de la espalda y postura.",
-            "sintomas": "Dolor entre los omóplatos, sensación de carga o 'mochila pesada'.",
-            "posicion": "Sentado al revés en una silla (pecho contra el respaldo) o tumbado boca abajo. Panel cubriendo zona interescapular.",
+            "sintomas": "Dolor entre omóplatos.",
+            "posicion": "Sentado al revés en silla o tumbado.",
             "tips_ant": ["Postura recta"], "tips_des": ["Estirar pecho"]
         },
         "Lumbalgia (Baja)": {
@@ -135,8 +127,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 20,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Penetración profunda lumbar para desinflamar discos.",
-            "sintomas": "Dolor en la zona baja de la espalda, dificultad para enderezarse o levantarse de la silla.",
-            "posicion": "Tumbado boca abajo cómodamente o sentado en taburete sin respaldo. Panel centrado en la zona lumbar.",
+            "sintomas": "Dolor en zona baja, dificultad al enderezarse.",
+            "posicion": "Tumbado boca abajo o sentado en taburete.",
             "tips_ant": ["Calor previo"], "tips_des": ["No cargar peso"]
         }
     },
@@ -146,8 +138,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
             "frecuencias": [(660, 80), (850, 80)],
             "descripcion": "Relajación muscular general del antebrazo.",
-            "sintomas": "Sensación de fatiga, antebrazos duros o congestionados tras esfuerzo.",
-            "posicion": "Antebrazo apoyado en mesa. Panel desde arriba cubriendo toda la musculatura.",
+            "sintomas": "Sensación de fatiga, antebrazos duros.",
+            "posicion": "Antebrazo apoyado en mesa. Panel desde arriba.",
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar", "Calor"]
         },
         "Tendinitis": {
@@ -155,8 +147,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Tratamiento anti-inflamatorio localizado.",
-            "sintomas": "Dolor puntual en el trayecto de un tendón al mover los dedos o muñeca.",
-            "posicion": "Localizar el punto exacto de dolor. Panel apuntando directamente a ese punto.",
+            "sintomas": "Dolor puntual en trayecto del tendón.",
+            "posicion": "Panel apuntando directamente al punto de dolor.",
             "tips_ant": ["Quitar reloj"], "tips_des": ["Reposo"]
         }
     },
@@ -166,8 +158,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "10Hz (Nervio)", "dist": "5cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Enfocado en regeneración nerviosa y desinflamación.",
-            "sintomas": "Hormigueo en dedos pulgar, índice y medio. Dolor nocturno.",
-            "posicion": "Palma de la mano hacia arriba. Panel enfocado en la base de la muñeca (zona del reloj).",
+            "sintomas": "Hormigueo en dedos, dolor nocturno.",
+            "posicion": "Palma arriba. Panel en base de muñeca.",
             "tips_ant": ["Palma abierta"], "tips_des": ["Movilidad"]
         },
         "Articular": {
@@ -175,8 +167,8 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz", "dist": "5cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Para dolor articular general y rigidez.",
-            "sintomas": "Dolor difuso en la muñeca al moverla en cualquier dirección.",
-            "posicion": "Ir rotando la muñeca frente al panel para cubrir todas las caras (dorsal, palmar, lateral).",
+            "sintomas": "Dolor difuso al mover la muñeca.",
+            "posicion": "Rotar muñeca frente al panel.",
             "tips_ant": ["Sin muñequera"], "tips_des": ["Hielo"]
         }
     },
@@ -186,47 +178,47 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 12,
             "frecuencias": [(660, 50), (850, 100)],
             "descripcion": "Reduce fricción e inflamación en fascia lata.",
-            "sintomas": "Dolor punzante en la cara externa de la rodilla o muslo al correr o bajar escaleras.",
-            "posicion": "Tumbado de lado o sentado. Panel recorriendo la cara lateral externa del muslo hasta la rodilla.",
+            "sintomas": "Dolor lateral externo rodilla/muslo.",
+            "posicion": "Tumbado de lado, panel en cara externa muslo.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar TFL"]
         },
         "Sobrecarga Femoral": {
             "ondas": "660+850", "energia": "660nm: 80% | 850nm: 100%", 
             "hz": "10Hz (Recuperación)", "dist": "10cm", "dur": 15,
             "frecuencias": [(660, 80), (850, 100)],
-            "descripcion": "Acelera recuperación y barrido de lactato.",
-            "sintomas": "Agujetas fuertes, sensación de pesadez en isquios o cuádriceps.",
-            "posicion": "Sentado (para cuádriceps) o tumbado boca abajo (para isquios). Panel cubriendo el grupo muscular.",
+            "descripcion": "Acelera barrido de lactato y recuperación.",
+            "sintomas": "Fatiga, pesadez muscular.",
+            "posicion": "Panel cubriendo el grupo muscular afectado.",
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar"]
         }
     },
     "Pie": {
-        "Plantar (Fascitis)": {
+        "Fascitis Plantar": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz", "dist": "5cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Tratamiento para la fascia plantar inflamada.",
-            "sintomas": "Dolor agudo en el talón o arco del pie, especialmente al dar los primeros pasos por la mañana.",
-            "posicion": "Sentado con el pie apoyado sobre la rodilla contraria. Panel apuntando directamente a la planta del pie.",
+            "descripcion": "Desinflamación del arco plantar.",
+            "sintomas": "Dolor agudo en talón al pisar.",
+            "posicion": "Sentado, panel apuntando a planta del pie.",
             "tips_ant": ["Sin calcetín"], "tips_des": ["Rodar pelota"]
         },
         "Dorsal (Esguince)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "10Hz (Regeneración)", "dist": "10cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Regeneración de ligamentos tras torcedura.",
-            "sintomas": "Dolor e hinchazón en la parte externa o empeine tras una torcedura.",
-            "posicion": "Pie apoyado en suelo o taburete. Panel enfocado a la zona hinchada (generalmente maléolo externo).",
+            "descripcion": "Regeneración de ligamentos.",
+            "sintomas": "Dolor e hinchazón tobillo/empeine.",
+            "posicion": "Panel enfocado a zona hinchada.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Movilidad"]
         },
         "Lateral (Metatarso)": {
             "ondas": "Todas (Mega)", "energia": "TODO 100%", 
             "hz": "50Hz (Analgesia)", "dist": "10cm", "dur": 12,
             "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
-            "descripcion": "Alivio dolor agudo en lateral del pie (5º metatarsiano). Anti-inflamación profunda ósea.",
-            "sintomas": "Dolor en el borde exterior del pie, debajo del dedo pequeño (juanete de sastre o sobrecarga).",
-            "posicion": "Sentado, pie relajado sobre un taburete. Colocar el panel de lado en el suelo apuntando directamente al lateral del pie.",
-            "tips_ant": ["Pie limpio", "Sentado cómodo"], "tips_des": ["Movilidad dedos", "No pisar fuerte"]
+            "descripcion": "Alivio dolor agudo en 5º metatarsiano.",
+            "sintomas": "Dolor borde exterior del pie bajo dedo pequeño.",
+            "posicion": "Panel de lado en suelo apuntando al lateral del pie.",
+            "tips_ant": ["Pie limpio"], "tips_des": ["Movilidad dedos"]
         }
     },
     "Hombro": {
@@ -234,20 +226,20 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "10-40Hz", "dist": "15cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Para manguito rotador y tendones inflamados.",
-            "sintomas": "Dolor al levantar el brazo lateralmente o por la noche al dormir sobre ese lado.",
-            "posicion": "Sentado. Panel lateral apuntando al deltoides/hombro. Brazo relajado colgando.",
+            "descripcion": "Para manguito rotador inflamado.",
+            "sintomas": "Dolor al levantar brazo lateralmente.",
+            "posicion": "Sentado, panel lateral apuntando al deltoides.",
             "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos"]
         }
     },
     "Rodilla": {
-        "General": {
+        "Dolor General": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "10Hz", "dist": "15cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Mantenimiento articular y dolor inespecífico.",
-            "sintomas": "Molestia profunda, chasquidos o dolor leve al subir escaleras.",
-            "posicion": "Sentado con la pierna estirada o ligeramente flexionada (con toalla debajo). Panel frontal o lateral a la rodilla.",
+            "descripcion": "Mantenimiento articular y meniscos.",
+            "sintomas": "Molestia profunda o chasquidos.",
+            "posicion": "Pierna estirada, panel frontal o lateral.",
             "tips_ant": ["No hielo antes"], "tips_des": ["Movilidad"]
         }
     },
@@ -256,9 +248,9 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "630+660", "energia": "660nm: 100% | 850nm: 20%", 
             "hz": "CW", "dist": "10cm", "dur": 10,
             "frecuencias": [(660, 100), (850, 20)],
-            "descripcion": "Mejora la textura y color de cicatrices recientes o antiguas.",
-            "sintomas": "Tejido cicatricial, marcas de heridas o cirugías.",
-            "posicion": "Panel directo a la cicatriz. Si es muy reciente, aumentar distancia para no calentar.",
+            "descripcion": "Mejora textura y color de cicatrices.",
+            "sintomas": "Tejido cicatricial reciente o antiguo.",
+            "posicion": "Panel directo a la cicatriz.",
             "tips_ant": ["Limpio"], "tips_des": ["Rosa Mosqueta"]
         },
         "Acné": {
@@ -266,17 +258,17 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "CW", "dist": "15cm", "dur": 8,
             "frecuencias": [(660, 80), (850, 0)],
             "descripcion": "Reduce inflamación bacteriana y rojez.",
-            "sintomas": "Brotes activos, rojez e inflamación facial.",
-            "posicion": "Panel frente al rostro (con gafas protectoras). Ojos cerrados.",
+            "sintomas": "Brotes activos, rojez facial.",
+            "posicion": "Frente al rostro (gafas puestas).",
             "tips_ant": ["Limpio"], "tips_des": ["Hidratar"]
         },
         "Quemaduras": {
             "ondas": "630+660", "energia": "660nm: 50% | 850nm: 0%", 
             "hz": "CW", "dist": "20cm", "dur": 5,
             "frecuencias": [(660, 50), (850, 0)],
-            "descripcion": "Acelera regeneración epidérmica sin calor excesivo.",
-            "sintomas": "Piel roja, sensible o dañada por el sol/calor.",
-            "posicion": "Mayor distancia (20-30cm) para evitar cualquier sensación de calor. Solo luz roja.",
+            "descripcion": "Regeneración epidérmica sin calor.",
+            "sintomas": "Piel roja o dañada por sol/calor.",
+            "posicion": "Mayor distancia (20-30cm).",
             "tips_ant": ["Sin cremas"], "tips_des": ["Aloe Vera"]
         }
     },
@@ -285,18 +277,18 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "100% | 100%", 
             "hz": "CW", "dist": "30cm", "dur": 20,
             "frecuencias": [(660, 100), (850, 100)],
-            "descripcion": "Vasodilatación general para mejorar retorno venoso.",
-            "sintomas": "Piernas cansadas, mala circulación general, frío en extremidades.",
-            "posicion": "Panel cubriendo grandes grupos musculares (espalda o piernas completas) a mayor distancia.",
+            "descripcion": "Vasodilatación general.",
+            "sintomas": "Piernas cansadas, frío en extremidades.",
+            "posicion": "Panel cubriendo grandes grupos musculares.",
             "tips_ant": ["Beber agua"], "tips_des": ["Caminar"]
         },
         "Energía": {
             "ondas": "660+850", "energia": "100% | 100%", 
             "hz": "CW", "dist": "20cm", "dur": 10,
             "frecuencias": [(660, 100), (850, 100)],
-            "descripcion": "Estimulación mitocondrial para boost de energía.",
-            "sintomas": "Fatiga general, falta de energía por la mañana.",
-            "posicion": "Panel frente al torso/pecho (timo) por la mañana.",
+            "descripcion": "Estimulación mitocondrial.",
+            "sintomas": "Fatiga general, falta de energía.",
+            "posicion": "Panel frente al torso/pecho.",
             "tips_ant": ["Mañana"], "tips_des": ["Actividad"]
         }
     },
@@ -305,41 +297,39 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "850nm", "energia": "660nm: 0% | 850nm: 50%", 
             "hz": "10Hz (Alfa)", "dist": "Contacto Nuca", "dur": 10,
             "frecuencias": [(660, 0), (850, 50)],
-            "descripcion": "Relajación occipital para reducir tensión vascular.",
-            "sintomas": "Dolor pulsátil, tensión en la base del cráneo.",
-            "posicion": "Panel en contacto o muy cerca de la base del cráneo (nuca), NO en los ojos.",
+            "descripcion": "Relajación occipital para tensión vascular.",
+            "sintomas": "Dolor pulsátil, tensión en nuca.",
+            "posicion": "Panel en la nuca (NO ojos).",
             "tips_ant": ["Oscuridad"], "tips_des": ["Reposo"]
         },
         "Salud Cerebral": {
             "ondas": "810nm", "energia": "0% | 100%", 
             "hz": "40Hz (Gamma)", "dist": "30cm", "dur": 10,
             "frecuencias": [(810, 100)],
-            "descripcion": "Neuroprotección y mejora cognitiva.",
-            "sintomas": "Niebla mental, deseo de mejorar foco o prevención.",
-            "posicion": "Panel dirigido a la frente/cabeza desde arriba o frente. GAFAS OBLIGATORIAS si es de frente.",
+            "descripcion": "Neuroprotección y cognitiva.",
+            "sintomas": "Niebla mental, prevención.",
+            "posicion": "Panel a la frente/cabeza. GAFAS OBLIGATORIAS.",
             "tips_ant": ["Gafas"], "tips_des": ["Tarea cognitiva"]
         }
     },
     "Grasa/Estética": {
         "Grasa Localizada": {
             "ondas": "Todas (Mega)", "energia": "TODO AL 100%", 
-            "hz": "CW (Continuo)", "dist": "20-30cm", "dur": 15,
+            "hz": "CW", "dist": "20-30cm", "dur": 15,
             "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
-            "descripcion": "Lipólisis térmica máxima. Requiere ejercicio posterior inmediato.",
-            "sintomas": "Acumulación de tejido adiposo resistente.",
-            "posicion": "Panel directo a la zona (abdomen, glúteos). Piel desnuda.",
-            "tips_ant": ["Beber vaso agua grande"], "tips_des": ["Cardio inmediato (30min)"], 
-            "visual_group": "PRE", "req_tags": ["Active"]
+            "descripcion": "Lipólisis térmica máxima.",
+            "sintomas": "Grasa resistente.",
+            "posicion": "Directo a piel desnuda. EJERCICIO INMEDIATO.",
+            "tips_ant": ["Beber agua"], "tips_des": ["Cardio 30min"]
         },
         "Facial": {
             "ondas": "630nm", "energia": "100% | 0%", 
             "hz": "CW", "dist": "30cm", "dur": 10,
             "frecuencias": [(630, 100), (660, 50)],
-            "descripcion": "Estimulación de colágeno superficial.",
-            "sintomas": "Arrugas finas, piel apagada, falta de tono.",
-            "posicion": "Sentado frente al panel a 30cm. Gafas protectoras puestas.",
-            "tips_ant": ["Gafas Obligatorias"], "tips_des": ["Serum"], 
-            "visual_group": "FLEX", "momento_txt": "Cualquier hora"
+            "descripcion": "Colágeno superficial.",
+            "sintomas": "Arrugas finas, piel apagada.",
+            "posicion": "Frente al rostro 30cm. Gafas puestas.",
+            "tips_ant": ["Gafas"], "tips_des": ["Serum"]
         }
     },
     "Permanente": {
@@ -348,20 +338,18 @@ DB_TRATAMIENTOS_BASE = {
             "hz": "CW", "dist": "15cm", "dur": 5,
             "frecuencias": [(660, 100), (850, 100)],
             "descripcion": "Estimulación mitocondrial hormonal.",
-            "sintomas": "Optimización hormonal masculina.",
-            "posicion": "Panel directo a la zona testicular (breve exposición).",
-            "tips_ant": ["Piel limpia"], "tips_des": ["Ducha fría"], 
-            "visual_group": "MORNING"
+            "sintomas": "Optimización hormonal.",
+            "posicion": "Directo a zona testicular.",
+            "tips_ant": ["Limpio"], "tips_des": ["Ducha fría"]
         },
         "Sueño": {
             "ondas": "Solo ROJO", "energia": "Rojo: 30% | NIR: 0%", 
-            "hz": "CW (Continuo)", "dist": ">1 Metro", "dur": 20,
+            "hz": "CW", "dist": ">1 Metro", "dur": 20,
             "frecuencias": [(630, 30), (660, 30), (810, 0), (830, 0), (850, 0)],
-            "descripcion": "Luz ambiente tenue para estimular melatonina. Usar 1h antes de dormir.",
-            "sintomas": "Insomnio, dificultad para desconectar por la noche.",
-            "posicion": "Panel en el suelo o mesa apuntando a una pared (luz indirecta) o lejos del usuario. Habitación a oscuras.",
-            "tips_ant": ["Habitación oscura"], "tips_des": ["Ir a dormir"], 
-            "visual_group": "NIGHT"
+            "descripcion": "Luz ambiente tenue para melatonina.",
+            "sintomas": "Insomnio, dificultad para desconectar.",
+            "posicion": "Panel lejos, luz indirecta contra pared.",
+            "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"]
         }
     }
 }
@@ -402,60 +390,63 @@ class Tratamiento:
         self.incompatibilidades = texto
         return self
 
-# --- GENERADOR DE CATÁLOGO (Fusión Base + Custom) ---
+# --- GENERADOR DE CATÁLOGO (LÓGICA MEJORADA DE LADOS) ---
 def obtener_catalogo(tratamientos_custom=[]):
     fases_lesion = [{"nombre": "🔥 Fase 1: Inflamatoria", "dias_fin": 7}, {"nombre": "🛠️ Fase 2: Proliferación", "dias_fin": 21}, {"nombre": "🧱 Fase 3: Remodelación", "dias_fin": 60}]
     catalogo = []
     ids_procesados = set()
 
-    # 1. Añadir Custom Primero (Prioridad)
+    # 1. Custom
     for c in tratamientos_custom:
         catalogo.append(Tratamiento(
             c['id'], c['nombre'], c['zona'], c['ondas'], c['energia'], c['hz'], c['dist'], c['dur'], 
             1, 7, c['tipo'], ['All'], "FLEX", "Personalizado", [], c['tips_ant'], c['tips_des'], 
             fases_config=c.get('fases', []), es_custom=True,
             patologia=c['nombre'], lado_txt="Custom", frecuencias=c.get('frecuencias', []), 
-            descripcion=c.get('descripcion', 'Tratamiento personalizado.'),
-            sintomas=c.get('sintomas', 'No especificado.'),
-            posicion=c.get('posicion', 'Seguir indicaciones generales.')
+            descripcion=c.get('descripcion', ''), sintomas=c.get('sintomas', ''), posicion=c.get('posicion', '')
         ))
         ids_procesados.add(c['id'])
 
-    # 2. Añadir Base (Solo si no están en Custom)
+    # 2. Base
     for zona, patologias in DB_TRATAMIENTOS_BASE.items():
         for patologia, specs in patologias.items():
             freqs = specs.get("frecuencias", [(660, 50), (850, 100)])
-            desc = specs.get("descripcion", "Tratamiento estándar.")
-            sint = specs.get("sintomas", "Sintomatología estándar.")
-            pos = specs.get("posicion", "Posición estándar.")
+            desc = specs.get("descripcion", "")
+            sint = specs.get("sintomas", "")
+            pos = specs.get("posicion", "")
             
-            if zona in ["Espalda", "Sistémico", "Cabeza", "Piel", "Hombro", "Rodilla", "Antebrazo", "Muñeca"]:
-                id_t = "".join(c for c in f"{zona[:4]}_{patologia[:4]}".lower() if c.isalnum() or c=="_")
-                if id_t not in ids_procesados:
-                    catalogo.append(Tratamiento(
-                        id_t, f"{zona} - {patologia}", zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
-                        1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
-                        patologia=patologia, lado_txt="General", frecuencias=freqs, descripcion=desc, sintomas=sint, posicion=pos
-                    ))
-            elif zona not in ["Grasa/Estética", "Permanente", "Cuerpo"]: # Filtro para los que tienen lado (Codo, Pierna, Pie)
-                for lado_code, lado_nom in [("d", "Derecho"), ("i", "Izquierdo")]:
-                    base_id = f"{zona.lower()[:4]}_{patologia.lower()[:4]}_{lado_code}"
-                    id_t = "".join(c for c in base_id if c.isalnum() or c == "_")
-                    nombre = f"{zona} {lado_nom} ({patologia})"
+            # Determinación automática de lados
+            lados_a_generar = [("g", "General")] # Default
+            if zona in ZONAS_SIMETRICAS:
+                lados_a_generar = [("d", "Derecho"), ("i", "Izquierdo")]
+            elif zona == "Abdomen": 
+                if "Frontal" in patologia: lados_a_generar = [("f", "Frontal")]
+            
+            # Excepción para estáticos históricos de grasa (se añaden luego)
+            if zona == "Grasa/Estética" and "Grasa Localizada" in patologia:
+                pass 
+            else:
+                for codigo, nombre_lado in lados_a_generar:
+                    base_id = f"{zona[:3]}_{patologia[:4]}_{codigo}".lower().replace(" ", "")
+                    id_t = "".join(ch for ch in base_id if ch.isalnum() or ch=="_")
+                    
+                    nombre_final = f"{zona} {nombre_lado} ({patologia})" if nombre_lado != "General" else f"{zona} ({patologia})"
+                    
                     if id_t not in ids_procesados:
                         catalogo.append(Tratamiento(
-                            id_t, nombre, zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
+                            id_t, nombre_final, zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
                             1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
-                            patologia=patologia, lado_txt=lado_nom, frecuencias=freqs, descripcion=desc, sintomas=sint, posicion=pos
+                            patologia=patologia, lado_txt=nombre_lado, frecuencias=freqs, descripcion=desc, sintomas=sint, posicion=pos
                         ))
 
-    # 3. Estáticos (Grasa)
+    # 3. Inyectar estáticos históricos de Grasa para no romper compatibilidad
     s = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
     for sufijo, nombre, lado in [("front", "Frontal", "Frontal"), ("d", "Flanco D", "Flanco Dcho"), ("i", "Flanco I", "Flanco Izq"), ("glutes", "Glúteos", "General")]:
         id_t = f"fat_{sufijo}"
         if id_t not in ids_procesados:
-            catalogo.append(Tratamiento(id_t, f"Grasa {nombre if 'Glúteos' in nombre else 'Abdomen ('+nombre+')'}", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", s["req_tags"], s["visual_group"], "Pre-Entreno", ["🌙 Noche"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt=lado, frecuencias=s.get("frecuencias"), descripcion=s.get("descripcion"), sintomas=s.get("sintomas"), posicion=s.get("posicion")))
-    
+            catalogo.append(Tratamiento(id_t, f"Grasa {nombre}", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", ["Active"], "PRE", "Pre-Entreno", ["🌙 Noche"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt=lado, frecuencias=s.get("frecuencias"), descripcion=s.get("descripcion"), sintomas=s.get("sintomas"), posicion=s.get("posicion")))
+
+    # 4. Inyectar facial y permanentes si no existen
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
     if "face" not in ids_procesados:
         catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"], patologia="Facial", lado_txt="General", frecuencias=f.get("frecuencias"), descripcion=f.get("descripcion"), sintomas=f.get("sintomas"), posicion=f.get("posicion")))
@@ -523,134 +514,91 @@ def procesar_excel_rutina(uploaded_file):
         for _, row in df_sem.iterrows():
             d = str(row.iloc[0]).lower().strip()
             if d in mapa: nueva_semana[mapa[d]] = [x.strip() for x in str(row.iloc[1]).split(',')]
-        df_tags = pd.read_excel(uploaded_file, sheet_name='Tags')
-        nuevos_tags = {}
-        for _, row in df_tags.iterrows():
-            t = str(row.iloc[1])
-            nuevos_tags[str(row.iloc[0]).strip()] = [x.strip() for x in t.split(',')] if not pd.isna(t) else []
-        return {"semana": nueva_semana, "tags": nuevos_tags}
+        return {"semana": nueva_semana, "tags": TAGS_ACTIVIDADES}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) - ACTUALIZADA CON SINTOMAS Y POSICION ---
+# --- 5. LÓGICA AI (GEMINI) - LISTA MÚLTIPLE + INFO VISUAL ---
 def consultar_ia(dolencia):
     api_key = None
-    try:
-        api_key = st.secrets["GEMINI_API_KEY"]
-    except:
-        pass
-    
-    if not api_key:
-        if 'api_key_val' in st.session_state and st.session_state.api_key_val:
-            api_key = st.session_state.api_key_val
-    
-    if not api_key:
-        st.error("⚠️ Falta API KEY. Configúrala en secrets.toml o en la barra lateral.")
-        return None
+    try: api_key = st.secrets["GEMINI_API_KEY"]
+    except: pass
+    if not api_key and 'api_key_val' in st.session_state: api_key = st.session_state.api_key_val
+    if not api_key: return None
 
     genai.configure(api_key=api_key)
     
     prompt = f"""
-    Actúa como un experto en Fotobiomodulación (Red Light Therapy) y Fisioterapia.
-    El usuario tiene: "{dolencia}".
-    Genera un JSON estricto con los siguientes campos:
+    Actúa como experto en Fotobiomodulación. Usuario: "{dolencia}".
+    Genera una LISTA de posibles tratamientos en formato JSON Array.
+    Cada objeto debe tener:
     {{
-        "nombre": "Título corto del tratamiento",
-        "zona": "Parte del cuerpo afectada",
-        "descripcion": "Explicación biológica breve (max 25 palabras)",
-        "sintomas": "Descripción de los síntomas típicos para confirmar la lesión (max 25 palabras)",
-        "posicion": "Instrucción precisa sobre cómo colocarse y dónde poner el panel (max 25 palabras)",
+        "nombre": "Título",
+        "zona": "Parte cuerpo",
+        "descripcion": "Qué hace biológicamente (max 20 palabras)",
+        "sintomas": "Síntomas que confirma (max 20 palabras)",
+        "posicion": "Cómo poner el panel y el cuerpo (max 20 palabras)",
         "ondas": "660+850",
-        "energia": "Dimmer (ej. 660nm: 100% | 850nm: 100%)",
-        "frecuencias": [[660, 100], [850, 100]],  
-        "hz": "Frecuencia (CW, 10Hz, 40Hz, 50Hz) y motivo",
-        "dist": "Distancia cm (ej: '10cm' o 'Contacto')",
+        "energia": "Texto resumen",
+        "frecuencias": [[660, 50], [850, 100]],
+        "hz": "Texto Hz",
+        "dist": "Texto dist",
         "dur": 10,
-        "tips_ant": ["Consejo previo 1", "Consejo previo 2"],
-        "tips_des": ["Consejo post 1", "Consejo post 2"],
+        "tips_ant": ["Tip 1"],
+        "tips_des": ["Tip 1"],
         "es_lesion": true,
         "tipo": "LESION"
     }}
-    Si es pérdida de grasa, pon TODAS las frecuencias al 100%.
-    Si es dolor agudo, Hz=50.
-    Responde SOLO JSON.
+    Devuelve un JSON Array con 1 a 3 opciones.
     """
     
-    modelos_a_probar = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
-    
-    for modelo_nombre in modelos_a_probar:
+    modelos = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+    for m in modelos:
         try:
-            model = genai.GenerativeModel(modelo_nombre)
+            model = genai.GenerativeModel(m)
             response = model.generate_content(prompt)
-            clean_text = response.text.replace("```json", "").replace("```", "").strip()
-            return json.loads(clean_text)
-        except Exception:
-            continue
-            
-    try:
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                model = genai.GenerativeModel(m.name)
-                response = model.generate_content(prompt)
-                clean_text = response.text.replace("```json", "").replace("```", "").strip()
-                return json.loads(clean_text)
-    except:
-        st.error("❌ Error fatal: No se encontró ningún modelo Gemini operativo con tu clave.")
-        return None
+            clean = response.text.replace("```json", "").replace("```", "").strip()
+            # Asegurar que es lista
+            data = json.loads(clean)
+            if isinstance(data, dict): data = [data]
+            return data
+        except: continue
+    return None
 
-# --- 6. HELPERS VISUALES (ACTUALIZADO CON INFO) ---
+# --- 6. HELPERS VISUALES ---
 def mostrar_visualizador_mega(t):
     if not t.frecuencias: return
     st.caption("Configuración Panel:")
     cols = st.columns(len(t.frecuencias))
     for idx, (nm, pct) in enumerate(t.frecuencias):
-        bg_color = "#ffebee" if pct >= 80 else "#f5f5f5"
-        border_color = "#ef5350" if pct >= 80 else "#bdbdbd"
-        txt_color = "#b71c1c" if pct >= 80 else "#616161"
-        cols[idx].markdown(f"""<div style="background-color: {bg_color}; border: 1px solid {border_color}; border-radius: 5px; padding: 5px; text-align: center; font-size: 12px; color: {txt_color}; font-weight: bold;">{nm}nm<br><span style="font-size: 14px">{pct}%</span></div>""", unsafe_allow_html=True)
-
-def mostrar_definiciones_ondas():
-    with st.expander("ℹ️ Guía Técnica (nm/Hz)"):
-        st.markdown("""**🔴 630nm / 660nm:** Piel (Regeneración) | **🟣 810nm / 850nm:** Profundidad (Inflamación)\n**⚡ CW:** Dosis Alta | **10Hz:** Recup. Muscular | **40Hz:** Cerebro | **50Hz:** Dolor Agudo""")
+        bg = "#ffebee" if pct >= 80 else "#f5f5f5"
+        border = "#ef5350" if pct >= 80 else "#bdbdbd"
+        txt = "#b71c1c" if pct >= 80 else "#616161"
+        cols[idx].markdown(f"""<div style="background-color:{bg};border:1px solid {border};border-radius:5px;padding:5px;text-align:center;font-size:12px;color:{txt};font-weight:bold;">{nm}nm<br>{pct}%</div>""", unsafe_allow_html=True)
 
 def mostrar_ficha_tecnica(t, lista_completa):
-    # NUEVA SECCIÓN DE INFORMACIÓN CLÍNICA
-    if t.sintomas or t.posicion or t.descripcion:
-        st.markdown("#### 🩺 Información Clínica")
-        if t.descripcion:
-            st.info(f"**¿Qué hace?** {t.descripcion}")
-        
-        c_sin, c_pos = st.columns(2)
-        with c_sin:
-            if t.sintomas:
-                st.markdown(f"**⚠️ Síntomas:**\n{t.sintomas}")
-        with c_pos:
-            if t.posicion:
-                st.warning(f"**🧘 Posición:**\n{t.posicion}")
-        st.divider()
-
-    # Visualizador Gráfico
+    if t.descripcion: st.info(f"ℹ️ **Info:** {t.descripcion}")
+    
+    # NUEVO: Sintomatología y Posición
+    c_sin, c_pos = st.columns(2)
+    with c_sin:
+        if t.sintomas: st.markdown(f"**🩺 Síntomas:**\n{t.sintomas}")
+    with c_pos:
+        if t.posicion: st.warning(f"**🧘 Posición:**\n{t.posicion}")
+    
     mostrar_visualizador_mega(t)
     st.divider()
-    
     c1, c2 = st.columns(2)
     with c1: st.markdown(f"**Zona:** {t.zona}\n**Intensidad:** {t.config_energia}")
     with c2: st.markdown(f"**Hz:** {t.herzios}\n**Tiempo:** {t.duracion} min ({t.distancia})")
     
-    st.markdown("---")
-    if t.momentos_prohibidos: st.write(f"⏰ **No usar:** {', '.join(t.momentos_prohibidos)}")
-    if t.tags_entreno != ['All']: st.write(f"🏋️ **Req:** {', '.join(t.tags_entreno)}")
-    if t.incompatible_with:
-        mapa = {tr.id: tr.nombre for tr in lista_completa}
-        nombres = [mapa.get(x, x) for x in t.incompatible_with]
-        st.write(f"⚔️ **Incompatible:** {', '.join(nombres)}")
-    
-    c_a, c_d = st.columns(2)
-    with c_a: 
-        st.markdown("**Antes:**")
-        for tip in t.tips_antes: st.caption(f"• {tip}")
-    with c_d:
-        st.markdown("**Después:**")
-        for tip in t.tips_despues: st.caption(f"• {tip}")
+    with st.expander("Consejos"):
+        c_a, c_d = st.columns(2)
+        with c_a: 
+            st.markdown("**Antes:**")
+            for tip in t.tips_antes: st.caption(f"• {tip}")
+        with c_d:
+            st.markdown("**Después:**")
+            for tip in t.tips_despues: st.caption(f"• {tip}")
 
 def analizar_bloqueos(tratamiento, momento, historial, registros_hoy, fecha_str, tags_dia, clave_usuario):
     if clave_usuario == "usuario_rutina":
@@ -673,253 +621,14 @@ def obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos):
     presentes.update(db_usuario["planificados_adhoc"].get(fecha_str, {}).keys())
     for t in lista_tratamientos:
         ciclo = db_usuario["ciclos_activos"].get(t.id)
-        if ciclo and ciclo.get('activo') and ciclo.get('estado') == 'activo': presentes.add(t.id)
+        if ciclo and ciclo.get('activo'): presentes.add(t.id)
     return presentes
 
 # ==============================================================================
-# 7. RENDERIZADO DIARIO (CORE)
+# 7. UI PRINCIPAL
 # ==============================================================================
-def renderizar_dia(fecha_obj):
-    fecha_str = fecha_obj.isoformat()
-    rutina_fuerza, rutina_cardio, tags_dia, man_f, man_c, todas_rutinas = obtener_rutina_completa(fecha_obj, st.session_state.db_global, db_usuario)
-    ids_seleccionados_libre = []
-
-    confirmado_db = db_usuario.get("confirmaciones_diarias", {}).get(fecha_str, False)
-
-    if clave_usuario == "usuario_rutina":
-        if not confirmado_db:
-            c_f, c_c = st.columns(2)
-            with c_f:
-                st.markdown(f"**🏋️ Fuerza** ({'Manual' if man_f else 'Auto'})")
-                opts_f = [k for k in todas_rutinas if "Remo" not in k and "Cinta" not in k and "Elíptica" not in k and "Andar" not in k]
-                def_f = [x for x in rutina_fuerza if x in opts_f]
-                sel_f = st.multiselect("Rutina:", opts_f, default=def_f, key=f"sf_{fecha_str}", label_visibility="collapsed")
-                if set(sel_f) != set(rutina_fuerza):
-                    if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
-                    db_usuario["meta_diaria"][fecha_str] = sel_f
-                    guardar_datos_completos(st.session_state.db_global); st.rerun()
-            with c_c:
-                st.markdown(f"**🏃 Cardio** ({'Manual' if man_c else 'Auto'})")
-                opts_c = ["Descanso Cardio"] + [k for k in GENERIC_CARDIO_PARAMS.keys() if k != "Descanso Cardio"]
-                sel_c = st.selectbox("Actividad:", opts_c, index=opts_c.index(rutina_cardio.get("actividad", "Descanso Cardio")), key=f"sc_{fecha_str}", label_visibility="collapsed")
-                params = rutina_cardio.copy(); params["actividad"] = sel_c
-                if sel_c != "Descanso Cardio":
-                    c_p1, c_p2 = st.columns(2)
-                    if "tiempo" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
-                        params["tiempo"] = c_p1.number_input("Min:", value=params.get("tiempo", 15), key=f"t_{fecha_str}")
-                    if "velocidad" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
-                        # FIX: 0.5 step, 1 decimal
-                        params["velocidad"] = c_p2.number_input("Km/h:", value=float(params.get("velocidad", 6.5)), step=0.5, format="%.1f", key=f"v_{fecha_str}")
-                    if "inclinacion" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
-                        # FIX: 0.5 step, 1 decimal
-                        params["inclinacion"] = c_p1.number_input("Inc %:", value=float(params.get("inclinacion", 0.0)), step=0.5, format="%.1f", key=f"i_{fecha_str}")
-                    if "pasos" in GENERIC_CARDIO_PARAMS.get(sel_c, {}): 
-                        params["pasos"] = c_p1.number_input("Pasos:", value=params.get("pasos", 10000), key=f"p_{fecha_str}")
-                
-                if params != rutina_cardio:
-                    if "meta_cardio" not in db_usuario: db_usuario["meta_cardio"] = {}
-                    db_usuario["meta_cardio"][fecha_str] = params
-                    guardar_datos_completos(st.session_state.db_global); st.rerun()
-            
-            if st.button("✅ Confirmar Rutina del Día", key=f"btn_c_{fecha_str}", type="primary", use_container_width=True):
-                if "confirmaciones_diarias" not in db_usuario: db_usuario["confirmaciones_diarias"] = {}
-                db_usuario["confirmaciones_diarias"][fecha_str] = True
-                guardar_datos_completos(st.session_state.db_global); st.rerun()
-        else:
-            st.success(f"Rutina Confirmada: 🏋️ {', '.join(rutina_fuerza)} | 🏃 {rutina_cardio.get('actividad')}")
-            if st.button("✏️ Editar Rutina", key=f"unlock_{fecha_str}"):
-                db_usuario["confirmaciones_diarias"][fecha_str] = False
-                guardar_datos_completos(st.session_state.db_global); st.rerun()
-    else:
-        ids = db_usuario.get("meta_diaria", {}).get(fecha_str, [])
-        mapa_n = {t.nombre: t.id for t in lista_tratamientos}
-        mapa_i = {t.id: t.nombre for t in lista_tratamientos}
-        sel = st.multiselect("Tratamientos:", list(mapa_n.keys()), default=[mapa_i[i] for i in ids if i in mapa_i], key=f"ml_{fecha_str}")
-        if set([mapa_n[n] for n in sel]) != set(ids):
-            if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
-            db_usuario["meta_diaria"][fecha_str] = [mapa_n[n] for n in sel]
-            guardar_datos_completos(st.session_state.db_global); st.rerun()
-        ids_seleccionados_libre = ids
-
-    st.divider()
-    adhoc_hoy = db_usuario.get("planificados_adhoc", {}).get(fecha_str, {})
-    presentes_hoy = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
-    registros_dia = db_usuario["historial"].get(fecha_str, {})
-    
-    if clave_usuario == "usuario_rutina":
-        if confirmado_db:
-            with st.expander("➕ Añadir Tratamiento Adicional"):
-                compatibles = []
-                for t in lista_tratamientos:
-                    compatible_tag = False
-                    if 'All' in t.tags_entreno or any(tag in tags_dia for tag in t.tags_entreno): compatible_tag = True
-                    if compatible_tag: compatibles.append(t)
-                
-                if compatibles:
-                    zonas_disp = sorted(list(set(t.zona for t in compatibles)))
-                    zona_sel = st.selectbox("1. Zona:", ["--"] + zonas_disp, key=f"zs_{fecha_str}")
-                    if zona_sel != "--":
-                        treats_zona = [t for t in compatibles if t.zona == zona_sel]
-                        pats_disp = sorted(list(set(t.patologia for t in treats_zona)))
-                        pat_sel = st.selectbox("2. Tratamiento:", ["--"] + pats_disp, key=f"ps_{fecha_str}")
-                        if pat_sel != "--":
-                            treats_final = [t for t in treats_zona if t.patologia == pat_sel]
-                            mapa_lados = {t.lado_txt: t for t in treats_final}
-                            lado_sel = st.selectbox("3. Lado/Variante:", list(mapa_lados.keys()), key=f"ls_{fecha_str}")
-                            t_obj = mapa_lados[lado_sel]
-                            esta_planificado = t_obj.id in adhoc_hoy
-                            st.markdown("---")
-                            if esta_planificado:
-                                st.warning(f"⚠️ {t_obj.nombre} ya está planificado.")
-                                if st.button("🗑️ Descartar del Plan", key=f"del_plan_{fecha_str}"):
-                                    del db_usuario["planificados_adhoc"][fecha_str][t_obj.id]
-                                    guardar_datos_completos(st.session_state.db_global); st.rerun()
-                            else:
-                                st.caption(f"💡 {t_obj.momento_ideal_txt} | {t_obj.config_energia} | {t_obj.herzios}")
-                                opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
-                                valid = [o for o in opts if o not in t_obj.momentos_prohibidos]
-                                mom = st.selectbox("Momento:", valid, key=f"mad_{fecha_str}")
-                                bloq, mot = analizar_bloqueos(t_obj, mom, db_usuario["historial"], {}, fecha_str, tags_dia, clave_usuario)
-                                for pid in presentes_hoy:
-                                    if pid in t_obj.incompatible_with: bloq=True; mot=f"Incompatible con {pid}"
-                                    t_pres = next((tp for tp in lista_tratamientos if tp.id == pid), None)
-                                    if t_pres and t_obj.id in t_pres.incompatible_with: bloq=True; mot=f"Incompatible con {pid}"
-                                if bloq: st.error(mot)
-                                else:
-                                    c_pl, c_reg = st.columns(2)
-                                    if c_pl.button("📅 Planificar", key=f"pl_{fecha_str}"):
-                                        if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
-                                        if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
-                                        db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
-                                        guardar_datos_completos(st.session_state.db_global); st.rerun()
-                                    if c_reg.button("✅ Registrar Ya", key=f"bdir_{fecha_str}"):
-                                        now = datetime.datetime.now().strftime('%H:%M')
-                                        if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
-                                        if t_obj.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t_obj.id] = []
-                                        db_usuario["historial"][fecha_str][t_obj.id].append({"hora": now, "detalle": mom})
-                                        if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
-                                        if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
-                                        db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = mom
-                                        guardar_datos_completos(st.session_state.db_global); st.rerun()
-
-    descartados = db_usuario.get("descartados", {}).get(fecha_str, [])
-    lista_mostrar = []
-    for t in lista_tratamientos:
-        mostrar = False; origen = ""
-        ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
-        if ciclo and ciclo.get('activo') and ciclo.get('estado') == 'activo': mostrar = True; origen = "clinica"
-        if t.id in adhoc_hoy: mostrar = True; origen = "adhoc"
-        if clave_usuario != "usuario_rutina" and t.id in ids_seleccionados_libre: mostrar = True
-        if mostrar: lista_mostrar.append((t, origen))
-
-    if lista_mostrar and st.button("⚡ Registrar Todos los Tratamientos del Día", key=f"all_{fecha_str}"):
-        now = datetime.datetime.now().strftime('%H:%M')
-        if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
-        for t, origen in lista_mostrar:
-            rad_key = f"rad_{t.id}_{fecha_str}"
-            momento_final = st.session_state.get(rad_key)
-            if not momento_final and origen == "adhoc": momento_final = adhoc_hoy.get(t.id)
-            if not momento_final:
-                opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
-                valid_opts = [o for o in opts if o not in t.momentos_prohibidos]
-                mapa_inv = {"PRE": "🏋️ Entrenamiento (Pre)", "POST": "🚿 Post-Entreno / Mañana", "NIGHT": "🌙 Noche", "MORNING": "🌞 Mañana"}
-                pref = mapa_inv.get(t.default_visual_group)
-                if pref and pref in valid_opts: momento_final = pref
-                elif valid_opts: momento_final = valid_opts[0] # FALLBACK FLEX
-            bloq, _ = analizar_bloqueos(t, momento_final, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
-            if origen in ["adhoc", "clinica"]: bloq = False 
-            if not bloq and momento_final:
-                if t.id not in db_usuario["historial"][fecha_str] or not db_usuario["historial"][fecha_str][t.id]:
-                    if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
-                    db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": momento_final})
-        guardar_datos_completos(st.session_state.db_global); st.rerun()
-
-    grupos = {"PRE": [], "POST": [], "MORNING": [], "NIGHT": [], "FLEX": [], "COMPLETED": [], "DISCARDED": [], "HIDDEN": []}
-    mapa_vis = {"🏋️ Entrenamiento (Pre)": "PRE", "🚿 Post-Entreno / Mañana": "POST", "🌞 Mañana": "MORNING", "🌙 Noche": "NIGHT"}
-    ids_mostrados = []
-    for t, origen in lista_mostrar:
-        ids_mostrados.append(t.id) 
-        hechos = len(registros_dia.get(t.id, []))
-        if t.id in descartados: grupos["DISCARDED"].append((t, origen))
-        elif hechos >= t.max_diario: grupos["COMPLETED"].append((t, origen))
-        else:
-            g = t.default_visual_group
-            rad_key = f"rad_{t.id}_{fecha_str}"
-            if rad_key in st.session_state and st.session_state[rad_key] in mapa_vis: g = mapa_vis[st.session_state[rad_key]]
-            elif origen == "adhoc" and adhoc_hoy.get(t.id) in mapa_vis: g = mapa_vis[adhoc_hoy[t.id]]
-            if g in grupos: grupos[g].append((t, origen))
-            else: grupos["FLEX"].append((t, origen))
-    if clave_usuario == "usuario_rutina":
-        for t in lista_tratamientos:
-            if t.id not in ids_mostrados: grupos["HIDDEN"].append(t)
-
-    def render_card(item):
-        t, origen = item
-        hechos = len(registros_dia.get(t.id, []))
-        icon = "❌" if t.id in descartados else ("✅" if hechos>=t.max_diario else "⬜")
-        info_ex = f" [CLÍNICA] (Día {(fecha_obj - datetime.date.fromisoformat(db_usuario['ciclos_activos'][t.id]['fecha_inicio'])).days})" if origen == "clinica" else (" [PUNTUAL]" if origen == "adhoc" else "")
-        head_xtra = f" | {registros_dia[t.id][-1]['detalle']}" if hechos >= t.max_diario else ""
-        with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario}){info_ex}{head_xtra}"):
-            if t.id in descartados:
-                mostrar_ficha_tecnica(t, lista_tratamientos)
-                if st.button("Recuperar", key=f"rec_{t.id}_{fecha_str}"):
-                    db_usuario["descartados"][fecha_str].remove(t.id)
-                    guardar_datos_completos(st.session_state.db_global); st.rerun()
-                return
-            if hechos >= t.max_diario:
-                st.success("✅ Completado")
-                if st.button("❌ Deshacer", key=f"undo_{t.id}_{fecha_str}"):
-                    del db_usuario["historial"][fecha_str][t.id]
-                    guardar_datos_completos(st.session_state.db_global); st.rerun()
-                return
-            st.success(f"💡 {t.momento_ideal_txt}")
-            mostrar_ficha_tecnica(t, lista_tratamientos)
-            opts = ["🏋️ Entrenamiento (Pre)", "🚿 Post-Entreno / Mañana", "⛅ Tarde", "🌙 Noche"]
-            valid = [o for o in opts if o not in t.momentos_prohibidos]
-            idx_def = valid.index(adhoc_hoy[t.id]) if origen == "adhoc" and adhoc_hoy.get(t.id) in valid else 0
-            sel = st.radio("Momento:", valid, index=idx_def, key=f"rad_{t.id}_{fecha_str}")
-            c1, c2, c3 = st.columns([2,1,1])
-            bloq, mot = analizar_bloqueos(t, sel, db_usuario["historial"], registros_dia, fecha_str, tags_dia, clave_usuario)
-            if bloq: c1.warning(mot)
-            if c1.button("Registrar", key=f"go_{t.id}_{fecha_str}", disabled=bloq):
-                now = datetime.datetime.now().strftime('%H:%M')
-                if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
-                if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
-                db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": sel})
-                guardar_datos_completos(st.session_state.db_global); st.rerun()
-            if c2.button("Omitir", key=f"om_{t.id}_{fecha_str}"):
-                if "descartados" not in db_usuario: db_usuario["descartados"] = {}
-                if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
-                db_usuario["descartados"][fecha_str].append(t.id)
-                if origen == "adhoc": del db_usuario["planificados_adhoc"][fecha_str][t.id]
-                guardar_datos_completos(st.session_state.db_global); st.rerun()
-            if origen == "clinica" and c3.button("⏭️ Saltar", key=f"sk_{t.id}_{fecha_str}"):
-                c = db_usuario["ciclos_activos"][t.id]
-                if 'dias_saltados' not in c: c['dias_saltados'] = []
-                c['dias_saltados'].append(fecha_str)
-                if "descartados" not in db_usuario: db_usuario["descartados"] = {}
-                if fecha_str not in db_usuario["descartados"]: db_usuario["descartados"][fecha_str] = []
-                db_usuario["descartados"][fecha_str].append(t.id)
-                guardar_datos_completos(st.session_state.db_global); st.rerun()
-            elif origen == "adhoc" and c3.button("🗑️ Quitar", key=f"del_{t.id}_{fecha_str}"):
-                del db_usuario["planificados_adhoc"][fecha_str][t.id]
-                guardar_datos_completos(st.session_state.db_global); st.rerun()
-
-    for g in ["MORNING", "PRE", "POST", "NIGHT", "FLEX"]:
-        if grupos[g]:
-            st.subheader(g)
-            for item in grupos[g]: render_card(item)
-    for g in ["COMPLETED", "DISCARDED"]:
-        if grupos[g]:
-            st.markdown(f"### {('✅ Completados' if g=='COMPLETED' else '❌ Descartados')}")
-            for item in grupos[g]: render_card(item)
-    if grupos["HIDDEN"] and clave_usuario == "usuario_rutina":
-        with st.expander("Inactivos / Ocultos Hoy"):
-            for t in grupos["HIDDEN"]: 
-                with st.expander(f"{t.nombre}"): mostrar_ficha_tecnica(t, lista_tratamientos)
-
-# --- MENÚ Y NAVEGACIÓN ---
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+
 def login_screen():
     st.title("🔐 Acceso")
     c1, c2, c3 = st.columns([1,2,1])
@@ -950,289 +659,235 @@ with st.sidebar:
     st.divider()
     if st.button("💾 Guardar Todo"):
         guardar_datos_completos(st.session_state.db_global); st.success("Guardado.")
-    if clave_usuario == "usuario_rutina":
-        with st.expander("⚙️ Importar Excel"):
-            uploaded_file = st.file_uploader("Subir .xlsx", type=['xlsx'])
-            if uploaded_file and st.button("Procesar"):
-                new_conf = procesar_excel_rutina(uploaded_file)
-                if new_conf:
-                    st.session_state.db_global["configuracion_rutina"] = new_conf
-                    guardar_datos_completos(st.session_state.db_global); st.success("Correcto"); st.rerun()
-    st.divider()
-    mostrar_definiciones_ondas()
-    st.divider()
     if st.button("Cerrar Sesión"): st.session_state.logged_in = False; st.rerun()
 
+# --- VISTAS ---
 if menu_navegacion == "📅 Panel Diario":
     st.title("📅 Panel Diario")
     c_f, c_r = st.columns([2,1])
     fecha_seleccionada = c_f.date_input("Fecha", datetime.date.today())
-    renderizar_dia(fecha_seleccionada)
+    fecha_str = fecha_seleccionada.isoformat()
+    
+    rutina_fuerza, rutina_cardio = obtener_rutina_completa(fecha_seleccionada, st.session_state.db_global, db_usuario)
+    confirmado = db_usuario.get("confirmaciones_diarias", {}).get(fecha_str, False)
 
-elif menu_navegacion == "🗓️ Panel Semanal":
-    st.title("🗓️ Panel Semanal")
-    d_ref = st.date_input("Semana de Referencia:", datetime.date.today())
-    start_week = d_ref - timedelta(days=d_ref.weekday())
-    tabs = st.tabs(["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"])
-    for i, tab in enumerate(tabs):
-        with tab:
-            dia_tab = start_week + timedelta(days=i)
-            st.subheader(dia_tab.strftime("%A %d/%m"))
-            renderizar_dia(dia_tab)
+    if clave_usuario == "usuario_rutina":
+        if not confirmado:
+            c1, c2 = st.columns(2)
+            with c1:
+                st.markdown("**🏋️ Fuerza**")
+                def_f = [x for x in rutina_fuerza if "Descanso" not in x]
+                sel_f = st.multiselect("Rutina:", def_f, default=def_f, key=f"sf_{fecha_str}")
+                if set(sel_f) != set(rutina_fuerza):
+                    if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
+                    db_usuario["meta_diaria"][fecha_str] = sel_f
+            with c2:
+                st.markdown("**🏃 Cardio**")
+                idx = list(GENERIC_CARDIO_PARAMS.keys()).index(rutina_cardio.get("actividad", "Descanso Cardio")) if rutina_cardio.get("actividad") in GENERIC_CARDIO_PARAMS else 0
+                sel_c = st.selectbox("Actividad:", ["Descanso Cardio"] + list(GENERIC_CARDIO_PARAMS.keys())[:-1], index=idx, key=f"sc_{fecha_str}")
+                params = rutina_cardio.copy(); params["actividad"] = sel_c
+                if sel_c != "Descanso Cardio":
+                    cp1, cp2 = st.columns(2)
+                    params["tiempo"] = cp1.number_input("Min:", value=params.get("tiempo", 15), key=f"t_{fecha_str}")
+                    if "velocidad" in GENERIC_CARDIO_PARAMS.get(sel_c, {}):
+                        params["velocidad"] = cp2.number_input("Km/h:", value=float(params.get("velocidad", 6.5)), step=0.5, format="%.1f", key=f"v_{fecha_str}")
+                    if "inclinacion" in GENERIC_CARDIO_PARAMS.get(sel_c, {}):
+                        params["inclinacion"] = cp2.number_input("Inc %:", value=float(params.get("inclinacion", 0.0)), step=0.5, format="%.1f", key=f"i_{fecha_str}")
+                if params != rutina_cardio:
+                    if "meta_cardio" not in db_usuario: db_usuario["meta_cardio"] = {}
+                    db_usuario["meta_cardio"][fecha_str] = params
+                    guardar_datos_completos(st.session_state.db_global); st.rerun()
+            
+            if st.button("✅ Confirmar Rutina", type="primary", use_container_width=True):
+                if "confirmaciones_diarias" not in db_usuario: db_usuario["confirmaciones_diarias"] = {}
+                db_usuario["confirmaciones_diarias"][fecha_str] = True
+                guardar_datos_completos(st.session_state.db_global); st.rerun()
+        else:
+            st.success(f"Rutina: {', '.join(rutina_fuerza)} | {rutina_cardio.get('actividad')}")
+            if st.button("✏️ Editar"): 
+                db_usuario["confirmaciones_diarias"][fecha_str] = False; guardar_datos_completos(st.session_state.db_global); st.rerun()
 
-elif menu_navegacion == "🚑 Clínica":
-    st.title("🚑 Clínica")
-    with st.expander("🆕 Iniciar Nuevo Tratamiento (Catálogo Local)"):
-        zonas = list(DB_TRATAMIENTOS_BASE.keys())
-        c1, c2, c3 = st.columns(3)
-        z = c1.selectbox("Zona", ["--"] + zonas)
-        if z != "--":
-            pats = list(DB_TRATAMIENTOS_BASE[z].keys())
-            p = c2.selectbox("Patología", ["--"] + pats)
-            if p != "--":
-                l = c3.selectbox("Lado", ["Derecho", "Izquierdo"])
-                if l:
-                    fi = st.date_input("Fecha Inicio", datetime.date.today())
-                    code_lado = "d" if l == "Derecho" else "i"
-                    id_temp = "".join(c for c in f"{z.lower()[:4]}_{p.lower()[:4]}_{code_lado}".lower() if c.isalnum() or c=="_")
-                    presentes = obtener_tratamientos_presentes(fi.isoformat(), db_usuario, lista_tratamientos)
-                    t_obj = next((t for t in lista_tratamientos if t.id == id_temp), None)
-                    conflicto_msg = ""
-                    if t_obj:
-                        if t_obj.id in presentes: conflicto_msg = "Ya registrado/planificado hoy."
-                        for pid in presentes:
-                            t_p = next((t for t in lista_tratamientos if t.id == pid), None)
-                            if pid in t_obj.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
-                            if t_p and t_obj.id in t_p.incompatible_with: conflicto_msg = f"Incompatible con {pid}"
-                    if conflicto_msg: st.error(f"🚫 Conflicto: {conflicto_msg}")
-                    else:
-                        fin = fi + timedelta(days=60)
-                        st.info(f"📅 Fin Estimado: {fin.strftime('%d/%m/%Y')}")
-                        if st.button("Comenzar Tratamiento"):
-                            if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                            db_usuario["ciclos_activos"][id_temp] = {"fecha_inicio": fi.isoformat(), "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []}
-                            guardar_datos_completos(st.session_state.db_global); st.success("Iniciado"); st.rerun()
     st.divider()
-    st.subheader("Tratamientos Activos")
+    
+    # ADD MANUAL
+    if confirmado or clave_usuario == "usuario_libre":
+        with st.expander("➕ Añadir Tratamiento Manual"):
+            zonas = sorted(list(set(t.zona for t in lista_tratamientos)))
+            z_sel = st.selectbox("Zona:", ["--"] + zonas, key="mz_sel")
+            if z_sel != "--":
+                pats = sorted(list(set(t.patologia for t in lista_tratamientos if t.zona == z_sel)))
+                p_sel = st.selectbox("Tratamiento:", ["--"] + pats, key="mp_sel")
+                if p_sel != "--":
+                    vars_objs = [t for t in lista_tratamientos if t.zona == z_sel and t.patologia == p_sel]
+                    v_sel = st.selectbox("Lado/Variante:", [t.nombre for t in vars_objs], key="mv_sel")
+                    
+                    t_obj = next((t for t in vars_objs if t.nombre == v_sel), None)
+                    if t_obj:
+                        if t_obj.sintomas: st.info(f"**Síntomas:** {t_obj.sintomas}")
+                        if t_obj.posicion: st.warning(f"**Posición:** {t_obj.posicion}")
+                        
+                        if st.button("Añadir al Día"):
+                            if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
+                            if fecha_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][fecha_str] = {}
+                            db_usuario["planificados_adhoc"][fecha_str][t_obj.id] = "FLEX"
+                            guardar_datos_completos(st.session_state.db_global); st.rerun()
+
+    # RENDER TARJETAS
+    adhoc = db_usuario.get("planificados_adhoc", {}).get(fecha_str, {})
+    presentes = obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos)
+    registros = db_usuario["historial"].get(fecha_str, {})
+    
+    to_show = []
     for t in lista_tratamientos:
-        ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
-        if ciclo:
-            estado = ciclo.get('estado', 'activo')
-            with st.container(border=True):
-                c1, c2 = st.columns([3, 1])
-                c1.markdown(f"**{t.nombre}** ({estado.upper()})")
-                ini = datetime.date.fromisoformat(ciclo['fecha_inicio'])
-                hoy = datetime.date.today()
-                saltos = len([s for s in ciclo.get('dias_saltados', []) if s < hoy.isoformat()])
-                dias = (hoy - ini).days - saltos
-                c1.progress(min(dias/60, 1.0))
-                c1.caption(f"Día {dias} | Inicio: {ini.strftime('%d/%m')}")
-                if estado == 'activo':
-                    if c2.button("Pausar", key=f"cp_{t.id}"):
-                        ciclo['estado']='pausado'; ciclo['dias_acumulados']=dias; ciclo['activo']=False
-                        guardar_datos_completos(st.session_state.db_global); st.rerun()
-                else:
-                    fr = c2.date_input("Retomar:", key=f"cfr_{t.id}")
-                    if c2.button("Continuar", key=f"cc_{t.id}"):
-                        ciclo['fecha_inicio'] = (fr - timedelta(days=ciclo['dias_acumulados'])).isoformat()
-                        ciclo['estado']='activo'; ciclo['activo']=True; ciclo['dias_saltados']=[]; del ciclo['dias_acumulados']
-                        guardar_datos_completos(st.session_state.db_global); st.rerun()
-                if st.button("🗑️ Finalizar/Cancelar", key=f"cx_{t.id}"):
-                    del db_usuario["ciclos_activos"][t.id]
+        if t.id in adhoc or t.id in registros: to_show.append((t, "adhoc"))
+        else:
+            ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+            if ciclo and ciclo['activo']: to_show.append((t, "clinica"))
+    
+    for t, origen in to_show:
+        hechos = len(registros.get(t.id, []))
+        icon = "✅" if hechos >= t.max_diario else ("🩺" if origen == "clinica" else "📍")
+        with st.expander(f"{icon} {t.nombre} ({hechos}/{t.max_diario})"):
+            if hechos >= t.max_diario:
+                st.success("Completado")
+                if st.button("Deshacer", key=f"undo_{t.id}"):
+                    del db_usuario["historial"][fecha_str][t.id]
+                    guardar_datos_completos(st.session_state.db_global); st.rerun()
+            else:
+                mostrar_ficha_tecnica(t, lista_tratamientos)
+                if st.button("Registrar Ahora", key=f"reg_{t.id}"):
+                    now = datetime.datetime.now().strftime('%H:%M')
+                    if fecha_str not in db_usuario["historial"]: db_usuario["historial"][fecha_str] = {}
+                    if t.id not in db_usuario["historial"][fecha_str]: db_usuario["historial"][fecha_str][t.id] = []
+                    db_usuario["historial"][fecha_str][t.id].append({"hora": now, "detalle": "Manual"})
+                    guardar_datos_completos(st.session_state.db_global); st.rerun()
+                if origen == "adhoc" and st.button("Quitar del plan", key=f"del_{t.id}"):
+                    del db_usuario["planificados_adhoc"][fecha_str][t.id]
                     guardar_datos_completos(st.session_state.db_global); st.rerun()
 
 elif menu_navegacion == "🔍 Buscador AI":
     st.title("🔍 Buscador & Generador AI")
-    if not HAS_GEMINI: st.warning("Instala 'google-generativeai' para usar esto."); st.stop()
+    if not HAS_GEMINI: st.error("Falta API Key"); st.stop()
     
-    if 'ai_search_result' not in st.session_state:
-        st.session_state.ai_search_result = None
-
-    query = st.text_input("Describe tu dolencia...")
-    if st.button("Consultar AI") and query:
-        with st.spinner("Analizando con Gemini..."):
-            res = consultar_ia(query)
-            if res:
-                st.session_state.ai_search_result = res
-            else:
-                st.error("No se pudo obtener respuesta de la IA.")
-
-    if st.session_state.ai_search_result:
-        res = st.session_state.ai_search_result
-        st.success(f"Protocolo Encontrado: {res['nombre']}")
-        
-        if 'descripcion' in res: st.info(res['descripcion'])
-        st.json(res)
-        
-        temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'), descripcion=res.get('descripcion', ''), sintomas=res.get('sintomas', ''), posicion=res.get('posicion', ''))
-        mostrar_ficha_tecnica(temp_t, []) # Usamos la ficha completa para preview
-        
-        st.markdown("---")
-        
-        if st.button("💾 Guardar en Mis Tratamientos (Sin Planificar)", use_container_width=True):
-            id_new = str(uuid.uuid4())[:8]
-            res['id'] = id_new
-            res['tipo'] = 'LESION'
-            res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
-            db_usuario["tratamientos_custom"].append(res)
-            guardar_datos_completos(st.session_state.db_global)
-            st.success("Guardado en tu catálogo. Puedes buscarlo en 'Gestionar Tratamientos'.")
-            st.session_state.ai_search_result = None
-            st.rerun()
-
-        c_plan, c_clinic = st.columns(2)
-        with c_plan:
-            st.subheader("📅 Planificar")
-            d_plan = st.date_input("Fecha:", datetime.date.today(), key="date_ai_plan")
-            if st.button("Añadir a Agenda", use_container_width=True):
-                id_new = str(uuid.uuid4())[:8]
-                res['id'] = id_new
-                res['tipo'] = 'PUNTUAL'
-                db_usuario["tratamientos_custom"].append(res)
-                f_str = d_plan.isoformat()
-                if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
-                if f_str not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][f_str] = {}
-                db_usuario["planificados_adhoc"][f_str][id_new] = "FLEX"
-                guardar_datos_completos(st.session_state.db_global)
-                st.success(f"Añadido al {f_str}")
-                st.session_state.ai_search_result = None
-                st.rerun()
-
-        with c_clinic:
-            st.subheader("🚑 Clínica")
-            d_start = st.date_input("Inicio:", datetime.date.today(), key="date_ai_start")
-            if st.button("Empezar Clínica", use_container_width=True):
-                id_new = str(uuid.uuid4())[:8]
-                res['id'] = id_new
-                res['tipo'] = 'LESION'
-                res['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
-                db_usuario["tratamientos_custom"].append(res)
-                if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
-                db_usuario["ciclos_activos"][id_new] = {
-                    "fecha_inicio": d_start.isoformat(),
-                    "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []
-                }
-                guardar_datos_completos(st.session_state.db_global)
-                st.success(f"Tratamiento iniciado el {d_start}")
-                st.session_state.ai_search_result = None
-                st.rerun()
+    if 'ai_results' not in st.session_state: st.session_state.ai_results = []
+    
+    q = st.text_input("Describe dolencia:")
+    if st.button("Buscar") and q:
+        with st.spinner("Generando opciones visuales..."):
+            res = consultar_ia(q)
+            if res: st.session_state.ai_results = res
+    
+    if st.session_state.ai_results:
+        st.write(f"He encontrado {len(st.session_state.ai_results)} opciones:")
+        for i, r in enumerate(st.session_state.ai_results):
+            with st.container(border=True):
+                st.subheader(r['nombre'])
+                # Objeto temporal para visualización
+                temp = Tratamiento("prev", r['nombre'], r['zona'], r['ondas'], r['energia'], r['hz'], r['dist'], r['dur'], 1, 7, "AI", [], "FLEX", "AI", [], r['tips_ant'], r['tips_des'], frecuencias=r.get('frecuencias'), descripcion=r.get('descripcion'), sintomas=r.get('sintomas'), posicion=r.get('posicion'))
+                mostrar_ficha_tecnica(temp, [])
                 
-        if st.button("❌ Cancelar / Nueva Búsqueda"):
-            st.session_state.ai_search_result = None
+                c1, c2, c3 = st.columns(3)
+                if c1.button(f"💾 Guardar Disponibles", key=f"s_{i}"):
+                    id_new = str(uuid.uuid4())[:8]; r['id'] = id_new
+                    db_usuario["tratamientos_custom"].append(r)
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Guardado!"); st.rerun()
+                
+                if c2.button(f"📅 Planificar Hoy", key=f"p_{i}"):
+                    id_new = str(uuid.uuid4())[:8]; r['id'] = id_new; r['tipo'] = 'PUNTUAL'
+                    db_usuario["tratamientos_custom"].append(r)
+                    hoy = datetime.date.today().isoformat()
+                    if "planificados_adhoc" not in db_usuario: db_usuario["planificados_adhoc"] = {}
+                    if hoy not in db_usuario["planificados_adhoc"]: db_usuario["planificados_adhoc"][hoy] = {}
+                    db_usuario["planificados_adhoc"][hoy][id_new] = "FLEX"
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Añadido a hoy!"); st.rerun()
+                
+                if c3.button(f"🚑 Empezar Clínica", key=f"c_{i}"):
+                    id_new = str(uuid.uuid4())[:8]; r['id'] = id_new; r['tipo'] = 'LESION'
+                    r['fases'] = [{"nombre": "Estándar", "dias_fin": 30}]
+                    db_usuario["tratamientos_custom"].append(r)
+                    if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                    db_usuario["ciclos_activos"][id_new] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True, "modo": "fases", "estado": "activo", "dias_saltados": []}
+                    guardar_datos_completos(st.session_state.db_global)
+                    st.success("Clínica iniciada!"); st.rerun()
+        
+        if st.button("Limpiar Búsqueda"):
+            st.session_state.ai_results = []
             st.rerun()
 
 elif menu_navegacion == "🗂️ Gestionar Tratamientos":
     st.title("🗂️ Gestionar Tratamientos")
-    st.write("Busca, edita o elimina tratamientos de tu base de datos.")
-    
-    tratamientos_nombres = [t.nombre for t in lista_tratamientos]
-    seleccion = st.selectbox("Selecciona un tratamiento:", ["--"] + tratamientos_nombres)
-    
-    if seleccion != "--":
-        t_sel = next((t for t in lista_tratamientos if t.nombre == seleccion), None)
+    nombres = [t.nombre for t in lista_tratamientos]
+    sel = st.selectbox("Editar:", ["--"] + nombres)
+    if sel != "--":
+        t = next(x for x in lista_tratamientos if x.nombre == sel)
+        with st.form("edit"):
+            nn = st.text_input("Nombre", t.nombre)
+            nd = st.text_area("Descripción", t.descripcion)
+            ns = st.text_area("Síntomas", t.sintomas)
+            np = st.text_area("Posición", t.posicion)
+            if st.form_submit_button("Guardar"):
+                new_data = t.__dict__.copy()
+                new_data['nombre'] = nn; new_data['descripcion'] = nd
+                new_data['sintomas'] = ns; new_data['posicion'] = np
+                new_data['id'] = str(uuid.uuid4())[:8] if not t.es_custom else t.id
+                
+                if t.es_custom:
+                    db_usuario["tratamientos_custom"] = [x for x in db_usuario["tratamientos_custom"] if x['id'] != t.id]
+                db_usuario["tratamientos_custom"].append(new_data)
+                guardar_datos_completos(st.session_state.db_global)
+                st.success("Guardado!"); st.rerun()
         
-        if t_sel:
-            st.markdown(f"### Editando: {t_sel.nombre}")
-            if not t_sel.es_custom:
-                st.info("ℹ️ Estás editando un tratamiento BASE. Se creará una copia personalizada con tus cambios.")
-            
-            with st.form("edit_form"):
-                new_nombre = st.text_input("Nombre", value=t_sel.nombre)
-                new_desc = st.text_area("Descripción", value=t_sel.descripcion)
-                new_sint = st.text_area("Síntomas", value=t_sel.sintomas)
-                new_pos = st.text_area("Posición", value=t_sel.posicion)
-                new_dur = st.number_input("Duración (min)", value=t_sel.duracion)
-                new_dist = st.text_input("Distancia", value=t_sel.distancia)
-                new_hz = st.text_input("Hercios (Hz)", value=t_sel.herzios)
-                
-                st.markdown("**Frecuencias (JSON format: [[nm, %], ...])**")
-                freq_str = st.text_area("Configuración Panel", value=json.dumps(t_sel.frecuencias))
-                
-                c1, c2 = st.columns(2)
-                submitted = c1.form_submit_button("💾 Guardar Cambios")
-                
-                if submitted:
-                    try:
-                        parsed_freqs = json.loads(freq_str)
-                        new_data = {
-                            "id": t_sel.id if t_sel.es_custom else str(uuid.uuid4())[:8],
-                            "nombre": new_nombre,
-                            "zona": t_sel.zona,
-                            "ondas": t_sel.ondas_txt,
-                            "energia": "Custom Config",
-                            "hz": new_hz,
-                            "dist": new_dist,
-                            "dur": new_dur,
-                            "tipo": t_sel.tipo,
-                            "tips_ant": t_sel.tips_antes,
-                            "tips_des": t_sel.tips_despues,
-                            "fases": t_sel.fases_config,
-                            "frecuencias": parsed_freqs,
-                            "descripcion": new_desc,
-                            "sintomas": new_sint,
-                            "posicion": new_pos
-                        }
-                        
-                        if t_sel.es_custom:
-                            db_usuario["tratamientos_custom"] = [t for t in db_usuario["tratamientos_custom"] if t['id'] != t_sel.id]
-                        
-                        db_usuario["tratamientos_custom"].append(new_data)
-                        guardar_datos_completos(st.session_state.db_global)
-                        st.success("Tratamiento guardado correctamente.")
-                        st.rerun()
-                        
-                    except Exception as e:
-                        st.error(f"Error al guardar: {e}")
+        if t.es_custom and st.button("Borrar"):
+            db_usuario["tratamientos_custom"] = [x for x in db_usuario["tratamientos_custom"] if x['id'] != t.id]
+            guardar_datos_completos(st.session_state.db_global)
+            st.success("Borrado!"); st.rerun()
 
-            if t_sel.es_custom:
-                st.markdown("---")
-                if st.button("🗑️ Borrar Tratamiento Definitivamente", type="primary"):
-                    db_usuario["tratamientos_custom"] = [t for t in db_usuario["tratamientos_custom"] if t['id'] != t_sel.id]
-                    guardar_datos_completos(st.session_state.db_global)
-                    st.success("Tratamiento eliminado.")
-                    st.rerun()
+elif menu_navegacion == "🚑 Clínica":
+    st.title("🚑 Clínica")
+    
+    # 1. Selector Manual
+    with st.expander("🆕 Iniciar Tratamiento Manualmente"):
+        # Misma lógica que en Panel Diario pero para activar ciclo
+        zonas = sorted(list(set(t.zona for t in lista_tratamientos)))
+        z_sel = st.selectbox("Zona:", ["--"] + zonas, key="cz_sel")
+        if z_sel != "--":
+            pats = sorted(list(set(t.patologia for t in lista_tratamientos if t.zona == z_sel)))
+            p_sel = st.selectbox("Tratamiento:", ["--"] + pats, key="cp_sel")
+            if p_sel != "--":
+                vars_objs = [t for t in lista_tratamientos if t.zona == z_sel and t.patologia == p_sel]
+                v_sel = st.selectbox("Lado/Variante:", [t.nombre for t in vars_objs], key="cv_sel")
+                
+                if st.button("Iniciar Ciclo"):
+                    t_obj = next((t for t in vars_objs if t.nombre == v_sel), None)
+                    if t_obj:
+                        if "ciclos_activos" not in db_usuario: db_usuario["ciclos_activos"] = {}
+                        db_usuario["ciclos_activos"][t_obj.id] = {"fecha_inicio": datetime.date.today().isoformat(), "activo": True}
+                        guardar_datos_completos(st.session_state.db_global); st.rerun()
+
+    # 2. Lista Activos
+    for t in lista_tratamientos:
+        ciclo = db_usuario.get("ciclos_activos", {}).get(t.id)
+        if ciclo and ciclo['activo']:
+            st.info(f"En curso: {t.nombre} (Desde {ciclo['fecha_inicio']})")
+            if st.button(f"Finalizar {t.nombre}"):
+                ciclo['activo'] = False
+                guardar_datos_completos(st.session_state.db_global); st.rerun()
+
+elif menu_navegacion == "🗓️ Panel Semanal":
+    st.title("🗓️ Panel Semanal")
+    # Restauración completa panel semanal INTERACTIVO
+    d_ref = st.date_input("Semana de:", datetime.date.today())
+    start = d_ref - timedelta(days=d_ref.weekday())
+    
+    tabs = st.tabs(["L", "M", "X", "J", "V", "S", "D"])
+    for i, tab in enumerate(tabs):
+        with tab:
+            dia = start + timedelta(days=i)
+            st.subheader(dia.strftime("%d/%m"))
+            renderizar_dia(dia) # Llamada recursiva para funcionalidad total en cada dia
 
 elif menu_navegacion == "📊 Historial":
     st.title("📊 Historial")
-    vista = st.radio("Vista:", ["Semana", "Mes", "Año"], horizontal=True)
-    hist = db_usuario.get("historial", {})
-    t_usados = set([k for r in hist.values() for k in r.keys()])
-    mapa = {t.id: t.nombre for t in lista_tratamientos}
-    if vista == "Semana":
-        d_ref = st.date_input("Semana:", datetime.date.today())
-        start = d_ref - timedelta(days=d_ref.weekday())
-        days = [start + timedelta(days=i) for i in range(7)]
-        data = []
-        for tid in t_usados:
-            row = {"Tratamiento": mapa.get(tid, tid), "Total": 0}
-            for i, d in enumerate(days):
-                c = len(hist.get(d.isoformat(), {}).get(tid, []))
-                row[["Lun","Mar","Mie","Jue","Vie","Sab","Dom"][i]] = "✅" * c
-                row["Total"] += c
-            if row["Total"] > 0: data.append(row)
-        st.dataframe(pd.DataFrame(data), use_container_width=True)
-    elif vista == "Mes":
-        d_ref = st.date_input("Mes:", datetime.date.today())
-        m_str = d_ref.strftime("%Y-%m")
-        counts = {}
-        for f, r in hist.items():
-            if f.startswith(m_str):
-                for tid, l in r.items(): counts[mapa.get(tid, tid)] = counts.get(mapa.get(tid, tid), 0) + len(l)
-        if counts: st.bar_chart(pd.DataFrame(list(counts.items()), columns=["T", "N"]).set_index("T"))
-    elif vista == "Año":
-        y_ref = st.number_input("Año:", value=datetime.date.today().year)
-        y_str = str(y_ref)
-        meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-        data = []
-        for tid in t_usados:
-            row = {"T": mapa.get(tid, tid)}
-            tot = 0
-            for i in range(1, 13):
-                m_key = f"{y_str}-{i:02d}"
-                c = 0
-                for f, r in hist.items():
-                    if f.startswith(m_key): c += len(r.get(tid, []))
-                row[meses[i-1]] = c
-                tot += c
-            if tot > 0: data.append(row)
-        st.dataframe(pd.DataFrame(data), use_container_width=True)
+    st.write(db_usuario.get("historial", {}))
