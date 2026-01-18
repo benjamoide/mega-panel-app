@@ -70,7 +70,7 @@ TAGS_ACTIVIDADES = {
 }
 
 # ==============================================================================
-# 2. DEFINICIÓN MAESTRA BASE (CON DESCRIPCIONES)
+# 2. DEFINICIÓN MAESTRA BASE (CON SÍNTOMAS Y POSICIÓN)
 # ==============================================================================
 DB_TRATAMIENTOS_BASE = {
     "Codo": {
@@ -78,28 +78,36 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Reduce inflamación en tendón extensor y alivia dolor agudo mediante pulsos analgésicos.",
+            "descripcion": "Reduce inflamación en tendón extensor y alivia dolor agudo.",
+            "sintomas": "Dolor en la cara externa del codo, debilidad al agarrar objetos o girar la muñeca.",
+            "posicion": "Sentado frente a una mesa. Brazo apoyado sobre la mesa. Panel colocado lateralmente tocando la zona externa del codo.",
             "tips_ant": ["Piel limpia"], "tips_des": ["No pinza con dedos", "Hielo si dolor"]
         },
         "Epitrocleitis (Golfista)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Tratamiento regenerativo para la cara interna del codo y flexores.",
+            "descripcion": "Tratamiento regenerativo para la cara interna del codo.",
+            "sintomas": "Dolor en la cara interna del codo que puede irradiarse al antebrazo. Molestia al flexionar la muñeca.",
+            "posicion": "Sentado con el brazo apoyado en mesa, palma hacia arriba. Panel tocando la cara interna del codo.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar flexores"]
         },
         "Calcificación": {
             "ondas": "850nm", "energia": "660nm: 0% | 850nm: 100%", 
             "hz": "50Hz (Analgesia)", "dist": "Contacto", "dur": 12,
             "frecuencias": [(660, 0), (850, 100)],
-            "descripcion": "Infrarrojo profundo para estimular reabsorción de calcio y vascularización.",
+            "descripcion": "Infrarrojo profundo para estimular reabsorción de calcio.",
+            "sintomas": "Dolor punzante y limitación de movimiento debido a depósitos de calcio endurecidos.",
+            "posicion": "Panel en contacto directo con la zona donde se palpa la calcificación. Presión ligera.",
             "tips_ant": ["Calor previo"], "tips_des": ["Movilidad suave"]
         },
         "Bursitis (Apoyo)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "10Hz (Anti-inflamatorio)", "dist": "5cm", "dur": 10,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Baja la inflamación de la bursa sin contacto directo para evitar presión.",
+            "descripcion": "Baja la inflamación de la bursa sin contacto directo.",
+            "sintomas": "Hinchazón visible (bulto) en la punta del codo, caliente al tacto y doloroso al apoyar.",
+            "posicion": "Brazo relajado. Panel a 5cm de distancia apuntando al 'bulto'. NO TOCAR la piel para no presionar la bursa.",
             "tips_ant": ["Zona limpia"], "tips_des": ["No apoyar codo"]
         }
     },
@@ -108,21 +116,27 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Relaja tensión cervical y mejora riego sanguíneo para aliviar contracturas.",
+            "descripcion": "Relaja tensión cervical y mejora riego sanguíneo.",
+            "sintomas": "Rigidez en el cuello, dolor al girar la cabeza, tensión en trapecios superiores.",
+            "posicion": "Sentado en silla. Panel detrás a la altura del cuello. Mantener postura erguida.",
             "tips_ant": ["Sin collar"], "tips_des": ["Movilidad suave"]
         },
         "Dorsalgia (Alta)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz", "dist": "15cm", "dur": 15,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Para zona media-alta de la espalda, útil en corrección postural.",
+            "descripcion": "Para zona media-alta de la espalda y postura.",
+            "sintomas": "Dolor entre los omóplatos, sensación de carga o 'mochila pesada'.",
+            "posicion": "Sentado al revés en una silla (pecho contra el respaldo) o tumbado boca abajo. Panel cubriendo zona interescapular.",
             "tips_ant": ["Postura recta"], "tips_des": ["Estirar pecho"]
         },
         "Lumbalgia (Baja)": {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 20,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Penetración profunda lumbar para desinflamar discos y musculatura.",
+            "descripcion": "Penetración profunda lumbar para desinflamar discos.",
+            "sintomas": "Dolor en la zona baja de la espalda, dificultad para enderezarse o levantarse de la silla.",
+            "posicion": "Tumbado boca abajo cómodamente o sentado en taburete sin respaldo. Panel centrado en la zona lumbar.",
             "tips_ant": ["Calor previo"], "tips_des": ["No cargar peso"]
         }
     },
@@ -131,8 +145,39 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 80% | 850nm: 80%", 
             "hz": "10Hz (Relajación)", "dist": "15cm", "dur": 12,
             "frecuencias": [(660, 80), (850, 80)],
-            "descripcion": "Relajación muscular general del antebrazo por uso excesivo.",
+            "descripcion": "Relajación muscular general del antebrazo.",
+            "sintomas": "Sensación de fatiga, antebrazos duros o congestionados tras esfuerzo.",
+            "posicion": "Antebrazo apoyado en mesa. Panel desde arriba cubriendo toda la musculatura.",
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar", "Calor"]
+        },
+        "Tendinitis": {
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz (Dolor)", "dist": "10cm", "dur": 10,
+            "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Tratamiento anti-inflamatorio localizado.",
+            "sintomas": "Dolor puntual en el trayecto de un tendón al mover los dedos o muñeca.",
+            "posicion": "Localizar el punto exacto de dolor. Panel apuntando directamente a ese punto.",
+            "tips_ant": ["Quitar reloj"], "tips_des": ["Reposo"]
+        }
+    },
+    "Muñeca": {
+        "Túnel Carpiano": {
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10Hz (Nervio)", "dist": "5cm", "dur": 10,
+            "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Enfocado en regeneración nerviosa y desinflamación.",
+            "sintomas": "Hormigueo en dedos pulgar, índice y medio. Dolor nocturno.",
+            "posicion": "Palma de la mano hacia arriba. Panel enfocado en la base de la muñeca (zona del reloj).",
+            "tips_ant": ["Palma abierta"], "tips_des": ["Movilidad"]
+        },
+        "Articular": {
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz", "dist": "5cm", "dur": 10,
+            "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Para dolor articular general y rigidez.",
+            "sintomas": "Dolor difuso en la muñeca al moverla en cualquier dirección.",
+            "posicion": "Ir rotando la muñeca frente al panel para cubrir todas las caras (dorsal, palmar, lateral).",
+            "tips_ant": ["Sin muñequera"], "tips_des": ["Hielo"]
         }
     },
     "Pierna": {
@@ -140,15 +185,139 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
             "hz": "50Hz (Dolor)", "dist": "Contacto", "dur": 12,
             "frecuencias": [(660, 50), (850, 100)],
-            "descripcion": "Reduce fricción e inflamación en la fascia lata lateral.",
+            "descripcion": "Reduce fricción e inflamación en fascia lata.",
+            "sintomas": "Dolor punzante en la cara externa de la rodilla o muslo al correr o bajar escaleras.",
+            "posicion": "Tumbado de lado o sentado. Panel recorriendo la cara lateral externa del muslo hasta la rodilla.",
             "tips_ant": ["Piel limpia"], "tips_des": ["Estirar TFL"]
         },
         "Sobrecarga Femoral": {
             "ondas": "660+850", "energia": "660nm: 80% | 850nm: 100%", 
             "hz": "10Hz (Recuperación)", "dist": "10cm", "dur": 15,
             "frecuencias": [(660, 80), (850, 100)],
-            "descripcion": "Acelera barrido de lactato y reduce fatiga post-entreno.",
+            "descripcion": "Acelera recuperación y barrido de lactato.",
+            "sintomas": "Agujetas fuertes, sensación de pesadez en isquios o cuádriceps.",
+            "posicion": "Sentado (para cuádriceps) o tumbado boca abajo (para isquios). Panel cubriendo el grupo muscular.",
             "tips_ant": ["Quitar sudor"], "tips_des": ["Estirar"]
+        }
+    },
+    "Pie": {
+        "Plantar (Fascitis)": {
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "50Hz", "dist": "5cm", "dur": 10,
+            "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Tratamiento para la fascia plantar inflamada.",
+            "sintomas": "Dolor agudo en el talón o arco del pie, especialmente al dar los primeros pasos por la mañana.",
+            "posicion": "Sentado con el pie apoyado sobre la rodilla contraria. Panel apuntando directamente a la planta del pie.",
+            "tips_ant": ["Sin calcetín"], "tips_des": ["Rodar pelota"]
+        },
+        "Dorsal (Esguince)": {
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10Hz (Regeneración)", "dist": "10cm", "dur": 10,
+            "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Regeneración de ligamentos tras torcedura.",
+            "sintomas": "Dolor e hinchazón en la parte externa o empeine tras una torcedura.",
+            "posicion": "Pie apoyado en suelo o taburete. Panel enfocado a la zona hinchada (generalmente maléolo externo).",
+            "tips_ant": ["Piel limpia"], "tips_des": ["Movilidad"]
+        },
+        "Lateral (Metatarso)": {
+            "ondas": "Todas (Mega)", "energia": "TODO 100%", 
+            "hz": "50Hz (Analgesia)", "dist": "10cm", "dur": 12,
+            "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
+            "descripcion": "Alivio dolor agudo en lateral del pie (5º metatarsiano). Anti-inflamación profunda ósea.",
+            "sintomas": "Dolor en el borde exterior del pie, debajo del dedo pequeño (juanete de sastre o sobrecarga).",
+            "posicion": "Sentado, pie relajado sobre un taburete. Colocar el panel de lado en el suelo apuntando directamente al lateral del pie.",
+            "tips_ant": ["Pie limpio", "Sentado cómodo"], "tips_des": ["Movilidad dedos", "No pisar fuerte"]
+        }
+    },
+    "Hombro": {
+        "Tendinitis": {
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10-40Hz", "dist": "15cm", "dur": 10,
+            "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Para manguito rotador y tendones inflamados.",
+            "sintomas": "Dolor al levantar el brazo lateralmente o por la noche al dormir sobre ese lado.",
+            "posicion": "Sentado. Panel lateral apuntando al deltoides/hombro. Brazo relajado colgando.",
+            "tips_ant": ["Sin ropa"], "tips_des": ["Péndulos"]
+        }
+    },
+    "Rodilla": {
+        "General": {
+            "ondas": "660+850", "energia": "660nm: 50% | 850nm: 100%", 
+            "hz": "10Hz", "dist": "15cm", "dur": 10,
+            "frecuencias": [(660, 50), (850, 100)],
+            "descripcion": "Mantenimiento articular y dolor inespecífico.",
+            "sintomas": "Molestia profunda, chasquidos o dolor leve al subir escaleras.",
+            "posicion": "Sentado con la pierna estirada o ligeramente flexionada (con toalla debajo). Panel frontal o lateral a la rodilla.",
+            "tips_ant": ["No hielo antes"], "tips_des": ["Movilidad"]
+        }
+    },
+    "Piel": {
+        "Cicatrices": {
+            "ondas": "630+660", "energia": "660nm: 100% | 850nm: 20%", 
+            "hz": "CW", "dist": "10cm", "dur": 10,
+            "frecuencias": [(660, 100), (850, 20)],
+            "descripcion": "Mejora la textura y color de cicatrices recientes o antiguas.",
+            "sintomas": "Tejido cicatricial, marcas de heridas o cirugías.",
+            "posicion": "Panel directo a la cicatriz. Si es muy reciente, aumentar distancia para no calentar.",
+            "tips_ant": ["Limpio"], "tips_des": ["Rosa Mosqueta"]
+        },
+        "Acné": {
+            "ondas": "630+660", "energia": "660nm: 80% | 850nm: 0%", 
+            "hz": "CW", "dist": "15cm", "dur": 8,
+            "frecuencias": [(660, 80), (850, 0)],
+            "descripcion": "Reduce inflamación bacteriana y rojez.",
+            "sintomas": "Brotes activos, rojez e inflamación facial.",
+            "posicion": "Panel frente al rostro (con gafas protectoras). Ojos cerrados.",
+            "tips_ant": ["Limpio"], "tips_des": ["Hidratar"]
+        },
+        "Quemaduras": {
+            "ondas": "630+660", "energia": "660nm: 50% | 850nm: 0%", 
+            "hz": "CW", "dist": "20cm", "dur": 5,
+            "frecuencias": [(660, 50), (850, 0)],
+            "descripcion": "Acelera regeneración epidérmica sin calor excesivo.",
+            "sintomas": "Piel roja, sensible o dañada por el sol/calor.",
+            "posicion": "Mayor distancia (20-30cm) para evitar cualquier sensación de calor. Solo luz roja.",
+            "tips_ant": ["Sin cremas"], "tips_des": ["Aloe Vera"]
+        }
+    },
+    "Sistémico": {
+        "Circulación": {
+            "ondas": "660+850", "energia": "100% | 100%", 
+            "hz": "CW", "dist": "30cm", "dur": 20,
+            "frecuencias": [(660, 100), (850, 100)],
+            "descripcion": "Vasodilatación general para mejorar retorno venoso.",
+            "sintomas": "Piernas cansadas, mala circulación general, frío en extremidades.",
+            "posicion": "Panel cubriendo grandes grupos musculares (espalda o piernas completas) a mayor distancia.",
+            "tips_ant": ["Beber agua"], "tips_des": ["Caminar"]
+        },
+        "Energía": {
+            "ondas": "660+850", "energia": "100% | 100%", 
+            "hz": "CW", "dist": "20cm", "dur": 10,
+            "frecuencias": [(660, 100), (850, 100)],
+            "descripcion": "Estimulación mitocondrial para boost de energía.",
+            "sintomas": "Fatiga general, falta de energía por la mañana.",
+            "posicion": "Panel frente al torso/pecho (timo) por la mañana.",
+            "tips_ant": ["Mañana"], "tips_des": ["Actividad"]
+        }
+    },
+    "Cabeza": {
+        "Migraña": {
+            "ondas": "850nm", "energia": "660nm: 0% | 850nm: 50%", 
+            "hz": "10Hz (Alfa)", "dist": "Contacto Nuca", "dur": 10,
+            "frecuencias": [(660, 0), (850, 50)],
+            "descripcion": "Relajación occipital para reducir tensión vascular.",
+            "sintomas": "Dolor pulsátil, tensión en la base del cráneo.",
+            "posicion": "Panel en contacto o muy cerca de la base del cráneo (nuca), NO en los ojos.",
+            "tips_ant": ["Oscuridad"], "tips_des": ["Reposo"]
+        },
+        "Salud Cerebral": {
+            "ondas": "810nm", "energia": "0% | 100%", 
+            "hz": "40Hz (Gamma)", "dist": "30cm", "dur": 10,
+            "frecuencias": [(810, 100)],
+            "descripcion": "Neuroprotección y mejora cognitiva.",
+            "sintomas": "Niebla mental, deseo de mejorar foco o prevención.",
+            "posicion": "Panel dirigido a la frente/cabeza desde arriba o frente. GAFAS OBLIGATORIAS si es de frente.",
+            "tips_ant": ["Gafas"], "tips_des": ["Tarea cognitiva"]
         }
     },
     "Grasa/Estética": {
@@ -156,7 +325,9 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "Todas (Mega)", "energia": "TODO AL 100%", 
             "hz": "CW (Continuo)", "dist": "20-30cm", "dur": 15,
             "frecuencias": [(660, 100), (850, 100), (810, 100), (830, 100), (630, 100)],
-            "descripcion": "Lipólisis térmica máxima. Libera ácidos grasos que deben quemarse con ejercicio inmediato.",
+            "descripcion": "Lipólisis térmica máxima. Requiere ejercicio posterior inmediato.",
+            "sintomas": "Acumulación de tejido adiposo resistente.",
+            "posicion": "Panel directo a la zona (abdomen, glúteos). Piel desnuda.",
             "tips_ant": ["Beber vaso agua grande"], "tips_des": ["Cardio inmediato (30min)"], 
             "visual_group": "PRE", "req_tags": ["Active"]
         },
@@ -164,7 +335,9 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "630nm", "energia": "100% | 0%", 
             "hz": "CW", "dist": "30cm", "dur": 10,
             "frecuencias": [(630, 100), (660, 50)],
-            "descripcion": "Estimulación de colágeno superficial para piel y arrugas finas.",
+            "descripcion": "Estimulación de colágeno superficial.",
+            "sintomas": "Arrugas finas, piel apagada, falta de tono.",
+            "posicion": "Sentado frente al panel a 30cm. Gafas protectoras puestas.",
             "tips_ant": ["Gafas Obligatorias"], "tips_des": ["Serum"], 
             "visual_group": "FLEX", "momento_txt": "Cualquier hora"
         }
@@ -174,16 +347,20 @@ DB_TRATAMIENTOS_BASE = {
             "ondas": "660+850", "energia": "100% | 100%", 
             "hz": "CW", "dist": "15cm", "dur": 5,
             "frecuencias": [(660, 100), (850, 100)],
-            "descripcion": "Estimulación mitocondrial en células de Leydig para optimización hormonal.",
+            "descripcion": "Estimulación mitocondrial hormonal.",
+            "sintomas": "Optimización hormonal masculina.",
+            "posicion": "Panel directo a la zona testicular (breve exposición).",
             "tips_ant": ["Piel limpia"], "tips_des": ["Ducha fría"], 
             "visual_group": "MORNING"
         },
         "Sueño": {
-            "ondas": "630nm", "energia": "20% | 0%", 
-            "hz": "CW", "dist": "50cm", "dur": 15,
-            "frecuencias": [(630, 20)],
-            "descripcion": "Luz roja tenue ambiental para favorecer la producción de melatonina.",
-            "tips_ant": ["Oscuridad"], "tips_des": ["Dormir"], 
+            "ondas": "Solo ROJO", "energia": "Rojo: 30% | NIR: 0%", 
+            "hz": "CW (Continuo)", "dist": ">1 Metro", "dur": 20,
+            "frecuencias": [(630, 30), (660, 30), (810, 0), (830, 0), (850, 0)],
+            "descripcion": "Luz ambiente tenue para estimular melatonina. Usar 1h antes de dormir.",
+            "sintomas": "Insomnio, dificultad para desconectar por la noche.",
+            "posicion": "Panel en el suelo o mesa apuntando a una pared (luz indirecta) o lejos del usuario. Habitación a oscuras.",
+            "tips_ant": ["Habitación oscura"], "tips_des": ["Ir a dormir"], 
             "visual_group": "NIGHT"
         }
     }
@@ -193,7 +370,7 @@ DB_TRATAMIENTOS_BASE = {
 # 3. CLASES Y MODELO DE DATOS
 # ==============================================================================
 class Tratamiento:
-    def __init__(self, id_t, nombre, zona, ondas_txt, config_energia, herzios, distancia, duracion, max_diario, max_semanal, tipo, tags_entreno, default_visual_group, momento_ideal_txt, momentos_prohibidos, tips_antes, tips_despues, incompatible_with=None, fases_config=None, es_custom=False, patologia="", lado_txt="", frecuencias=None, descripcion=""):
+    def __init__(self, id_t, nombre, zona, ondas_txt, config_energia, herzios, distancia, duracion, max_diario, max_semanal, tipo, tags_entreno, default_visual_group, momento_ideal_txt, momentos_prohibidos, tips_antes, tips_despues, incompatible_with=None, fases_config=None, es_custom=False, patologia="", lado_txt="", frecuencias=None, descripcion="", sintomas="", posicion=""):
         self.id = id_t
         self.nombre = nombre
         self.zona = zona
@@ -218,6 +395,8 @@ class Tratamiento:
         self.lado_txt = lado_txt
         self.frecuencias = frecuencias if frecuencias else []
         self.descripcion = descripcion
+        self.sintomas = sintomas
+        self.posicion = posicion
 
     def set_incompatibilidades(self, texto):
         self.incompatibilidades = texto
@@ -236,7 +415,9 @@ def obtener_catalogo(tratamientos_custom=[]):
             1, 7, c['tipo'], ['All'], "FLEX", "Personalizado", [], c['tips_ant'], c['tips_des'], 
             fases_config=c.get('fases', []), es_custom=True,
             patologia=c['nombre'], lado_txt="Custom", frecuencias=c.get('frecuencias', []), 
-            descripcion=c.get('descripcion', 'Tratamiento personalizado.')
+            descripcion=c.get('descripcion', 'Tratamiento personalizado.'),
+            sintomas=c.get('sintomas', 'No especificado.'),
+            posicion=c.get('posicion', 'Seguir indicaciones generales.')
         ))
         ids_procesados.add(c['id'])
 
@@ -245,16 +426,18 @@ def obtener_catalogo(tratamientos_custom=[]):
         for patologia, specs in patologias.items():
             freqs = specs.get("frecuencias", [(660, 50), (850, 100)])
             desc = specs.get("descripcion", "Tratamiento estándar.")
+            sint = specs.get("sintomas", "Sintomatología estándar.")
+            pos = specs.get("posicion", "Posición estándar.")
             
-            if zona in ["Espalda", "Sistémico", "Cabeza", "Piel"]:
+            if zona in ["Espalda", "Sistémico", "Cabeza", "Piel", "Hombro", "Rodilla", "Antebrazo", "Muñeca"]:
                 id_t = "".join(c for c in f"{zona[:4]}_{patologia[:4]}".lower() if c.isalnum() or c=="_")
                 if id_t not in ids_procesados:
                     catalogo.append(Tratamiento(
                         id_t, f"{zona} - {patologia}", zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
                         1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
-                        patologia=patologia, lado_txt="General", frecuencias=freqs, descripcion=desc
+                        patologia=patologia, lado_txt="General", frecuencias=freqs, descripcion=desc, sintomas=sint, posicion=pos
                     ))
-            elif zona not in ["Grasa/Estética", "Permanente", "Cuerpo"]: # Filtro para los que tienen lado
+            elif zona not in ["Grasa/Estética", "Permanente", "Cuerpo"]: # Filtro para los que tienen lado (Codo, Pierna, Pie)
                 for lado_code, lado_nom in [("d", "Derecho"), ("i", "Izquierdo")]:
                     base_id = f"{zona.lower()[:4]}_{patologia.lower()[:4]}_{lado_code}"
                     id_t = "".join(c for c in base_id if c.isalnum() or c == "_")
@@ -263,24 +446,24 @@ def obtener_catalogo(tratamientos_custom=[]):
                         catalogo.append(Tratamiento(
                             id_t, nombre, zona, specs["ondas"], specs["energia"], specs["hz"], specs["dist"], specs["dur"], 
                             1, 7, "LESION", ['All'], "FLEX", "Flexible", [], specs["tips_ant"], specs["tips_des"], fases_config=fases_lesion,
-                            patologia=patologia, lado_txt=lado_nom, frecuencias=freqs, descripcion=desc
+                            patologia=patologia, lado_txt=lado_nom, frecuencias=freqs, descripcion=desc, sintomas=sint, posicion=pos
                         ))
 
-    # 3. Estáticos (Grasa) - Si no fueron sobreescritos
+    # 3. Estáticos (Grasa)
     s = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Grasa Localizada"]
     for sufijo, nombre, lado in [("front", "Frontal", "Frontal"), ("d", "Flanco D", "Flanco Dcho"), ("i", "Flanco I", "Flanco Izq"), ("glutes", "Glúteos", "General")]:
         id_t = f"fat_{sufijo}"
         if id_t not in ids_procesados:
-            catalogo.append(Tratamiento(id_t, f"Grasa {nombre if 'Glúteos' in nombre else 'Abdomen ('+nombre+')'}", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", s["req_tags"], s["visual_group"], "Pre-Entreno", ["🌙 Noche"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt=lado, frecuencias=s.get("frecuencias"), descripcion=s.get("descripcion")))
+            catalogo.append(Tratamiento(id_t, f"Grasa {nombre if 'Glúteos' in nombre else 'Abdomen ('+nombre+')'}", "Abdomen", s["ondas"], s["energia"], s["hz"], s["dist"], s["dur"], 1, 7, "GRASA", s["req_tags"], s["visual_group"], "Pre-Entreno", ["🌙 Noche"], s["tips_ant"], s["tips_des"], patologia="Grasa Localizada", lado_txt=lado, frecuencias=s.get("frecuencias"), descripcion=s.get("descripcion"), sintomas=s.get("sintomas"), posicion=s.get("posicion")))
     
     f = DB_TRATAMIENTOS_BASE["Grasa/Estética"]["Facial"]
     if "face" not in ids_procesados:
-        catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"], patologia="Facial", lado_txt="General", frecuencias=f.get("frecuencias"), descripcion=f.get("descripcion")))
+        catalogo.append(Tratamiento("face", "Facial Rejuv", "Cara", f["ondas"], f["energia"], f["hz"], f["dist"], f["dur"], 1, 7, "PERMANENTE", ['All'], f["visual_group"], f.get("momento_txt", "Cualquier hora"), ["🏋️ Entrenamiento (Pre)"], f["tips_ant"], f["tips_des"], patologia="Facial", lado_txt="General", frecuencias=f.get("frecuencias"), descripcion=f.get("descripcion"), sintomas=f.get("sintomas"), posicion=f.get("posicion")))
     
     for k, v in DB_TRATAMIENTOS_BASE["Permanente"].items():
         id_t = k.lower()
         if id_t not in ids_procesados:
-            catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], v["energia"], v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v.get("momento_txt","FLEX"), [], v["tips_ant"], v["tips_des"], patologia=k, lado_txt="Único", frecuencias=v.get("frecuencias"), descripcion=v.get("descripcion")))
+            catalogo.append(Tratamiento(id_t, k, "Cuerpo", v["ondas"], v["energia"], v["hz"], v["dist"], v["dur"], 1, 7, "PERMANENTE", ['All'], v["visual_group"], v.get("momento_txt","FLEX"), [], v["tips_ant"], v["tips_des"], patologia=k, lado_txt="Único", frecuencias=v.get("frecuencias"), descripcion=v.get("descripcion"), sintomas=v.get("sintomas"), posicion=v.get("posicion")))
 
     return catalogo
 
@@ -348,51 +531,73 @@ def procesar_excel_rutina(uploaded_file):
         return {"semana": nueva_semana, "tags": nuevos_tags}
     except: return None
 
-# --- 5. LÓGICA AI (GEMINI) ---
+# --- 5. LÓGICA AI (GEMINI) - ACTUALIZADA CON SINTOMAS Y POSICION ---
 def consultar_ia(dolencia):
     api_key = None
-    try: api_key = st.secrets["GEMINI_API_KEY"]
-    except: pass
-    if not api_key and 'api_key_val' in st.session_state: api_key = st.session_state.api_key_val
+    try:
+        api_key = st.secrets["GEMINI_API_KEY"]
+    except:
+        pass
     
-    if not api_key: st.error("⚠️ Falta API KEY."); return None
+    if not api_key:
+        if 'api_key_val' in st.session_state and st.session_state.api_key_val:
+            api_key = st.session_state.api_key_val
+    
+    if not api_key:
+        st.error("⚠️ Falta API KEY. Configúrala en secrets.toml o en la barra lateral.")
+        return None
 
     genai.configure(api_key=api_key)
     
     prompt = f"""
-    Actúa como un experto en Fotobiomodulación (Red Light Therapy). 
+    Actúa como un experto en Fotobiomodulación (Red Light Therapy) y Fisioterapia.
     El usuario tiene: "{dolencia}".
-    Genera JSON estricto con:
+    Genera un JSON estricto con los siguientes campos:
     {{
-        "nombre": "Título corto",
-        "zona": "Parte cuerpo",
-        "descripcion": "Explica brevemente qué hace este tratamiento biológicamente y sus beneficios (max 20 palabras)",
+        "nombre": "Título corto del tratamiento",
+        "zona": "Parte del cuerpo afectada",
+        "descripcion": "Explicación biológica breve (max 25 palabras)",
+        "sintomas": "Descripción de los síntomas típicos para confirmar la lesión (max 25 palabras)",
+        "posicion": "Instrucción precisa sobre cómo colocarse y dónde poner el panel (max 25 palabras)",
         "ondas": "660+850",
-        "energia": "Dimmer (ej. 660nm: 50% | 850nm: 100%)",
-        "frecuencias": [[660, 50], [850, 100]],  
+        "energia": "Dimmer (ej. 660nm: 100% | 850nm: 100%)",
+        "frecuencias": [[660, 100], [850, 100]],  
         "hz": "Frecuencia (CW, 10Hz, 40Hz, 50Hz) y motivo",
-        "dist": "Distancia cm",
+        "dist": "Distancia cm (ej: '10cm' o 'Contacto')",
         "dur": 10,
-        "tips_ant": ["Consejo 1", "Consejo 2"],
-        "tips_des": ["Consejo 1", "Consejo 2"],
+        "tips_ant": ["Consejo previo 1", "Consejo previo 2"],
+        "tips_des": ["Consejo post 1", "Consejo post 2"],
         "es_lesion": true,
         "tipo": "LESION"
     }}
     Si es pérdida de grasa, pon TODAS las frecuencias al 100%.
+    Si es dolor agudo, Hz=50.
     Responde SOLO JSON.
     """
     
-    modelos = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
-    for m_nom in modelos:
+    modelos_a_probar = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+    
+    for modelo_nombre in modelos_a_probar:
         try:
-            model = genai.GenerativeModel(m_nom)
+            model = genai.GenerativeModel(modelo_nombre)
             response = model.generate_content(prompt)
             clean_text = response.text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean_text)
-        except: continue
-    return None
+        except Exception:
+            continue
+            
+    try:
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                model = genai.GenerativeModel(m.name)
+                response = model.generate_content(prompt)
+                clean_text = response.text.replace("```json", "").replace("```", "").strip()
+                return json.loads(clean_text)
+    except:
+        st.error("❌ Error fatal: No se encontró ningún modelo Gemini operativo con tu clave.")
+        return None
 
-# --- 6. HELPERS VISUALES ---
+# --- 6. HELPERS VISUALES (ACTUALIZADO CON INFO) ---
 def mostrar_visualizador_mega(t):
     if not t.frecuencias: return
     st.caption("Configuración Panel:")
@@ -408,13 +613,29 @@ def mostrar_definiciones_ondas():
         st.markdown("""**🔴 630nm / 660nm:** Piel (Regeneración) | **🟣 810nm / 850nm:** Profundidad (Inflamación)\n**⚡ CW:** Dosis Alta | **10Hz:** Recup. Muscular | **40Hz:** Cerebro | **50Hz:** Dolor Agudo""")
 
 def mostrar_ficha_tecnica(t, lista_completa):
-    if t.descripcion:
-        st.info(f"ℹ️ {t.descripcion}")
+    # NUEVA SECCIÓN DE INFORMACIÓN CLÍNICA
+    if t.sintomas or t.posicion or t.descripcion:
+        st.markdown("#### 🩺 Información Clínica")
+        if t.descripcion:
+            st.info(f"**¿Qué hace?** {t.descripcion}")
+        
+        c_sin, c_pos = st.columns(2)
+        with c_sin:
+            if t.sintomas:
+                st.markdown(f"**⚠️ Síntomas:**\n{t.sintomas}")
+        with c_pos:
+            if t.posicion:
+                st.warning(f"**🧘 Posición:**\n{t.posicion}")
+        st.divider()
+
+    # Visualizador Gráfico
     mostrar_visualizador_mega(t)
     st.divider()
+    
     c1, c2 = st.columns(2)
     with c1: st.markdown(f"**Zona:** {t.zona}\n**Intensidad:** {t.config_energia}")
     with c2: st.markdown(f"**Hz:** {t.herzios}\n**Tiempo:** {t.duracion} min ({t.distancia})")
+    
     st.markdown("---")
     if t.momentos_prohibidos: st.write(f"⏰ **No usar:** {', '.join(t.momentos_prohibidos)}")
     if t.tags_entreno != ['All']: st.write(f"🏋️ **Req:** {', '.join(t.tags_entreno)}")
@@ -422,6 +643,7 @@ def mostrar_ficha_tecnica(t, lista_completa):
         mapa = {tr.id: tr.nombre for tr in lista_completa}
         nombres = [mapa.get(x, x) for x in t.incompatible_with]
         st.write(f"⚔️ **Incompatible:** {', '.join(nombres)}")
+    
     c_a, c_d = st.columns(2)
     with c_a: 
         st.markdown("**Antes:**")
@@ -839,16 +1061,14 @@ elif menu_navegacion == "🔍 Buscador AI":
         res = st.session_state.ai_search_result
         st.success(f"Protocolo Encontrado: {res['nombre']}")
         
-        # Muestra la descripcion en resultado AI
         if 'descripcion' in res: st.info(res['descripcion'])
         st.json(res)
         
-        temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'), descripcion=res.get('descripcion', ''))
-        mostrar_visualizador_mega(temp_t)
+        temp_t = Tratamiento("preview", res['nombre'], res['zona'], res['ondas'], res['energia'], res['hz'], res['dist'], res['dur'], 1, 7, "AI", [], "FLEX", "AI", [], res['tips_ant'], res['tips_des'], frecuencias=res.get('frecuencias'), descripcion=res.get('descripcion', ''), sintomas=res.get('sintomas', ''), posicion=res.get('posicion', ''))
+        mostrar_ficha_tecnica(temp_t, []) # Usamos la ficha completa para preview
         
         st.markdown("---")
         
-        # BOTON 1: SOLO GUARDAR
         if st.button("💾 Guardar en Mis Tratamientos (Sin Planificar)", use_container_width=True):
             id_new = str(uuid.uuid4())[:8]
             res['id'] = id_new
@@ -861,7 +1081,6 @@ elif menu_navegacion == "🔍 Buscador AI":
             st.rerun()
 
         c_plan, c_clinic = st.columns(2)
-        # BOTON 2: PLANIFICACIÓN DIARIA
         with c_plan:
             st.subheader("📅 Planificar")
             d_plan = st.date_input("Fecha:", datetime.date.today(), key="date_ai_plan")
@@ -879,7 +1098,6 @@ elif menu_navegacion == "🔍 Buscador AI":
                 st.session_state.ai_search_result = None
                 st.rerun()
 
-        # BOTON 3: CLÍNICA
         with c_clinic:
             st.subheader("🚑 Clínica")
             d_start = st.date_input("Inicio:", datetime.date.today(), key="date_ai_start")
@@ -907,12 +1125,10 @@ elif menu_navegacion == "🗂️ Gestionar Tratamientos":
     st.title("🗂️ Gestionar Tratamientos")
     st.write("Busca, edita o elimina tratamientos de tu base de datos.")
     
-    # 1. Selector de Tratamiento
     tratamientos_nombres = [t.nombre for t in lista_tratamientos]
     seleccion = st.selectbox("Selecciona un tratamiento:", ["--"] + tratamientos_nombres)
     
     if seleccion != "--":
-        # Encontrar el objeto seleccionado
         t_sel = next((t for t in lista_tratamientos if t.nombre == seleccion), None)
         
         if t_sel:
@@ -923,11 +1139,12 @@ elif menu_navegacion == "🗂️ Gestionar Tratamientos":
             with st.form("edit_form"):
                 new_nombre = st.text_input("Nombre", value=t_sel.nombre)
                 new_desc = st.text_area("Descripción", value=t_sel.descripcion)
+                new_sint = st.text_area("Síntomas", value=t_sel.sintomas)
+                new_pos = st.text_area("Posición", value=t_sel.posicion)
                 new_dur = st.number_input("Duración (min)", value=t_sel.duracion)
                 new_dist = st.text_input("Distancia", value=t_sel.distancia)
                 new_hz = st.text_input("Hercios (Hz)", value=t_sel.herzios)
                 
-                # Edición simple de frecuencias (para usuarios avanzados)
                 st.markdown("**Frecuencias (JSON format: [[nm, %], ...])**")
                 freq_str = st.text_area("Configuración Panel", value=json.dumps(t_sel.frecuencias))
                 
@@ -937,12 +1154,10 @@ elif menu_navegacion == "🗂️ Gestionar Tratamientos":
                 if submitted:
                     try:
                         parsed_freqs = json.loads(freq_str)
-                        
-                        # Crear objeto diccionario para guardar
                         new_data = {
-                            "id": t_sel.id if t_sel.es_custom else str(uuid.uuid4())[:8], # Mismo ID si es custom, nuevo si es base
+                            "id": t_sel.id if t_sel.es_custom else str(uuid.uuid4())[:8],
                             "nombre": new_nombre,
-                            "zona": t_sel.zona, # Mantenemos zona original por simpleza
+                            "zona": t_sel.zona,
                             "ondas": t_sel.ondas_txt,
                             "energia": "Custom Config",
                             "hz": new_hz,
@@ -953,14 +1168,14 @@ elif menu_navegacion == "🗂️ Gestionar Tratamientos":
                             "tips_des": t_sel.tips_despues,
                             "fases": t_sel.fases_config,
                             "frecuencias": parsed_freqs,
-                            "descripcion": new_desc
+                            "descripcion": new_desc,
+                            "sintomas": new_sint,
+                            "posicion": new_pos
                         }
                         
-                        # Si era custom, lo actualizamos (borrar viejo, poner nuevo)
                         if t_sel.es_custom:
                             db_usuario["tratamientos_custom"] = [t for t in db_usuario["tratamientos_custom"] if t['id'] != t_sel.id]
                         
-                        # Añadir el nuevo/editado
                         db_usuario["tratamientos_custom"].append(new_data)
                         guardar_datos_completos(st.session_state.db_global)
                         st.success("Tratamiento guardado correctamente.")
@@ -969,12 +1184,10 @@ elif menu_navegacion == "🗂️ Gestionar Tratamientos":
                     except Exception as e:
                         st.error(f"Error al guardar: {e}")
 
-            # Botón de Borrar (Fuera del form)
             if t_sel.es_custom:
                 st.markdown("---")
                 if st.button("🗑️ Borrar Tratamiento Definitivamente", type="primary"):
                     db_usuario["tratamientos_custom"] = [t for t in db_usuario["tratamientos_custom"] if t['id'] != t_sel.id]
-                    # Limpiar referencias en historiales/adhoc sería ideal pero complejo, lo dejamos simple
                     guardar_datos_completos(st.session_state.db_global)
                     st.success("Tratamiento eliminado.")
                     st.rerun()
