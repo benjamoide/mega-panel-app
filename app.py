@@ -30,9 +30,9 @@ ARCHIVO_DATOS = 'historial_mega_panel_pro.json'
 RUTINA_SEMANAL = {
     "0": ["FULLBODY I"],            # Lunes
     "1": ["TORSO I"],               # Martes
-    "2": ["FULLBODY II"],           # Miércoles
-    "3": ["TORSO II / CIRCUITO"],   # Jueves
-    "4": ["PREVENTIVO I"],          # Viernes
+    "2": ["PREVENTIVO I"],          # Miércoles
+    "3": ["FULLBODY II"],           # Jueves
+    "4": ["TORSO II / CIRCUITO"],  # Viernes
     "5": ["PREVENTIVO II"],         # Sábado
     "6": ["Descanso Total"]         # Domingo
 }
