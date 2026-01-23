@@ -32,7 +32,7 @@ RUTINA_SEMANAL = {
     "1": ["TORSO I"],               # Martes
     "2": ["PREVENTIVO I"],          # Miércoles
     "3": ["FULLBODY II"],           # Jueves
-    "4": ["TORSO II / CIRCUITO"],  # Viernes
+    "4": ["TORSO II / CIRCUITO"],   # Viernes
     "5": ["PREVENTIVO II"],         # Sábado
     "6": ["Descanso Total"]         # Domingo
 }
@@ -526,7 +526,9 @@ def obtener_rutina_completa(fecha_obj, db_global, db_usuario):
         if r in config_tags: tags.update(config_tags[r])
     act = rutina_cardio.get("actividad", "Descanso Cardio")
     if act in TAGS_ACTIVIDADES: tags.update(TAGS_ACTIVIDADES[act])
-    return rutina_fuerza, rutina_cardio, tags, es_manual_f, es_manual_c, list(config_tags.keys())
+    # Devuelve lista completa de posibles rutinas para el selector
+    todas_rutinas = list(config_tags.keys())
+    return rutina_fuerza, rutina_cardio, tags, es_manual_f, es_manual_c, todas_rutinas
 
 def procesar_excel_rutina(uploaded_file):
     try:
@@ -644,7 +646,7 @@ def obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos):
     return presentes
 
 # ==============================================================================
-# 7. UI PRINCIPAL Y LÓGICA DE AÑADIR MANUAL (NOVEDAD CLAVE)
+# 7. UI PRINCIPAL Y LÓGICA DE AÑADIR MANUAL
 # ==============================================================================
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 
@@ -739,9 +741,8 @@ def renderizar_dia_completo(fecha_obj):
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown("**🏋️ Fuerza**")
-                opts_f = [k for k in todas_rutinas if "Remo" not in k and "Cinta" not in k and "Elíptica" not in k and "Andar" not in k]
-                def_f = [x for x in rutina_fuerza if x in opts_f]
-                sel_f = st.multiselect("Rutina:", opts_f, default=def_f, key=f"sf_{fecha_str}")
+                # Mostrar TODAS las rutinas disponibles en el multiselect para permitir cambios
+                sel_f = st.multiselect("Rutina:", todas_rutinas, default=[x for x in rutina_fuerza if x in todas_rutinas], key=f"sf_{fecha_str}")
                 if set(sel_f) != set(rutina_fuerza):
                     if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
                     db_usuario["meta_diaria"][fecha_str] = sel_f
