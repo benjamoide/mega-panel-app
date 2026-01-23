@@ -644,7 +644,7 @@ def obtener_tratamientos_presentes(fecha_str, db_usuario, lista_tratamientos):
     return presentes
 
 # ==============================================================================
-# 7. UI PRINCIPAL Y LÓGICA DE AÑADIR MANUAL
+# 7. UI PRINCIPAL Y LÓGICA DE AÑADIR MANUAL (NOVEDAD CLAVE)
 # ==============================================================================
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 
@@ -739,8 +739,9 @@ def renderizar_dia_completo(fecha_obj):
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown("**🏋️ Fuerza**")
-                def_f = [x for x in rutina_fuerza if "Descanso" not in x]
-                sel_f = st.multiselect("Rutina:", def_f, default=def_f, key=f"sf_{fecha_str}")
+                opts_f = [k for k in todas_rutinas if "Remo" not in k and "Cinta" not in k and "Elíptica" not in k and "Andar" not in k]
+                def_f = [x for x in rutina_fuerza if x in opts_f]
+                sel_f = st.multiselect("Rutina:", opts_f, default=def_f, key=f"sf_{fecha_str}")
                 if set(sel_f) != set(rutina_fuerza):
                     if "meta_diaria" not in db_usuario: db_usuario["meta_diaria"] = {}
                     db_usuario["meta_diaria"][fecha_str] = sel_f
